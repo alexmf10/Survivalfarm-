@@ -102,3 +102,37 @@ func get_first_free_slot() -> int:
 		if not slot_exists(i):
 			return i
 	return -1
+
+
+## Guarda el día actual en un slot existente.
+## Llamado por el sistema de guardado cuando el jugador guarda la partida.
+## @param slot  Número de slot (1-5).
+## @param day   Día actual (proporcionado por DayCycleService.current_day).
+func save_day(slot: int, day: int) -> void:
+	if not slot_exists(slot): return
+	var path: String = _get_slot_path(slot)
+	var file_read: FileAccess = FileAccess.open(path, FileAccess.READ)
+	if not file_read: return
+	var json: JSON = JSON.new()
+	if json.parse(file_read.get_as_text()) == OK:
+		var data: Dictionary = json.data
+		file_read.close()
+		data["day"] = day
+		data["timestamp"] = Time.get_unix_time_from_system()
+		data["date_string"] = Time.get_datetime_string_from_system()
+		var file_write: FileAccess = FileAccess.open(path, FileAccess.WRITE)
+		if file_write:
+			file_write.store_string(JSON.stringify(data, "\t"))
+			file_write.close()
+	else:
+		file_read.close()
+
+
+## Lee el día guardado de un slot. Devuelve 1 si el slot no existe.
+## @param slot  Número de slot (1-5).
+func get_day(slot: int) -> int:
+	var info: Dictionary = get_slot_info(slot)
+	if not info.get("exists", false):
+		return 1
+	return info.get("day", 1)
+
