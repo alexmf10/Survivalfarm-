@@ -30,3 +30,8 @@ var profile: RefCounted:
 
 var save: RefCounted:
 	get: return get_service(&"save")
+
+## Atajo para DayCycleService (Node, no RefCounted).
+## Registrado por main.gd al arrancar.
+var day_cycle: Node:
+	get: return get_service(&"day_cycle")
