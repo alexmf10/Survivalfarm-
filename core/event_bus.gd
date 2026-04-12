@@ -27,5 +27,7 @@ signal day_started(day_number: int)
 ## Escuchada por DayCycleHUD para actualizar la barra de progreso y etiquetas.
 signal time_tick(day_number: int, elapsed: float, phase: String)
 
+#señales del inventario
+##Emitida y escuchada por 
 # Registro de servicios compartidos.
 var services: ServiceLocator = ServiceLocator.new()
