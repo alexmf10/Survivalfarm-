@@ -1,12 +1,9 @@
-[gd_scene load_steps=2 format=3 uid="uid://dr2a4knwqn6ut"]
+[gd_scene load_steps=3 format=3 uid="uid://0drmfvmccjpq"]
 
 [ext_resource type="Script" uid="uid://dujgv7raln5n1" path="res://core/game_world.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://biyoaoqxbexbi" path="res://entities/test/test_scene_house_tilemap.tscn" id="2"]
 
-[node name="GameWorld" type="Control"]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="GameWorld" type="Node2D"]
 script = ExtResource("1")
+
+[node name="World" parent="." instance=ExtResource("2")]

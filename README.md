@@ -1,91 +1,64 @@
-# 🚀 Team Workflow & Contribution Guide
+# Project Documentation
 
-Welcome to the team! To keep our Godot project stable and avoid merge conflicts, we follow this **Feature Branch Workflow**. Please read this before making your first commit.
+## 1. Project Architecture and Folder Structure
+
+The project follows a Service-Oriented Architecture (SOA) to maintain a strict separation between logic, data, and presentation.
+
+| Directory | Responsibility | Components |
+| :--- | :--- | :--- |
+| **`core/`** | Central orchestration and global messaging. | Event Bus, Service Locator, Main entry point. |
+| **`services/`** | Backend logic and heavy-duty data processing. | Save systems, Day/Night cycles, Profile management. |
+| **`assets/`** | Media storage and engine-side visual configurations. | Textures, Audio, and Resource setups. |
+| **`data/`** | Gameplay blueprints and numerical balance data. | Custom Resource scripts and stat definitions. |
+| **`entities/`** | Concrete game objects and world actors. | Player, NPCs, and interactable world objects. |
+| **`script/`** | Abstract behavioral templates and reusable logic. | State Machine and Utility helpers. |
+| **`ui/`** | Interface, HUDs, and user feedback layers. | Menus, Themes, Fonts, and HUD scenes. |
+
+### 1.1 Asset and Data Breakdown
+
+To maintain a clean distinction between "Source" files and "Gameplay" data, the following sub-structures are enforced:
+
+* **`assets/textures/`**: Raw visual media (`.png`, `.svg`) and sprite sheets.
+* **`assets/audio/`**: Sound effects and music tracks (`.wav`, `.ogg`).
+* **`assets/resources/`**: Godot-native visual configurations like `TileSets`, `Materials`, and `Environments` (`.tres`).
+* **`data/component/`**: Script-only logic (`.gd`) defining the structure of custom resources.
+* **`data/definition/`**: Instance-specific data (`.tres`) such as item stats, NPC health values, or loot tables.
+
+The main idea is to have all heavy logic in `services/`, raw media in `assets/`, and pure numerical/logic data in `data/`, while `entities/` act as the bridge by notifying events and reflecting changes.
 
 ---
 
-## 🌲 Branching Strategy
+## 2. Branching Strategy
 
 | Branch | Purpose | Stability |
-| --- | --- | --- |
-| `main` | **Production.** Only contains playable, tested milestones. | 🟢 Stable |
-| `develop` | **Integration.** Where all finished features meet. | 🟡 Testing |
-| `feature/*` | **Work-in-progress.** Individual tasks (e.g., `feature/player-jump`). | 🔴 Volatile |
-| `fix/*` | **Bug fixes** Correcciones individuales (e.g., fix/login-error). | 🔴 Volatile |
----
-
-## 🔄 The Standard Loop (Daily Routine)
-
-### 1. Start of Session
-
-Always start by syncing your local machine with the latest team changes.
-
-```bash
-git checkout develop
-git pull origin develop
-
-```
-
-### 2. Creating a Feature
-
-Never work directly on `develop` or `main`. Create a new branch for your specific task:
-
-```bash
-git checkout -b feature/your-task-name
-
-```
-
-### 3. Committing Work
-
-Commit in small "atomic" chunks. Use descriptive messages.
-
-```bash
-git add .
-git commit -m "Add: Jump logic to Player.gd"
-
-```
-
-### 4. Submitting for Review
-
-Once your feature is finished and tested in Godot:
-
-1. Push to GitHub: `git push origin feature/your-task-name`
-2. Open a **Pull Request (PR)** on GitHub from your branch to `develop`.
-3. Notify the team in Discord/Slack for a code review.
-4. Once approved, merge to `develop` and delete your local branch.
+| :--- | :--- | :--- |
+| `main` | Production-ready code; contains only tested milestones. | Stable |
+| `develop` | Integration branch; target for all feature completions. | Testing |
+| `feature/*` | Individual tasks and new functionality. | Volatile |
+| `fix/*` | Critical bug fixes and hotfixes. | Volatile |
 
 ---
 
-## 🛠 Godot-Specific Rules
+## 3. Version Control Workflow
 
-Godot files (`.tscn`) are text-based but can be messy to merge. Follow these "Golden Rules":
+### 3.1 Daily Routine
+1. **Synchronize**: Ensure the local environment is current.
+   ```bash
+   git checkout develop
+   git pull origin develop
+   ```
+2. **Branching**: Create a dedicated branch for each task.
+   ```bash
+   git checkout -b feature/task-name
+   ```
+3. **Commits**: Use atomic commits with descriptive messages.
+   ```bash
+   git add .
+   git commit -m "Add: Core jump logic to Player.gd"
+   ```
 
-| Rule | Description |
-| --- | --- |
-| **No Shared Scenes** | Avoid two people editing the same `.tscn` file at the same time. |
-| **Scene Composition** | Break big scenes into smaller, nested scenes. It reduces conflict risks. |
-| **External Scripts** | Keep scripts as separate `.gd` files rather than "built-in" to the node. |
-| **The `.godot/` Folder** | **Never** commit the `.godot/` folder. It should be in our `.gitignore`. |
-| **UIDs** | If you see `.uid` changes in files you didn't touch, don't worry—it's Godot's internal tracking. |
-
----
-
-## ⚠️ Handling Merge Conflicts
-
-If Git tells you there is a conflict:
-
-1. **Don't Panic.**
-2. Open the conflicting file in a text editor (like VS Code).
-3. Look for the markers:
-```text
-<<<<<<< HEAD
-Current Code
-=======
-Incoming Code from Teammate
->>>>>>> develop
-
-```
-
-
-4. Delete the version you don't want, remove the markers, save, and `git commit`.
-5. **If it's a `.tscn` file:** If you aren't sure, ask the person who worked on it last before saving.
+### 3.2 Submission and Review
+* **Push**: Upload the branch to the remote repository.
+* **Pull Request**: Open a PR from the feature branch to `develop`.
+* **Peer Review**: Notify the team for code audit.
+* **Integration**: Merge only after approval and resolve local branch deletion.
