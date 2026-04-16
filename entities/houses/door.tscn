@@ -1,8 +1,8 @@
 [gd_scene load_steps=16 format=3 uid="uid://crcxrnjociiyb"]
 
-[ext_resource type="Script" uid="uid://ja6dfpq646yo" path="res://scenes/houses/door.gd" id="1_act2a"]
-[ext_resource type="Texture2D" uid="uid://f7fufubu2ace" path="res://assets/game/tilesets/doors.png" id="1_bxi54"]
-[ext_resource type="PackedScene" uid="uid://i3w6h171pjb7" path="res://scenes/components/interactable_component.tscn" id="2_2dpp7"]
+[ext_resource type="Script" uid="uid://ja6dfpq646yo" path="res://entities/houses/door.gd" id="1_act2a"]
+[ext_resource type="Texture2D" uid="uid://f7fufubu2ace" path="res://assets/textures/game/tilesets/doors.png" id="1_bxi54"]
+[ext_resource type="PackedScene" uid="uid://i3w6h171pjb7" path="res://entities/behaviours/interactable_component.tscn" id="2_2dpp7"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_2dpp7"]
 atlas = ExtResource("1_bxi54")
