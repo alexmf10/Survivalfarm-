@@ -11,6 +11,7 @@ The project follows a Service-Oriented Architecture (SOA) to maintain a strict s
 | **`assets/`** | Media storage and engine-side visual configurations. | Textures, Audio, and Resource setups. |
 | **`data/`** | Gameplay blueprints and numerical balance data. | Custom Resource scripts and stat definitions. |
 | **`entities/`** | Concrete game objects and world actors. | Player, NPCs, and interactable world objects. |
+| **`script/`** | Abstract behavioral templates and reusable logic. | State Machine and Utility helpers. |
 | **`ui/`** | Interface, HUDs, and user feedback layers. | Menus, Themes, Fonts, and HUD scenes. |
 
 ### 1.1 Asset and Data Breakdown
