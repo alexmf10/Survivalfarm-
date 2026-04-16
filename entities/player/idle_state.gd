@@ -20,18 +20,18 @@ func _on_physics_process(_delta : float) -> void:
 		animated_sprite_2d.play("idle_front")
 
 func _on_next_transitions() -> void:
-	GameInputEvents.movement_input()
+	EventBus.services.input.movement_input()
 	
-	if GameInputEvents.is_movement_input():
+	if EventBus.services.input.is_movement_input():
 		transition.emit("Walk");
 		
-	if player.current_tools == DataTypes.Tools.AxeWood && GameInputEvents.use_tool():
+	if player.current_tools == DataTypes.Tools.AxeWood && EventBus.services.input.use_tool():
 		transition.emit("Chopping")
 		
-	if player.current_tools == DataTypes.Tools.TillGround && GameInputEvents.use_tool():
+	if player.current_tools == DataTypes.Tools.TillGround && EventBus.services.input.use_tool():
 		transition.emit("Tilling")
 		
-	if player.current_tools == DataTypes.Tools.WaterCrops && GameInputEvents.use_tool():
+	if player.current_tools == DataTypes.Tools.WaterCrops && EventBus.services.input.use_tool():
 		transition.emit("Watering")
 
 

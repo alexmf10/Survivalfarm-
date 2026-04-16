@@ -10,7 +10,7 @@ func _on_process(_delta : float) -> void:
 
 
 func _on_physics_process(_delta : float) -> void:
-	var direction: Vector2 = GameInputEvents.movement_input()
+	var direction: Vector2 = EventBus.services.input.movement_input()
 	
 	# animation
 	if direction == Vector2.LEFT:
@@ -30,7 +30,7 @@ func _on_physics_process(_delta : float) -> void:
 
 
 func _on_next_transitions() -> void:
-	if !GameInputEvents.is_movement_input():
+	if !EventBus.services.input.is_movement_input():
 		transition.emit("Idle")
 
 func _on_enter() -> void:

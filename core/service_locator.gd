@@ -35,3 +35,6 @@ var save: RefCounted:
 ## Registrado por main.gd al arrancar.
 var day_cycle: Node:
 	get: return get_service(&"day_cycle")
+
+var input: RefCounted:
+	get: return get_service(&"input")
