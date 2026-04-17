@@ -25,14 +25,23 @@ func _on_next_transitions() -> void:
 	if EventBus.services.input.is_movement_input():
 		transition.emit("Walk");
 		
-	if player.current_tools == DataTypes.Tools.AxeWood && EventBus.services.input.use_tool():
+	if player.current_tools == ToolsComponent.Tools.AxeWood && EventBus.services.input.use_tool():
 		transition.emit("Chopping")
 		
-	if player.current_tools == DataTypes.Tools.TillGround && EventBus.services.input.use_tool():
+	if player.current_tools == ToolsComponent.Tools.TillGround && EventBus.services.input.use_tool():
 		transition.emit("Tilling")
 		
-	if player.current_tools == DataTypes.Tools.WaterCrops && EventBus.services.input.use_tool():
+	if player.current_tools == ToolsComponent.Tools.WaterCrops && EventBus.services.input.use_tool():
 		transition.emit("Watering")
+
+	if player.current_tools == ToolsComponent.Tools.PlantCorn && EventBus.services.input.use_tool():
+		transition.emit("Planting")
+
+	if player.current_tools == ToolsComponent.Tools.PlantTomato && EventBus.services.input.use_tool():
+		transition.emit("Planting")
+
+	if player.current_tools == ToolsComponent.Tools.None && EventBus.services.input.use_tool():
+		EventBus.player_harvest_attempted.emit(player.global_position, player.player_direction)
 
 
 func _on_enter() -> void:

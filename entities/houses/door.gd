@@ -2,7 +2,7 @@ extends StaticBody2D
 
 @onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
 @onready var collision_shape_2d: CollisionShape2D = $CollisionShape2D
-@onready var interactable_component: InteractableComponent = $InteractableComponent
+@onready var interactable_component: InteractableBehaviour = $InteractableComponent
 
 func _ready() -> void:
 	interactable_component.interactable_activated.connect(on_interactable_activated)

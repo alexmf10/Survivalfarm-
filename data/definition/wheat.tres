@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="CropComponent" load_steps=2 format=3 uid="uid://dkascurvykivv"]
+
+[ext_resource type="Script" uid="uid://dyk8gpabr5i6s" path="res://data/component/crop_component.gd" id="1_h4xpa"]
+
+[resource]
+script = ExtResource("1_h4xpa")
+crop_name = ""
+crop_type = 0
+max_stages = 4
+days_per_stage = 1
+metadata/_custom_type_script = "uid://dyk8gpabr5i6s"
