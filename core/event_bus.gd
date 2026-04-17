@@ -64,3 +64,8 @@ func _ready() -> void:
 	day_cycle_svc.name = "DayCycleService"
 	add_child(day_cycle_svc)
 	services.register(&"day_cycle", day_cycle_svc)
+
+	var farm_svc: FarmService = FarmService.new()
+	farm_svc.name = "FarmService"
+	add_child(farm_svc)
+	services.register(&"farm", farm_svc)

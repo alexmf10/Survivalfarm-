@@ -1,4 +1,4 @@
-[gd_scene load_steps=52 format=3 uid="uid://bisjn777ousch"]
+[gd_scene load_steps=53 format=3 uid="uid://bisjn777ousch"]
 
 [ext_resource type="Script" uid="uid://dqv8p4t2hhmcd" path="res://entities/player/player.gd" id="1_6avc5"]
 [ext_resource type="Texture2D" uid="uid://be6km65i42md" path="res://assets/textures/test/characters/basic_charakter_spritesheet.png" id="1_7uws0"]
@@ -9,6 +9,7 @@
 [ext_resource type="Script" uid="uid://cfaey6x4n7b6v" path="res://entities/player/chopping_state.gd" id="7_mk55u"]
 [ext_resource type="Script" uid="uid://cygv5b7q0dbex" path="res://entities/player/tilling_state.gd" id="8_xuses"]
 [ext_resource type="Script" uid="uid://bpyvsk1atl4ug" path="res://entities/player/watering_state.gd" id="9_42irl"]
+[ext_resource type="Script" uid="uid://bo8bocatdo4f1" path="res://entities/player/planting_state.gd" id="10_plant"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_6avc5"]
 atlas = ExtResource("1_t61fv")
@@ -438,5 +439,10 @@ animated_sprite_2d = NodePath("../../AnimatedSprite2D")
 
 [node name="Watering" type="Node" parent="StateMachine" node_paths=PackedStringArray("player", "animated_sprite_2d")]
 script = ExtResource("9_42irl")
+player = NodePath("../..")
+animated_sprite_2d = NodePath("../../AnimatedSprite2D")
+
+[node name="Planting" type="Node" parent="StateMachine" node_paths=PackedStringArray("player", "animated_sprite_2d")]
+script = ExtResource("10_plant")
 player = NodePath("../..")
 animated_sprite_2d = NodePath("../../AnimatedSprite2D")

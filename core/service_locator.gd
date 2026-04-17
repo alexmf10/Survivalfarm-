@@ -41,3 +41,6 @@ var input: RefCounted:
 
 var crop: RefCounted:
 	get: return get_service(&"crop")
+
+var farm: Node:
+	get: return get_service(&"farm")
