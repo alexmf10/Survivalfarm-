@@ -1,9 +1,11 @@
-[gd_scene load_steps=3 format=4 uid="uid://biyoaoqxbexbi"]
+[gd_scene load_steps=4 format=4 uid="uid://biyoaoqxbexbi"]
 
 [ext_resource type="TileSet" uid="uid://csru1lfxpv6q1" path="res://assets/resources/tilesets/game_tile_set.tres" id="1_34o6h"]
 [ext_resource type="PackedScene" uid="uid://bisjn777ousch" path="res://entities/player/player.tscn" id="2_8re64"]
+[ext_resource type="Script" uid="uid://dxrac6xorcgcw" path="res://entities/test/xiao/test_scene.gd" id="3_test"]
 
 [node name="TestSceneTilemap" type="Node2D"]
+script = ExtResource("3_test")
 
 [node name="GameTileMap" type="Node2D" parent="."]
 
@@ -25,4 +27,4 @@ tile_set = ExtResource("1_34o6h")
 
 [node name="Player" parent="." instance=ExtResource("2_8re64")]
 position = Vector2(269, 206)
-current_tools = 4
+current_tools = 5
