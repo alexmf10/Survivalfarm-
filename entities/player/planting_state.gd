@@ -32,8 +32,8 @@ func _on_enter() -> void:
 
 func _on_exit() -> void:
 	var crop_type: CropComponent.CropType
-	if player.current_tools == ToolsComponent.Tools.PlantCorn:
-		crop_type = CropComponent.CropType.Corn
+	if player.current_tools == ToolsComponent.Tools.PlantWheat:
+		crop_type = CropComponent.CropType.Wheat
 	else:
-		crop_type = CropComponent.CropType.Tomato
+		crop_type = CropComponent.CropType.Beet
 	EventBus.player_planted.emit(player.global_position, player.player_direction, crop_type)

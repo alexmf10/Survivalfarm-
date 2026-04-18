@@ -52,6 +52,8 @@ func _ready() -> void:
 
 	var crop_svc: CropService = CropService.new()
 	crop_svc.connect_signals()
+	crop_svc.register_crop(preload("res://data/definition/wheat.tres"))
+	crop_svc.register_crop(preload("res://data/definition/beet.tres"))
 	services.register(&"crop", crop_svc)
 
 	var profile_svc: ProfileService = ProfileService.new()

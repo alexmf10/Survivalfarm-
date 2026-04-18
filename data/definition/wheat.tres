@@ -1,11 +1,18 @@
-[gd_resource type="Resource" script_class="CropComponent" load_steps=2 format=3 uid="uid://dkascurvykivv"]
+[gd_resource type="Resource" script_class="CropComponent" load_steps=3 format=3 uid="uid://dkascurvykivv"]
 
 [ext_resource type="Script" uid="uid://dyk8gpabr5i6s" path="res://data/component/crop_component.gd" id="1_h4xpa"]
+[ext_resource type="Texture2D" uid="uid://dbjrnbco28rga" path="res://assets/textures/test/objects/basic_plants.png" id="2_8ph0d"]
 
 [resource]
 script = ExtResource("1_h4xpa")
-crop_name = ""
-crop_type = 0
+crop_name = "Beet"
+crop_type = 1
 max_stages = 4
 days_per_stage = 1
+spritesheet = ExtResource("2_8ph0d")
+frame_width = 16
+frame_height = 16
+spritesheet_row = 0
+seed_col = 0
+drop_col = 5
 metadata/_custom_type_script = "uid://dyk8gpabr5i6s"
