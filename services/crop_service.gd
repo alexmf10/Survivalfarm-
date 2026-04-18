@@ -106,6 +106,14 @@ func _on_player_harvest_attempted(world_pos: Vector2, direction: Vector2) -> voi
 	EventBus.crop_harvested.emit(tile, crop_type)
 
 
+func water_all() -> void:
+	for tile: Vector2i in _crops:
+		var crop: CropState = _crops[tile]
+		if crop.stage < crop.max_stages - 1:
+			crop.watered = true
+			EventBus.crop_watered.emit(tile)
+
+
 ## Avanza el crecimiento de los cultivos regados al inicio de cada nuevo día.
 func _on_day_started(_day_number: int) -> void:
 	for tile: Vector2i in _crops:
