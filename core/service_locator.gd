@@ -38,3 +38,9 @@ var day_cycle: Node:
 
 var input: RefCounted:
 	get: return get_service(&"input")
+
+var crop: RefCounted:
+	get: return get_service(&"crop")
+
+var farm: Node:
+	get: return get_service(&"farm")

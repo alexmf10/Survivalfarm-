@@ -8,6 +8,7 @@
 ## - Lee el día guardado del slot activo usando SaveService.get_day().
 ## - Escucha EventBus.day_started para guardar el día automáticamente.
 ## - Al pulsar ESC (input "pause") guarda y vuelve a SlotsScreen.
+## Los visuales de cultivo son gestionados por FarmService.
 ##
 ## Conexiones
 ## - Recibe: EventBus.day_started → para auto-guardar el día

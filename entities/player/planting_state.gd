@@ -3,11 +3,12 @@ extends NodeState
 @export var player: Player
 @export var animated_sprite_2d: AnimatedSprite2D
 
-func _on_process(_delta : float) -> void:
+
+func _on_process(_delta: float) -> void:
 	pass
 
 
-func _on_physics_process(_delta : float) -> void:
+func _on_physics_process(_delta: float) -> void:
 	pass
 
 
@@ -22,11 +23,17 @@ func _on_enter() -> void:
 	elif player.player_direction == Vector2.RIGHT:
 		animated_sprite_2d.play("tilling_right")
 	elif player.player_direction == Vector2.UP:
-		animated_sprite_2d.play("tilling_back")	
+		animated_sprite_2d.play("tilling_back")
 	elif player.player_direction == Vector2.DOWN:
 		animated_sprite_2d.play("tilling_front")
 	else:
 		animated_sprite_2d.play("tilling_front")
 
+
 func _on_exit() -> void:
-	EventBus.player_tilled.emit(player.global_position, player.player_direction)
+	var crop_type: CropComponent.CropType
+	if player.current_tools == ToolsComponent.Tools.PlantWheat:
+		crop_type = CropComponent.CropType.Wheat
+	else:
+		crop_type = CropComponent.CropType.Beet
+	EventBus.player_planted.emit(player.global_position, player.player_direction, crop_type)

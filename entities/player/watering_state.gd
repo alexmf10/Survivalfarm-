@@ -29,4 +29,4 @@ func _on_enter() -> void:
 		animated_sprite_2d.play("watering_front")
 
 func _on_exit() -> void:
-	pass
+	EventBus.player_watered.emit(player.global_position, player.player_direction)
