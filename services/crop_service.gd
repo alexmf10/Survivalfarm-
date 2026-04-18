@@ -4,11 +4,16 @@
 class_name CropService
 extends RefCounted
 
-## Etapas máximas por tipo de cultivo (0..max_stages-1, última = listo para cosechar)
-const CROP_MAX_STAGES: Dictionary = {
-	CropComponent.CropType.Corn: 4,
-	CropComponent.CropType.Tomato: 3,
-}
+## Resources por tipo de cultivo — registrar desde EventBus._ready() con register_crop()
+var _crop_data: Dictionary = {}  # CropType → CropComponent
+
+
+func register_crop(data: CropComponent) -> void:
+	_crop_data[data.crop_type] = data
+
+
+func get_crop_data(crop_type: CropComponent.CropType) -> CropComponent:
+	return _crop_data.get(crop_type)
 
 ## Estado interno de un cultivo plantado
 class CropState:
@@ -39,6 +44,8 @@ func connect_signals() -> void:
 ## Llamado desde GameWorld._ready() cuando la escena está lista.
 func set_tilled_layer(layer: TileMapLayer) -> void:
 	_tilled_layer = layer
+	for tile: Vector2i in layer.get_used_cells():
+		_tilled_tiles[tile] = true
 
 
 ## Convierte posición mundial + dirección al tile objetivo frente al jugador.
@@ -66,7 +73,8 @@ func _on_player_planted(world_pos: Vector2, direction: Vector2, crop_type: CropC
 		return  # no se puede plantar en tierra sin arar
 	if _crops.has(tile):
 		return  # tile ya ocupado
-	var max_s: int = CROP_MAX_STAGES.get(crop_type, 4)
+	var res: CropComponent = _crop_data.get(crop_type)
+	var max_s: int = res.max_stages if res else 4
 	_crops[tile] = CropState.new(crop_type, max_s)
 	EventBus.crop_planted.emit(tile, crop_type)
 

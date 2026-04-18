@@ -5,6 +5,8 @@
 class_name FarmService
 extends Node
 
+const CROP_SCENE: PackedScene = preload("res://entities/crops/Crop.tscn")
+
 var _tilled_layer: TileMapLayer
 var _crop_entities: Dictionary = {}  # Vector2i → CropEntity
 
@@ -66,10 +68,13 @@ func _on_tile_tilled(tile_pos: Vector2i) -> void:
 func _on_crop_planted(tile_pos: Vector2i, crop_type: CropComponent.CropType) -> void:
 	if not _tilled_layer:
 		return
-	var crop := CropEntity.new()
+	var data: CropComponent = EventBus.services.crop.get_crop_data(crop_type)
+	if not data:
+		return
+	var crop := CROP_SCENE.instantiate() as CropEntity
 	get_tree().current_scene.add_child(crop)
 	crop.global_position = _tilled_layer.to_global(_tilled_layer.map_to_local(tile_pos))
-	crop.setup(crop_type, CropService.CROP_MAX_STAGES.get(crop_type, 4))
+	crop.setup(data)
 	_crop_entities[tile_pos] = crop
 
 

@@ -34,10 +34,10 @@ func _on_next_transitions() -> void:
 	if player.current_tools == ToolsComponent.Tools.WaterCrops && EventBus.services.input.use_tool():
 		transition.emit("Watering")
 
-	if player.current_tools == ToolsComponent.Tools.PlantCorn && EventBus.services.input.use_tool():
+	if player.current_tools == ToolsComponent.Tools.PlantWheat && EventBus.services.input.use_tool():
 		transition.emit("Planting")
 
-	if player.current_tools == ToolsComponent.Tools.PlantTomato && EventBus.services.input.use_tool():
+	if player.current_tools == ToolsComponent.Tools.PlantBeet && EventBus.services.input.use_tool():
 		transition.emit("Planting")
 
 	if player.current_tools == ToolsComponent.Tools.None && EventBus.services.input.use_tool():
