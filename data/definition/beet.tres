@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="CropComponent" load_steps=3 format=3 uid="uid://d3u0x36digaoi"]
+
+[ext_resource type="Script" uid="uid://dyk8gpabr5i6s" path="res://data/component/crop_component.gd" id="1_5p2df"]
+[ext_resource type="Texture2D" uid="uid://dbjrnbco28rga" path="res://assets/textures/test/objects/basic_plants.png" id="2_i40tp"]
+
+[resource]
+script = ExtResource("1_5p2df")
+crop_name = ""
+crop_type = 0
+max_stages = 4
+days_per_stage = 1
+spritesheet = ExtResource("2_i40tp")
+frame_width = 16
+frame_height = 16
+spritesheet_row = 0
+seed_col = 0
+drop_col = 5
+metadata/_custom_type_script = "uid://dyk8gpabr5i6s"
