@@ -70,9 +70,6 @@ func _on_node_added(node: Node) -> void:
 				"atlas": _tilled_layer.get_cell_atlas_coords(pos),
 			}
 			tillable_positions.append(pos)
-		# Limpiar visualmente — el jugador debe ararlos con E + azada.
-		for pos: Vector2i in tillable_positions:
-			_tilled_layer.erase_cell(pos)
 		# Inyectar estado en CropService
 		var crop_svc := EventBus.services.crop as CropService
 		if crop_svc:
@@ -97,7 +94,10 @@ func _on_tile_tilled(tile_pos: Vector2i) -> void:
 		return
 	var data: Dictionary = _tillable_tile_data.get(tile_pos, {})
 	if data.is_empty():
-		return  # no era una posición aratable registrada
+		# Tile outside pre-placed area — use the first known tilled tile appearance as fallback
+		if _tillable_tile_data.is_empty():
+			return
+		data = _tillable_tile_data.values()[0]
 	_tilled_layer.set_cell(tile_pos, data["source"], data["atlas"])
 
 

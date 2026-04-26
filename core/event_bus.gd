@@ -82,8 +82,6 @@ signal crop_harvested(tile_pos: Vector2i, crop_type: CropComponent.CropType)
 ## Emitida por ToolComponent cuando se usa una herramienta (para squash/stretch feedback).
 signal tool_action_performed(tool: ToolsComponent.Tools, tile_pos: Vector2i)
 
-# [TEST] Señal de debug — avanzar crecimiento de un cultivo manualmente.
-signal debug_advance_crop(tile_pos: Vector2i)
 
 # Registro de servicios compartidos.
 var services: ServiceLocator = ServiceLocator.new()
