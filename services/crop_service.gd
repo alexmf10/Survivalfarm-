@@ -92,11 +92,13 @@ func _on_player_tilled(tile_pos: Vector2i) -> void:
 
 
 func _on_player_planted(tile_pos: Vector2i, crop_type: CropComponent.CropType) -> void:
-	# Solo se puede plantar en tierra arada sin cultivo
 	if not _tilled_tiles.get(tile_pos, false):
 		return
 	if _crops.has(tile_pos):
-		return  # tile ya ocupado
+		return
+	var trade_svc := EventBus.services.trade as TradeService
+	if trade_svc and not trade_svc.consume_seed(crop_type):
+		return
 	var res: CropComponent = _crop_data.get(crop_type)
 	var max_s: int = res.max_stages if res else 4
 	_crops[tile_pos] = CropState.new(crop_type, max_s)
