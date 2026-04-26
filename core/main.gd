@@ -45,4 +45,3 @@ func _ready() -> void:
 
 	# Ir al menú principal
 	get_tree().call_deferred("change_scene_to_file", "res://ui/menus/main_menu.tscn")
-

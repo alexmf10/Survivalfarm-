@@ -231,11 +231,6 @@ func _is_valid_grass_tile_for_tilling() -> bool:
 	var tilled_source_id: int = _tilled_layer.get_cell_source_id(grass_tile)
 	if tilled_source_id != -1:
 		return false  # Ya está arado
-	# Solo se puede arar dentro de la zona designada ("clarito").
-	# Las otras tierras (hierba verde normal, bordes, etc.) NO son aratables.
-	var crop_svc := EventBus.services.crop as CropService
-	if crop_svc == null or not crop_svc.is_tillable_area(grass_tile):
-		return false
 	# Posición global del centro del tile (no solo local a la capa)
 	var tile_world: Vector2 = _grass_layer.to_global(_grass_layer.map_to_local(grass_tile))
 	if _body.global_position.distance_to(tile_world) > ACTION_RADIUS:
