@@ -50,3 +50,8 @@ var crop: RefCounted:
 ## Registrado por main.gd al arrancar.
 var farm: Node:
 	get: return get_service(&"farm")
+
+## Atajo para TradeService.
+## Registrado por main.gd al arrancar.
+var trade: RefCounted:
+	get: return get_service(&"trade")

@@ -23,6 +23,7 @@ const MAP_SCENE_PATH: String = "res://entities/test/xiao/test_scene.tscn"
 
 ## Slot activo (se establece antes de cambiar a esta escena).
 var active_slot: int = 1
+var _trade_open: bool = false
 
 
 func _ready() -> void:
@@ -36,6 +37,8 @@ func _ready() -> void:
 	_start_day_cycle()
 
 	EventBus.day_started.connect(_on_day_started)
+	EventBus.trade_opened.connect(func() -> void: _trade_open = true)
+	EventBus.trade_closed.connect(func() -> void: _trade_open = false)
 
 
 func _exit_tree() -> void:
@@ -58,6 +61,10 @@ func _build_world() -> void:
 	var world: Node2D = map_scene.instantiate() as Node2D
 	add_child(world)
 
+	var trader: Trader = Trader.new()
+	trader.position = Vector2(350, 180)
+	world.add_child(trader)
+
 
 func _build_hud() -> void:
 	var hud_scene: PackedScene = load("res://ui/hud/day_cycle_hud.tscn")
@@ -67,6 +74,9 @@ func _build_hud() -> void:
 	var tool_hud_scene: PackedScene = load("res://ui/hud/tool_hud.tscn")
 	var tool_hud: CanvasLayer = tool_hud_scene.instantiate()
 	add_child(tool_hud)
+
+	var trade_hud: TradeHUD = TradeHUD.new()
+	add_child(trade_hud)
 
 
 func _start_day_cycle() -> void:
@@ -88,6 +98,8 @@ func _on_day_started(day_number: int) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if _trade_open:
+		return
 	if event.is_action_pressed("pause"):
 		var day_cycle_svc: DayCycleService = EventBus.services.day_cycle as DayCycleService
 		var save_svc: SaveService = EventBus.services.save as SaveService
