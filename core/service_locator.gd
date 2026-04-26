@@ -35,3 +35,23 @@ var save: RefCounted:
 ## Registrado por main.gd al arrancar.
 var day_cycle: Node:
 	get: return get_service(&"day_cycle")
+
+## Atajo para PlayerService.
+## Registrado por main.gd al arrancar.
+var player: RefCounted:
+	get: return get_service(&"player")
+
+## Atajo para CropService.
+## Registrado por main.gd al arrancar.
+var crop: RefCounted:
+	get: return get_service(&"crop")
+
+## Atajo para FarmService (Node, no RefCounted).
+## Registrado por main.gd al arrancar.
+var farm: Node:
+	get: return get_service(&"farm")
+
+## Atajo para TradeService.
+## Registrado por main.gd al arrancar.
+var trade: RefCounted:
+	get: return get_service(&"trade")
