@@ -89,7 +89,7 @@ func _on_node_removed(node: Node) -> void:
 		var crop_svc := EventBus.services.crop as CropService
 		if crop_svc:
 			crop_svc.set_tilled_layer(null)
-			crop_svc.set_tillable_area([])
+			crop_svc.set_tillable_area([] as Array[Vector2i])
 
 
 func _on_tile_tilled(tile_pos: Vector2i) -> void:
