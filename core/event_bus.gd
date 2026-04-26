@@ -82,6 +82,10 @@ signal crop_harvested(tile_pos: Vector2i, crop_type: CropComponent.CropType)
 ## Emitida por ToolComponent cuando se usa una herramienta (para squash/stretch feedback).
 signal tool_action_performed(tool: ToolsComponent.Tools, tile_pos: Vector2i)
 
+## Señales del sistema de comercio.
+signal trade_opened
+signal trade_closed
+signal inventory_updated(coins: int)
 
 # Registro de servicios compartidos.
 var services: ServiceLocator = ServiceLocator.new()

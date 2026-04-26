@@ -43,5 +43,10 @@ func _ready() -> void:
 	EventBus.add_child(farm_svc)
 	EventBus.services.register(&"farm", farm_svc)
 
+	# TradeService: gestiona inventario del jugador y lógica de compraventa.
+	var trade_svc: TradeService = TradeService.new()
+	trade_svc.connect_signals()
+	EventBus.services.register(&"trade", trade_svc)
+
 	# Ir al menú principal
 	get_tree().call_deferred("change_scene_to_file", "res://ui/menus/main_menu.tscn")
