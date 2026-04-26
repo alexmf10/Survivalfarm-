@@ -56,11 +56,6 @@ func _build_world() -> void:
 		return
 
 	var world: Node2D = map_scene.instantiate() as Node2D
-
-	# Desactivar el script de test_scene.gd para que no duplique la lógica
-	# de HUD y ciclo día/noche (eso lo gestiona este GameWorld).
-	world.set_script(null)
-
 	add_child(world)
 
 
