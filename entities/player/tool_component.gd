@@ -130,6 +130,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	if _is_using_tool:
 		return  # Bloqueado durante la pausa de uso
 
+	# Clic izquierdo → usar la herramienta activa (o cosechar si no hay herramienta)
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		_use_tool()
+		return
+
 	# Solo nos interesan pulsaciones de teclado (no repeticiones).
 	if not (event is InputEventKey and event.pressed and not event.echo):
 		return
@@ -142,10 +147,6 @@ func _unhandled_input(event: InputEvent) -> void:
 			tool_changed.emit(current_tool)
 			EventBus.player_tool_changed.emit(current_tool)
 		return
-
-	# Tecla E → usar la herramienta activa (o cosechar si no hay herramienta)
-	if event.keycode == KEY_E:
-		_use_tool()
 
 
 func _process(_delta: float) -> void:
