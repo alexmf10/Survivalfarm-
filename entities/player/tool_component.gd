@@ -139,6 +139,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventKey and event.pressed and not event.echo):
 		return
 
+	# Tecla E → cosechar el cultivo bajo el ratón
+	if event.keycode == KEY_E:
+		_try_harvest()
+		return
+
 	# Selección de herramienta con teclas numéricas
 	var new_tool: ToolsComponent.Tools = _key_to_tool(event.keycode)
 	if new_tool >= 0:
