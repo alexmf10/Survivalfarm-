@@ -1,10 +1,10 @@
 [gd_scene load_steps=57 format=3 uid="uid://c8m4r6s9wvhqe"]
 
-[ext_resource type="Script" uid="uid://b5k7p3q2nzxyd" path="res://actors/player/player.gd" id="1_player"]
-[ext_resource type="Texture2D" uid="uid://nhs1t8tlrvxb" path="res://art/sprites/char_spritesheet.png" id="2_sheet"]
-[ext_resource type="Script" uid="uid://d7n2t4v8xzqpa" path="res://components/movement_component.gd" id="3_movement"]
-[ext_resource type="Script" uid="uid://e3w1y5h9jkmnb" path="res://components/animation_component.gd" id="4_anim"]
-[ext_resource type="Script" path="res://components/tool_component.gd" id="5_tool"]
+[ext_resource type="Script" uid="uid://b5k7p3q2nzxyd" path="res://entities/player/player.gd" id="1_player"]
+[ext_resource type="Texture2D" uid="uid://nhs1t8tlrvxb" path="res://assets/sprites/char_spritesheet.png" id="2_sheet"]
+[ext_resource type="Script" uid="uid://d7n2t4v8xzqpa" path="res://entities/player/movement_component.gd" id="3_movement"]
+[ext_resource type="Script" uid="uid://e3w1y5h9jkmnb" path="res://entities/player/animation_component.gd" id="4_anim"]
+[ext_resource type="Script" path="res://entities/player/tool_component.gd" id="5_tool"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_id01"]
 atlas = ExtResource("2_sheet")

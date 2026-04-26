@@ -60,10 +60,12 @@ func set_tilled_layer(layer: TileMapLayer) -> void:
 	_tilled_layer = layer
 	_tilled_tiles.clear()
 	_tillable_area.clear()
-	if layer:
-		for tile: Vector2i in layer.get_used_cells():
-			_tilled_tiles[tile] = true
-			_tillable_area[tile] = true
+
+
+func set_tillable_area(positions: Array[Vector2i]) -> void:
+	_tillable_area.clear()
+	for pos: Vector2i in positions:
+		_tillable_area[pos] = true
 
 
 ## Comprueba si un tile tiene un cultivo plantado.
