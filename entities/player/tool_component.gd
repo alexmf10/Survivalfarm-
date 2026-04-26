@@ -130,8 +130,18 @@ func _unhandled_input(event: InputEvent) -> void:
 	if _is_using_tool:
 		return  # Bloqueado durante la pausa de uso
 
+	# Clic izquierdo → usar la herramienta activa (o cosechar si no hay herramienta)
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		_use_tool()
+		return
+
 	# Solo nos interesan pulsaciones de teclado (no repeticiones).
 	if not (event is InputEventKey and event.pressed and not event.echo):
+		return
+
+	# Tecla E → cosechar el cultivo bajo el ratón
+	if event.keycode == KEY_E:
+		_try_harvest()
 		return
 
 	# Selección de herramienta con teclas numéricas
@@ -142,10 +152,6 @@ func _unhandled_input(event: InputEvent) -> void:
 			tool_changed.emit(current_tool)
 			EventBus.player_tool_changed.emit(current_tool)
 		return
-
-	# Tecla E → usar la herramienta activa (o cosechar si no hay herramienta)
-	if event.keycode == KEY_E:
-		_use_tool()
 
 
 func _process(_delta: float) -> void:
@@ -231,11 +237,6 @@ func _is_valid_grass_tile_for_tilling() -> bool:
 	var tilled_source_id: int = _tilled_layer.get_cell_source_id(grass_tile)
 	if tilled_source_id != -1:
 		return false  # Ya está arado
-	# Solo se puede arar dentro de la zona designada ("clarito").
-	# Las otras tierras (hierba verde normal, bordes, etc.) NO son aratables.
-	var crop_svc := EventBus.services.crop as CropService
-	if crop_svc == null or not crop_svc.is_tillable_area(grass_tile):
-		return false
 	# Posición global del centro del tile (no solo local a la capa)
 	var tile_world: Vector2 = _grass_layer.to_global(_grass_layer.map_to_local(grass_tile))
 	if _body.global_position.distance_to(tile_world) > ACTION_RADIUS:

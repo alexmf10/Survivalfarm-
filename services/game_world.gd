@@ -56,11 +56,6 @@ func _build_world() -> void:
 		return
 
 	var world: Node2D = map_scene.instantiate() as Node2D
-
-	# Desactivar el script de test_scene.gd para que no duplique la lógica
-	# de HUD y ciclo día/noche (eso lo gestiona este GameWorld).
-	world.set_script(null)
-
 	add_child(world)
 
 
@@ -72,16 +67,6 @@ func _build_hud() -> void:
 	var tool_hud_scene: PackedScene = load("res://ui/hud/tool_hud.tscn")
 	var tool_hud: CanvasLayer = tool_hud_scene.instantiate()
 	add_child(tool_hud)
-
-	# [TEST] Mini-inventario de prueba (barra inferior con herramientas y cosechas)
-	var test_toolbar: TestToolbarHUD = TestToolbarHUD.new()
-	test_toolbar.name = "TestToolbarHUD"
-	add_child(test_toolbar)
-
-	# [TEST] Comandos de debug (tecla P para avanzar cultivos)
-	var test_debug: TestDebugCommands = TestDebugCommands.new()
-	test_debug.name = "TestDebugCommands"
-	add_child(test_debug)
 
 
 func _start_day_cycle() -> void:
@@ -100,10 +85,6 @@ func _on_day_started(day_number: int) -> void:
 	if save_svc:
 		save_svc.save_day(active_slot, day_number)
 
-	# Regar automáticamente todos los cultivos plantados
-	var crop_svc: CropService = EventBus.services.crop as CropService
-	if crop_svc:
-		crop_svc.water_all()
 
 
 func _input(event: InputEvent) -> void:

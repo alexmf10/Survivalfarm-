@@ -135,4 +135,3 @@ func get_day(slot: int) -> int:
 	if not info.get("exists", false):
 		return 1
 	return info.get("day", 1)
-

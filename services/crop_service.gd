@@ -48,8 +48,6 @@ func connect_signals() -> void:
 	EventBus.player_planted.connect(_on_player_planted)
 	EventBus.player_harvest_attempted.connect(_on_player_harvest_attempted)
 	EventBus.day_started.connect(_on_day_started)
-	# [TEST] Debug: avanzar crecimiento manualmente
-	EventBus.debug_advance_crop.connect(_on_debug_advance_crop)
 
 
 ## Inyecta el TileMapLayer necesario.
@@ -60,10 +58,13 @@ func set_tilled_layer(layer: TileMapLayer) -> void:
 	_tilled_layer = layer
 	_tilled_tiles.clear()
 	_tillable_area.clear()
-	if layer:
-		for tile: Vector2i in layer.get_used_cells():
-			_tilled_tiles[tile] = true
-			_tillable_area[tile] = true
+
+
+func set_tillable_area(positions: Array[Vector2i]) -> void:
+	_tillable_area.clear()
+	for pos: Vector2i in positions:
+		_tillable_area[pos] = true
+		_tilled_tiles[pos] = true
 
 
 ## Comprueba si un tile tiene un cultivo plantado.
@@ -84,11 +85,6 @@ func is_tillable_area(tile_pos: Vector2i) -> bool:
 
 
 func _on_player_tilled(tile_pos: Vector2i) -> void:
-	# El ToolComponent valida rango, dirección y capa. Aquí reforzamos:
-	# - Solo se puede arar dentro de la zona aratable designada (clarito).
-	# - No se puede arar un tile que ya está arado.
-	if not _tillable_area.get(tile_pos, false):
-		return  # fuera de la zona aratable
 	if _tilled_tiles.get(tile_pos, false):
 		return  # ya estaba arado
 	_tilled_tiles[tile_pos] = true
@@ -145,21 +141,3 @@ func _on_day_started(_day_number: int) -> void:
 			crop.watered = false
 			EventBus.crop_grown.emit(tile, crop.stage, crop.max_stages)
 
-
-# [TEST] Avanza manualmente el crecimiento de un cultivo en el tile dado.
-func _on_debug_advance_crop(tile_pos: Vector2i) -> void:
-	if not _crops.has(tile_pos):
-		return
-	var crop: CropState = _crops[tile_pos]
-	if crop.stage < crop.max_stages - 1:
-		crop.stage += 1
-		EventBus.crop_grown.emit(tile_pos, crop.stage, crop.max_stages)
-
-
-## Avanza TODOS los cultivos (debug Shift+P).
-func debug_advance_all() -> void:
-	for tile: Vector2i in _crops:
-		var crop: CropState = _crops[tile]
-		if crop.stage < crop.max_stages - 1:
-			crop.stage += 1
-			EventBus.crop_grown.emit(tile, crop.stage, crop.max_stages)
