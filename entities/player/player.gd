@@ -47,6 +47,22 @@ func _ready() -> void:
 	_last_broadcast_position = global_position
 	EventBus.player_spawned.emit(self)
 
+	EventBus.trade_opened.connect(_on_trade_opened)
+	EventBus.trade_closed.connect(_on_trade_closed)
+
+
+func _on_trade_opened() -> void:
+	var movement := get_node_or_null("MovementComponent") as MovementComponent
+	if movement:
+		movement.stop()
+		movement.input_enabled = false
+
+
+func _on_trade_closed() -> void:
+	var movement := get_node_or_null("MovementComponent") as MovementComponent
+	if movement:
+		movement.input_enabled = true
+
 
 func _exit_tree() -> void:
 	var player_svc := EventBus.services.player as PlayerService
