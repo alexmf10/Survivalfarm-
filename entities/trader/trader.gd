@@ -24,11 +24,10 @@ func _ready() -> void:
 
 
 func _build_visual() -> void:
-	var rect: ColorRect = ColorRect.new()
-	rect.color = Color(0.45, 0.2, 0.75)
-	rect.size = Vector2(16, 24)
-	rect.position = Vector2(-8, -24)
-	add_child(rect)
+	var sprite: Sprite2D = Sprite2D.new()
+	sprite.texture = load("res://assets/textures/shop/shop.png")
+	sprite.centered = true
+	add_child(sprite)
 
 	var name_label: Label = Label.new()
 	name_label.text = "TRADER"
