@@ -10,6 +10,7 @@ enum CropType {
 
 @export var crop_name: String = ""
 @export var crop_type: CropType = CropType.Wheat
+@export var is_seed: bool = false
 @export var max_stages: int = 4
 @export var days_per_stage: int = 1
 

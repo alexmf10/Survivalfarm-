@@ -130,28 +130,50 @@ func _unhandled_input(event: InputEvent) -> void:
 	if _is_using_tool:
 		return  # Bloqueado durante la pausa de uso
 
-	# Clic izquierdo → usar la herramienta activa (o cosechar si no hay herramienta)
+	# Clic izquierdo -> Usar la herramienta activa o el ítem del Hotbar
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		_use_tool()
 		return
 
-	# Solo nos interesan pulsaciones de teclado (no repeticiones).
+	# Solo nos interesan pulsaciones de teclado (no repeticiones)
 	if not (event is InputEventKey and event.pressed and not event.echo):
 		return
 
-	# Tecla E → cosechar el cultivo bajo el ratón
+	# Tecla E -> Cosechar
 	if event.keycode == KEY_E:
 		_try_harvest()
 		return
 
-	# Selección de herramienta con teclas numéricas
-	var new_tool: ToolsComponent.Tools = _key_to_tool(event.keycode)
-	if new_tool >= 0:
-		if new_tool != current_tool:
-			current_tool = new_tool
-			tool_changed.emit(current_tool)
-			EventBus.player_tool_changed.emit(current_tool)
-		return
+	var trade_svc = EventBus.services.trade
+	if not trade_svc: return
+
+	# ─── SISTEMA HÍBRIDO: HOTBAR (1-4) Y HERRAMIENTAS (5-6) ───
+	var new_tool = current_tool
+
+	match event.keycode:
+		# Teclas 1 al 4: Seleccionan el Hotbar y guardan la herramienta (None)
+		KEY_1: 
+			trade_svc.set_active_slot(0)
+			new_tool = ToolsComponent.Tools.None
+		KEY_2: 
+			trade_svc.set_active_slot(1)
+			new_tool = ToolsComponent.Tools.None
+		KEY_3: 
+			trade_svc.set_active_slot(2)
+			new_tool = ToolsComponent.Tools.None
+		KEY_4: 
+			trade_svc.set_active_slot(3)
+			new_tool = ToolsComponent.Tools.None
+			
+		# Teclas 5 y 6: Equípan herramientas hardcodeadas
+		KEY_5: new_tool = ToolsComponent.Tools.TillGround # Azada
+		KEY_6: new_tool = ToolsComponent.Tools.WaterCrops # Regadera
+
+	# Si la herramienta ha cambiado, avisamos al resto del juego (UI, etc.)
+	if new_tool != current_tool:
+		current_tool = new_tool
+		tool_changed.emit(current_tool)
+		EventBus.player_tool_changed.emit(current_tool)
 
 
 func _process(_delta: float) -> void:
@@ -260,39 +282,34 @@ func _try_harvest() -> void:
 ## Usa la herramienta actualmente seleccionada, emitiendo la señal global
 ## correspondiente al EventBus. Si la herramienta es None, intenta cosechar.
 func _use_tool() -> void:
-	if current_tool == ToolsComponent.Tools.None:
-		_try_harvest()
-		return
-
+	# 1. Si tenemos una herramienta hardcodeada seleccionada (Azada o Regadera)
 	match current_tool:
 		ToolsComponent.Tools.TillGround:
-			# Arar: solo funciona sobre hierba válida (no sobre tierra ya arada)
-			if not _is_valid_grass_tile_for_tilling():
-				return
-			EventBus.player_tilled.emit(_last_tile_pos)
-			_perform_feedback(current_tool, _last_tile_pos)
-
+			if _is_valid_grass_tile_for_tilling():
+				EventBus.player_tilled.emit(_last_tile_pos)
+				_perform_feedback(current_tool, _last_tile_pos)
+			return # Salimos para que no intente plantar
+			
 		ToolsComponent.Tools.WaterCrops:
-			# Regar: solo sobre tiles de tierra arada que tengan cultivo
-			if not _is_valid_farm_tile():
-				return
-			EventBus.player_watered.emit(_last_tile_pos)
-			_perform_feedback(current_tool, _last_tile_pos)
+			if _is_valid_farm_tile():
+				EventBus.player_watered.emit(_last_tile_pos)
+				_perform_feedback(current_tool, _last_tile_pos)
+			return # Salimos para que no intente plantar
 
-		ToolsComponent.Tools.PlantWheat:
-			# Plantar: solo sobre tiles de tierra arada válidos
-			if not _is_valid_farm_tile():
-				return
-			EventBus.player_planted.emit(_last_tile_pos, CropComponent.CropType.Wheat)
-			_perform_feedback(current_tool, _last_tile_pos)
-
-		ToolsComponent.Tools.PlantBeet:
-			# Plantar: solo sobre tiles de tierra arada válidos
-			if not _is_valid_farm_tile():
-				return
-			EventBus.player_planted.emit(_last_tile_pos, CropComponent.CropType.Beet)
-			_perform_feedback(current_tool, _last_tile_pos)
-
+	# 2. Si la herramienta es None (estamos usando el Hotbar 1-4)
+	if current_tool == ToolsComponent.Tools.None:
+		var trade_svc = EventBus.services.trade
+		var seed_to_plant = trade_svc.get_active_seed()
+		
+		# Si tenemos una semilla válida en la mano Y estamos apuntando a tierra arable
+		if seed_to_plant != null and _is_valid_farm_tile():
+			EventBus.player_planted.emit(_last_tile_pos, seed_to_plant.crop_type)
+			trade_svc.consume_active_item()
+			# Usamos la animación de PlantWheat como genérica para agacharse a plantar
+			_perform_feedback(ToolsComponent.Tools.PlantWheat, _last_tile_pos) 
+		else:
+			# Si la casilla no es válida para plantar o tenemos las manos vacías, intentamos cosechar
+			_try_harvest()
 
 ## Aplica feedback visual al usar una herramienta:
 ## - Pausa breve de movimiento (200ms)
@@ -337,15 +354,7 @@ func _perform_feedback(tool: ToolsComponent.Tools, tile_pos: Vector2i) -> void:
 	_is_using_tool = false
 
 
-## Convierte un keycode numérico al enum de herramienta.
-func _key_to_tool(keycode: int) -> ToolsComponent.Tools:
-	match keycode:
-		KEY_1: return ToolsComponent.Tools.None
-		KEY_2: return ToolsComponent.Tools.TillGround
-		KEY_3: return ToolsComponent.Tools.WaterCrops
-		KEY_4: return ToolsComponent.Tools.PlantWheat
-		KEY_5: return ToolsComponent.Tools.PlantBeet
-	return -1  # Tecla no mapeada
+
 
 
 # ── Resaltado del tile objetivo ─────────────────────────────────────────────

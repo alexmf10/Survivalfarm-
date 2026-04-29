@@ -96,9 +96,6 @@ func _on_player_planted(tile_pos: Vector2i, crop_type: CropComponent.CropType) -
 		return
 	if _crops.has(tile_pos):
 		return
-	var trade_svc := EventBus.services.trade as TradeService
-	if trade_svc and not trade_svc.consume_seed(crop_type):
-		return
 	var res: CropComponent = _crop_data.get(crop_type)
 	var max_s: int = res.max_stages if res else 4
 	_crops[tile_pos] = CropState.new(crop_type, max_s)
@@ -142,4 +139,3 @@ func _on_day_started(_day_number: int) -> void:
 			crop.stage += 1
 			crop.watered = false
 			EventBus.crop_grown.emit(tile, crop.stage, crop.max_stages)
-
