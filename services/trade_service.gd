@@ -61,6 +61,7 @@ func _init() -> void:
 
 func connect_signals() -> void:
 	EventBus.crop_harvested.connect(_on_crop_harvested)
+	EventBus.inventory_slot_swapped.connect(_on_inventory_slot_swapped)
 
 ##Buscamos si Resource existe. Si existe, lo apilamos. Si no existe, lo añadimos si quedan huecos libres
 func _add_to_inventory(item_resource: Resource, amount: int) -> bool:
@@ -92,6 +93,18 @@ func _remove_from_inventory(item_resource: Resource, amount: int) -> bool:
 				return true
 	return false
 
+func _on_inventory_slot_swapped(from_index: int, to_index: int) -> void:
+	# Verificación de seguridad
+	if from_index < 0 or from_index >= MAX_SLOTS or to_index < 0 or to_index >= MAX_SLOTS: return
+	if from_index == to_index: return #si no lo movemos de slot se queda
+	
+	# Intercambiamos los datos en el array
+	var temp = _slots[from_index]
+	_slots[from_index] = _slots[to_index]
+	_slots[to_index] = temp
+	
+	# Avisamos a las interfaces para que se repinten
+	EventBus.inventory_updated.emit(_slots, coins)
 
 ##Añadimos al inventario una unidad del crop type recogido y emitimos señal de inventory updated
 func _on_crop_harvested(_tile_pos: Vector2i, crop_type: CropComponent.CropType) -> void:

@@ -23,9 +23,9 @@ func _on_inventory_updated(slots: Array, _coins: int) -> void:
 	# Recorremos solo nuestros 4 slots visuales
 	for i in range(visual_slots.size()):
 		if i < slots.size():
-			visual_slots[i].display(slots[i]) # Le pasamos el dato del inventario real
+			visual_slots[i].display(slots[i],i) # Le pasamos el dato del inventario real
 		else:
-			visual_slots[i].display(null)
+			visual_slots[i].display(null,i)
 
 
 ## Cambia el color de los slots para resaltar el que tienes en la mano

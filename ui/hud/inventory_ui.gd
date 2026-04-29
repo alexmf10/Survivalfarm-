@@ -41,6 +41,6 @@ func _on_inventory_updated(slots: Array, _coins: int) -> void:
 		
 		# Si hay datos en esa posición, los mostramos
 		if i < slots.size():
-			slot.display(slots[i])
+			slot.display(slots[i],i)
 		else:
-			slot.display(null)
+			slot.display(null, i)

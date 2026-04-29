@@ -89,6 +89,7 @@ signal inventory_updated(slots: Array, coins: int)
 signal hotbar_selection_changed(index: int)
 signal inventory_opened
 signal inventory_closed
+signal inventory_slot_swapped(from_index: int, to_index: int)
 
 # Registro de servicios compartidos.
 var services: ServiceLocator = ServiceLocator.new()
