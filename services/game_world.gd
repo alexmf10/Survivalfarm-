@@ -75,6 +75,10 @@ func _build_hud() -> void:
 	var tool_hud: CanvasLayer = tool_hud_scene.instantiate()
 	add_child(tool_hud)
 
+	var health_hud_scene: PackedScene = load("res://ui/hud/health_hud.tscn")
+	var health_hud: CanvasLayer = health_hud_scene.instantiate()
+	add_child(health_hud)
+
 	var trade_hud: TradeHUD = TradeHUD.new()
 	add_child(trade_hud)
 
@@ -96,7 +100,6 @@ func _on_day_started(day_number: int) -> void:
 		save_svc.save_day(active_slot, day_number)
 
 
-
 func _input(event: InputEvent) -> void:
 	if _trade_open:
 		return
@@ -107,3 +110,31 @@ func _input(event: InputEvent) -> void:
 			save_svc.save_day(active_slot, day_cycle_svc.current_day)
 			day_cycle_svc.pause()
 		get_tree().change_scene_to_file("res://ui/menus/slots_screen.tscn")
+
+	# PRUEBAS GLOBALES 
+	if event is InputEventKey and event.pressed and not event.echo:
+		match event.keycode:
+			KEY_P:
+				var day_cycle := EventBus.services.day_cycle as DayCycleService
+				if day_cycle:
+					day_cycle.start_cycle(day_cycle.current_day + 1)
+			KEY_O:
+				var crop_svc := EventBus.services.crop as CropService
+				if crop_svc:
+					crop_svc.water_all()
+			KEY_K:
+				# Debug: infligir 15 de daño al jugador
+				var player_svc := EventBus.services.player as PlayerService
+				if player_svc and player_svc.has_player():
+					var player: Node = player_svc.get_active_player()
+					var health := player.get_node_or_null("HealthComponent") as HealthComponent
+					if health:
+						health.take_damage(15.0)
+			KEY_L:
+				# Debug: curar 20 HP al jugador
+				var player_svc := EventBus.services.player as PlayerService
+				if player_svc and player_svc.has_player():
+					var player: Node = player_svc.get_active_player()
+					var health := player.get_node_or_null("HealthComponent") as HealthComponent
+					if health:
+						health.heal(20.0)

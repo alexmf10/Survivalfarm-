@@ -8,6 +8,7 @@
 ## "player"    → PlayerService (byRef) — directorio del jugador activo
 ## "crop"      → CropService (byRef) — estado de cultivos
 ## "farm"      → FarmService (Node) — visuales de cultivos
+## "combat"    → CombatService (byRef) — cálculo centralizado de daño
 extends Node
 
 
@@ -47,6 +48,10 @@ func _ready() -> void:
 	var trade_svc: TradeService = TradeService.new()
 	trade_svc.connect_signals()
 	EventBus.services.register(&"trade", trade_svc)
+
+	# CombatService: cálculo centralizado de daño (RefCounted, no necesita árbol).
+	var combat_svc: CombatService = CombatService.new()
+	EventBus.services.register(&"combat", combat_svc)
 
 	# Ir al menú principal
 	get_tree().call_deferred("change_scene_to_file", "res://ui/menus/main_menu.tscn")

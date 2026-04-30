@@ -22,6 +22,8 @@
 ## ├── MovementComponent                   ← lee WASD, mueve al padre
 ## ├── AnimationComponent                  ← escucha y elige animaciones
 ## ├── ToolComponent                       ← gestiona herramientas y emite señales de cultivo
+## ├── HealthComponent                     ← vida del jugador (take_damage, heal, died)
+## ├── HealthBarComponent                  ← barra de vida sobre el sprite (oculta si 100%)
 ## └── Camera2D                            ← sigue al jugador
 class_name Player
 extends CharacterBody2D

@@ -11,6 +11,8 @@
 ## - ToolComponent emite: player_tilled, player_watered, player_planted, player_harvest_attempted
 ## - CropService emite: tile_tilled, crop_planted, crop_watered, crop_grown, crop_harvested
 ## - FarmService escucha: tile_tilled, crop_planted, crop_grown, crop_harvested, crop_watered
+## - HealthComponent emite: player_hp_changed, entity_died, player_healed
+## - HealthHUD escucha: player_hp_changed
 extends Node
 
 # Señales globales
@@ -81,6 +83,18 @@ signal crop_harvested(tile_pos: Vector2i, crop_type: CropComponent.CropType)
 
 ## Emitida por ToolComponent cuando se usa una herramienta (para squash/stretch feedback).
 signal tool_action_performed(tool: ToolsComponent.Tools, tile_pos: Vector2i)
+
+## Señales de vida y combate (emitidas por HealthComponent)
+## Emitida cada vez que la vida del jugador cambia.
+## Escuchada por HealthHUD para actualizar la barra detallada.
+signal player_hp_changed(current_hp: float, max_hp: float)
+
+## Emitida cuando cualquier entidad con HealthComponent muere (vida = 0).
+## El argumento es el nodo padre del HealthComponent (Player, Slime, etc.).
+signal entity_died(entity: Node)
+
+## Emitida cuando el jugador recibe curación (para feedback visual).
+signal player_healed(amount: float)
 
 ## Señales del sistema de comercio.
 signal trade_opened

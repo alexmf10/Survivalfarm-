@@ -1,10 +1,12 @@
-[gd_scene load_steps=57 format=3 uid="uid://c8m4r6s9wvhqe"]
+[gd_scene load_steps=59 format=3 uid="uid://c8m4r6s9wvhqe"]
 
 [ext_resource type="Script" uid="uid://b5k7p3q2nzxyd" path="res://entities/player/player.gd" id="1_player"]
 [ext_resource type="Texture2D" uid="uid://nhs1t8tlrvxb" path="res://assets/sprites/char_spritesheet.png" id="2_sheet"]
 [ext_resource type="Script" uid="uid://d7n2t4v8xzqpa" path="res://entities/player/movement_component.gd" id="3_movement"]
 [ext_resource type="Script" uid="uid://e3w1y5h9jkmnb" path="res://entities/player/animation_component.gd" id="4_anim"]
 [ext_resource type="Script" path="res://entities/player/tool_component.gd" id="5_tool"]
+[ext_resource type="Script" path="res://data/component/health_component.gd" id="6_health"]
+[ext_resource type="Script" path="res://entities/behaviours/health_bar_component.gd" id="7_healthbar"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_id01"]
 atlas = ExtResource("2_sheet")
@@ -414,6 +416,19 @@ initial_facing = "down"
 
 [node name="ToolComponent" type="Node" parent="."]
 script = ExtResource("5_tool")
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("6_health")
+max_health = 100.0
+passive_regen_enabled = true
+passive_regen_amount = 1.0
+passive_regen_interval = 5.0
+
+[node name="HealthBarComponent" type="Node2D" parent="."]
+script = ExtResource("7_healthbar")
+bar_width = 14.0
+bar_height = 2.0
+bar_offset_y = -12.0
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position_smoothing_enabled = true
