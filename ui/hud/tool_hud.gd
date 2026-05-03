@@ -1,10 +1,10 @@
 extends CanvasLayer
 
-const COLOR_PARCHMENT:      Color = Color(0.82, 0.76, 0.63)
+const COLOR_PARCHMENT: Color = Color(0.82, 0.76, 0.63)
 const COLOR_PARCHMENT_DARK: Color = Color(0.68, 0.61, 0.48)
-const COLOR_BORDER:         Color = Color(0.38, 0.28, 0.20)
-const COLOR_TEXT:           Color = Color(0.35, 0.25, 0.15)
-const COLOR_TEXT_LIGHT:     Color = Color(0.55, 0.42, 0.28)
+const COLOR_BORDER: Color = Color(0.38, 0.28, 0.20)
+const COLOR_TEXT: Color = Color(0.35, 0.25, 0.15)
+const COLOR_TEXT_LIGHT: Color = Color(0.55, 0.42, 0.28)
 
 var _font: Font
 var _tool_label: Label
@@ -28,17 +28,17 @@ func _build_ui() -> void:
 
 	var panel: PanelContainer = PanelContainer.new()
 	panel.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	panel.offset_top    = -36
+	panel.offset_top = -36
 	panel.offset_bottom = -8
-	panel.offset_left   =  8
-	panel.offset_right  =  8
+	panel.offset_left = 8
+	panel.offset_right = 8
 
 	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color       = COLOR_PARCHMENT
-	style.border_color   = COLOR_BORDER
-	style.border_width_top    = 2
-	style.border_width_left   = 2
-	style.border_width_right  = 2
+	style.bg_color = COLOR_PARCHMENT
+	style.border_color = COLOR_BORDER
+	style.border_width_top = 2
+	style.border_width_left = 2
+	style.border_width_right = 2
 	style.border_width_bottom = 4
 	style.set_corner_radius_all(0)
 	style.set_content_margin_all(8)
@@ -77,6 +77,8 @@ func _update_tool_label(tool_type: ToolsComponent.Tools) -> void:
 			tool_name = "WHEAT SEEDS (4)  x%d" % _get_seed_count(CropComponent.CropType.Wheat)
 		ToolsComponent.Tools.PlantBeet:
 			tool_name = "BEET SEEDS (5)  x%d" % _get_seed_count(CropComponent.CropType.Beet)
+		ToolsComponent.Tools.Sword:
+			tool_name = "SWORD (6)  LMB:ATTACK"
 	if _tool_label:
 		_tool_label.text = tool_name
 

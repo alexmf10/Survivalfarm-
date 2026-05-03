@@ -46,6 +46,12 @@ var _current_direction: Vector2 = Vector2.ZERO
 var _facing: Vector2 = Vector2.DOWN  # Dirección cardinal actual (para animaciones)
 var _was_moving: bool = false
 
+# ── Knockback ───────────────────────────────────────────────────────────────
+## Tiempo en segundos que dura el knockback hasta decaer a 0.
+const KNOCKBACK_DECAY: float = 0.18
+var _knockback_velocity: Vector2 = Vector2.ZERO
+var _knockback_timer: float = 0.0
+
 
 func _ready() -> void:
 	_body = get_parent() as CharacterBody2D
@@ -67,6 +73,14 @@ func stop() -> void:
 ## Solo tiene efecto si input_enabled == false.
 func set_direction(direction: Vector2) -> void:
 	_current_direction = direction.limit_length(1.0)
+	if _current_direction != Vector2.ZERO:
+		_update_facing(_current_direction)
+
+
+func face_direction(direction: Vector2) -> void:
+	if direction.length_squared() < 0.001:
+		return
+	_update_facing(direction.normalized())
 
 
 ## Dirección cardinal actual ("up"/"down"/"left"/"right" codificada como Vector2).
@@ -74,10 +88,29 @@ func get_facing() -> Vector2:
 	return _facing
 
 
+## Aplica un impulso de knockback. La velocidad decae linealmente en
+## KNOCKBACK_DECAY segundos. Reemplaza cualquier knockback anterior.
+## Útil para que ataques empujen al objetivo (player o enemigo).
+func apply_knockback(impulse: Vector2) -> void:
+	_knockback_velocity = impulse
+	_knockback_timer = KNOCKBACK_DECAY
+
+
 # ── Proceso físico ──────────────────────────────────────────────────────────
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if _body == null:
+		return
+
+	# Knockback tiene prioridad sobre dirección normal mientras decae.
+	if _knockback_timer > 0.0:
+		_knockback_timer -= delta
+		var t: float = clampf(_knockback_timer / KNOCKBACK_DECAY, 0.0, 1.0)
+		_body.velocity = _knockback_velocity * t
+		_body.move_and_slide()
+		# Durante knockback no leemos input ni emitimos señales de "moved".
+		# El AnimationComponent mantendrá la animación que tuviera.
+		_was_moving = false
 		return
 
 	if input_enabled:
@@ -86,14 +119,19 @@ func _physics_process(_delta: float) -> void:
 		)
 
 	# Aplicar velocidad al cuerpo y resolver colisiones
+	var previous_position: Vector2 = _body.global_position
 	_body.velocity = _current_direction * speed
 	_body.move_and_slide()
 
 	# Emitir señales locales según el estado
-	var is_moving: bool = _current_direction != Vector2.ZERO
+	var wants_to_move: bool = _current_direction != Vector2.ZERO
+	var actually_moved: bool = _body.global_position.distance_squared_to(previous_position) > 0.001
+	var is_moving: bool = wants_to_move and actually_moved
+
+	if wants_to_move:
+		_update_facing(_current_direction)
 
 	if is_moving:
-		_update_facing(_current_direction)
 		moved.emit(_current_direction)
 	elif _was_moving:
 		stopped.emit()

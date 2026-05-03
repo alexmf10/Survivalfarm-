@@ -15,20 +15,20 @@ class_name HealthHUD
 extends CanvasLayer
 
 # ── Paleta de colores estilo medieval/pixel ──────────────────────────────────
-const COLOR_PARCHMENT:  Color = Color(0.82, 0.76, 0.63)
-const COLOR_BORDER:     Color = Color(0.38, 0.28, 0.20)
-const COLOR_TEXT:       Color = Color(0.35, 0.25, 0.15)
+const COLOR_PARCHMENT: Color = Color(0.82, 0.76, 0.63)
+const COLOR_BORDER: Color = Color(0.38, 0.28, 0.20)
+const COLOR_TEXT: Color = Color(0.35, 0.25, 0.15)
 
-const COLOR_HP_HIGH:   Color = Color(0.18, 0.80, 0.25)
-const COLOR_HP_MID:    Color = Color(0.90, 0.78, 0.15)
-const COLOR_HP_LOW:    Color = Color(0.85, 0.18, 0.18)
-const COLOR_HP_BG:     Color = Color(0.48, 0.42, 0.32)
+const COLOR_HP_HIGH: Color = Color(0.18, 0.80, 0.25)
+const COLOR_HP_MID: Color = Color(0.90, 0.78, 0.15)
+const COLOR_HP_LOW: Color = Color(0.85, 0.18, 0.18)
+const COLOR_HP_BG: Color = Color(0.48, 0.42, 0.32)
 
-const COLOR_HEART:     Color = Color(0.85, 0.18, 0.25)
-const COLOR_HEART_BG:  Color = Color(0.60, 0.20, 0.22, 0.4)
+const COLOR_HEART: Color = Color(0.85, 0.18, 0.25)
+const COLOR_HEART_BG: Color = Color(0.60, 0.20, 0.22, 0.4)
 
-const THRESHOLD_LOW: float  = 0.3
-const THRESHOLD_MID: float  = 0.6
+const THRESHOLD_LOW: float = 0.3
+const THRESHOLD_MID: float = 0.6
 
 # ── Nodos internos ───────────────────────────────────────────────────────────
 var _font: Font
@@ -66,17 +66,17 @@ func _build_ui() -> void:
 	# Panel contenedor
 	var panel: PanelContainer = PanelContainer.new()
 	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	panel.offset_left   = 8
-	panel.offset_top    = 8
-	panel.offset_right  = 8
+	panel.offset_left = 8
+	panel.offset_top = 8
+	panel.offset_right = 8
 	panel.offset_bottom = 8
 
 	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color       = COLOR_PARCHMENT
-	style.border_color   = COLOR_BORDER
-	style.border_width_top    = 2
-	style.border_width_left   = 2
-	style.border_width_right  = 2
+	style.bg_color = COLOR_PARCHMENT
+	style.border_color = COLOR_BORDER
+	style.border_width_top = 2
+	style.border_width_left = 2
+	style.border_width_right = 2
 	style.border_width_bottom = 4
 	style.set_corner_radius_all(0)
 	style.set_content_margin_all(6)
@@ -179,8 +179,8 @@ func _update_display(current_hp: float, max_hp: float, animate: bool) -> void:
 		if _tween and _tween.is_running():
 			_tween.kill()
 		_tween = create_tween()
-		_tween.tween_property(_hp_bar, "value", ratio, 0.4)\
-			.set_ease(Tween.EASE_OUT)\
+		_tween.tween_property(_hp_bar, "value", ratio, 0.4) \
+			.set_ease(Tween.EASE_OUT) \
 			.set_trans(Tween.TRANS_CUBIC)
 	else:
 		_hp_bar.value = ratio
@@ -191,9 +191,8 @@ func _update_display(current_hp: float, max_hp: float, animate: bool) -> void:
 class HeartIcon extends Control:
 	## Icono pixel-art de un corazón usando draw_rect (cuadraditos de 2x2).
 	## Patrón de corazón 5x5 píxeles escalado x2.
-
 	const HEART_COLOR: Color = Color(0.85, 0.18, 0.25)
-	const PX: float = 2.0  # Tamaño de cada "pixel" del corazón
+	const PX: float = 2.0 # Tamaño de cada "pixel" del corazón
 
 	# Mapa del corazón 5x5 (1 = relleno, 0 = vacío)
 	const HEART_MAP: Array = [

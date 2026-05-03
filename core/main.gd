@@ -9,6 +9,7 @@
 ## "crop"      → CropService (byRef) — estado de cultivos
 ## "farm"      → FarmService (Node) — visuales de cultivos
 ## "combat"    → CombatService (byRef) — cálculo centralizado de daño
+## "enemy_coord" → EnemyCoordinatorService (byRef) — árbitro de ataques enemigos
 extends Node
 
 
@@ -52,6 +53,10 @@ func _ready() -> void:
 	# CombatService: cálculo centralizado de daño (RefCounted, no necesita árbol).
 	var combat_svc: CombatService = CombatService.new()
 	EventBus.services.register(&"combat", combat_svc)
+
+	# EnemyCoordinatorService: limita cuántos enemigos atacan a la vez (RefCounted).
+	var enemy_coord_svc: EnemyCoordinatorService = EnemyCoordinatorService.new()
+	EventBus.services.register(&"enemy_coord", enemy_coord_svc)
 
 	# Ir al menú principal
 	get_tree().call_deferred("change_scene_to_file", "res://ui/menus/main_menu.tscn")

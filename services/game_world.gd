@@ -79,6 +79,10 @@ func _build_hud() -> void:
 	var health_hud: CanvasLayer = health_hud_scene.instantiate()
 	add_child(health_hud)
 
+	var sword_hud_scene: PackedScene = load("res://ui/hud/sword_hud.tscn")
+	var sword_hud: CanvasLayer = sword_hud_scene.instantiate()
+	add_child(sword_hud)
+
 	var trade_hud: TradeHUD = TradeHUD.new()
 	add_child(trade_hud)
 
@@ -138,3 +142,21 @@ func _input(event: InputEvent) -> void:
 					var health := player.get_node_or_null("HealthComponent") as HealthComponent
 					if health:
 						health.heal(20.0)
+			KEY_Z:
+				get_viewport().set_input_as_handled()
+				var zombie_scene: PackedScene = load("res://entities/zombie/zombie.tscn") as PackedScene
+				if zombie_scene == null:
+					push_error("GameWorld: no se pudo cargar zombie.tscn — ¿sprites importados?")
+					return
+				var zombie: Node2D = zombie_scene.instantiate() as Node2D
+				if zombie == null:
+					push_error("GameWorld: instantiate() de zombie.tscn devolvió null")
+					return
+				# Añadir al mundo PRIMERO, luego fijar posición (global_position requiere estar en el árbol)
+				var world_node: Node = get_child(0)
+				if world_node == null:
+					push_error("GameWorld: get_child(0) es null, no hay nodo de mundo")
+					return
+				world_node.add_child(zombie)
+				var canvas_xform: Transform2D = get_viewport().get_canvas_transform()
+				zombie.global_position = canvas_xform.affine_inverse() * get_viewport().get_mouse_position()

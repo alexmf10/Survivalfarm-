@@ -6,5 +6,6 @@ enum Tools {
 	TillGround,
 	WaterCrops,
 	PlantWheat,
-	PlantBeet
+	PlantBeet,
+	Sword
 }

@@ -13,6 +13,11 @@
 ## - FarmService escucha: tile_tilled, crop_planted, crop_grown, crop_harvested, crop_watered
 ## - HealthComponent emite: player_hp_changed, entity_died, player_healed
 ## - HealthHUD escucha: player_hp_changed
+## - AttackComponent emite: player_attack_started
+## - SwordHUD escucha: player_tool_changed (para mostrar estado de la espada)
+## - Zombie.gd emite: zombie_died
+## - ZombieAIComponent usa: PlayerService para localizar al jugador
+## - DamageFlashComponent escucha: HealthComponent.health_changed (local)
 extends Node
 
 # Señales globales
@@ -96,10 +101,19 @@ signal entity_died(entity: Node)
 ## Emitida cuando el jugador recibe curación (para feedback visual).
 signal player_healed(amount: float)
 
+## Señales de combate/ataque (emitidas por AttackComponent)
+## Emitida cuando el jugador inicia un ataque con espada.
+## Escuchada por enemigos para detectar daño entrante.
+signal player_attack_started(base_damage: float, direction: Vector2, attack_origin: Vector2)
+
 ## Señales del sistema de comercio.
 signal trade_opened
 signal trade_closed
 signal inventory_updated(coins: int)
+
+## Señales de enemigos (emitidas por Zombie.gd).
+## Emitida cuando un zombie muere. Para contadores, logros, y limpieza.
+signal zombie_died(zombie: Node)
 
 # Registro de servicios compartidos.
 var services: ServiceLocator = ServiceLocator.new()

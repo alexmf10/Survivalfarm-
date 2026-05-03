@@ -31,7 +31,6 @@ folder_colors={
 "res://core/": "orange",
 "res://data/": "yellow",
 "res://entities/": "green",
-"res://script/": "teal",
 "res://services/": "blue",
 "res://ui/": "purple"
 }

@@ -131,7 +131,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		return  # Bloqueado durante la pausa de uso
 
 	# Clic izquierdo → usar la herramienta activa (o cosechar si no hay herramienta)
+	# Si la espada está equipada, no consumir el clic — lo gestiona AttackComponent
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		if current_tool == ToolsComponent.Tools.Sword:
+			return  # Delegar al AttackComponent
 		_use_tool()
 		return
 
@@ -345,6 +348,7 @@ func _key_to_tool(keycode: int) -> ToolsComponent.Tools:
 		KEY_3: return ToolsComponent.Tools.WaterCrops
 		KEY_4: return ToolsComponent.Tools.PlantWheat
 		KEY_5: return ToolsComponent.Tools.PlantBeet
+		KEY_6: return ToolsComponent.Tools.Sword
 	return -1  # Tecla no mapeada
 
 
@@ -392,6 +396,8 @@ func _update_highlight() -> void:
 		return
 	var valid: bool = false
 	match current_tool:
+		ToolsComponent.Tools.Sword:
+			valid = false  # La espada no tiene resaltado de tile
 		ToolsComponent.Tools.TillGround:
 			valid = _is_valid_grass_tile_for_tilling()
 		ToolsComponent.Tools.WaterCrops, \

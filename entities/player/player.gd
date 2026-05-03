@@ -22,6 +22,7 @@
 ## ├── MovementComponent                   ← lee WASD, mueve al padre
 ## ├── AnimationComponent                  ← escucha y elige animaciones
 ## ├── ToolComponent                       ← gestiona herramientas y emite señales de cultivo
+## ├── AttackComponent                     ← ataque con espada (clic izquierdo con espada)
 ## ├── HealthComponent                     ← vida del jugador (take_damage, heal, died)
 ## ├── HealthBarComponent                  ← barra de vida sobre el sprite (oculta si 100%)
 ## └── Camera2D                            ← sigue al jugador
