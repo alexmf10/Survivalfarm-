@@ -79,9 +79,9 @@ func _build_hud() -> void:
 	var health_hud: CanvasLayer = health_hud_scene.instantiate()
 	add_child(health_hud)
 
-	var sword_hud_scene: PackedScene = load("res://ui/hud/sword_hud.tscn")
-	var sword_hud: CanvasLayer = sword_hud_scene.instantiate()
-	add_child(sword_hud)
+	#var sword_hud_scene: PackedScene = load("res://ui/hud/sword_hud.tscn")
+	#var sword_hud: CanvasLayer = sword_hud_scene.instantiate()
+	#add_child(sword_hud)
 
 	var trade_hud: TradeHUD = TradeHUD.new()
 	add_child(trade_hud)

@@ -171,6 +171,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		# Teclas 5 y 6: Equípan herramientas hardcodeadas
 		KEY_5: new_tool = ToolsComponent.Tools.TillGround # Azada
 		KEY_6: new_tool = ToolsComponent.Tools.WaterCrops # Regadera
+		KEY_7: new_tool = ToolsComponent.Tools.Sword # Regadera
 
 	# Si la herramienta ha cambiado, avisamos al resto del juego (UI, etc.)
 	if new_tool != current_tool:
@@ -355,20 +356,6 @@ func _perform_feedback(tool: ToolsComponent.Tools, tile_pos: Vector2i) -> void:
 	# Timer para desbloquear el movimiento
 	await get_tree().create_timer(USE_PAUSE_DURATION).timeout
 	_is_using_tool = false
-
-
-## Convierte un keycode numérico al enum de herramienta.
-func _key_to_tool(keycode: int) -> ToolsComponent.Tools:
-	match keycode:
-		KEY_1: return ToolsComponent.Tools.None
-		KEY_2: return ToolsComponent.Tools.TillGround
-		KEY_3: return ToolsComponent.Tools.WaterCrops
-		KEY_4: return ToolsComponent.Tools.PlantWheat
-		KEY_5: return ToolsComponent.Tools.PlantBeet
-		KEY_6: return ToolsComponent.Tools.Sword
-	return -1  # Tecla no mapeada
-
-
 
 # ── Resaltado del tile objetivo ─────────────────────────────────────────────
 

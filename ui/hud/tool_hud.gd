@@ -68,17 +68,13 @@ func _update_tool_label(tool_type: ToolsComponent.Tools) -> void:
 	var tool_name: String
 	match tool_type:
 		ToolsComponent.Tools.None:
-			tool_name = "HANDS (1)  E:HARVEST"
+			tool_name = "HOTBAR (1-4)"
 		ToolsComponent.Tools.TillGround:
-			tool_name = "HOE (2)"
+			tool_name = "HOE (5)"
 		ToolsComponent.Tools.WaterCrops:
-			tool_name = "WATERING CAN (3)"
-		ToolsComponent.Tools.PlantWheat:
-			tool_name = "WHEAT SEEDS (4)  x%d" % _get_seed_count(CropComponent.CropType.Wheat)
-		ToolsComponent.Tools.PlantBeet:
-			tool_name = "BEET SEEDS (5)  x%d" % _get_seed_count(CropComponent.CropType.Beet)
+			tool_name = "WATERING CAN (6)"
 		ToolsComponent.Tools.Sword:
-			tool_name = "SWORD (6)  LMB:ATTACK"
+			tool_name = "SWORD (7)  LMB:ATTACK"
 	if _tool_label:
 		_tool_label.text = tool_name
 
