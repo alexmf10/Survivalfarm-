@@ -85,6 +85,9 @@ func _build_hud() -> void:
 
 	var trade_hud: TradeHUD = TradeHUD.new()
 	add_child(trade_hud)
+	
+	var inventory_hud: TradeHUD = TradeHUD.new()
+	add_child(trade_hud)
 
 
 func _start_day_cycle() -> void:

@@ -6,13 +6,14 @@
 [resource]
 script = ExtResource("1_5p2df")
 crop_name = ""
-crop_type = 0
+crop_type = 1
+is_seed = false
 max_stages = 4
 days_per_stage = 1
 spritesheet = ExtResource("2_i40tp")
 frame_width = 16
 frame_height = 16
-spritesheet_row = 0
+spritesheet_row = 1
 seed_col = 0
 drop_col = 5
 metadata/_custom_type_script = "uid://dyk8gpabr5i6s"

@@ -1,0 +1,56 @@
+[gd_scene load_steps=4 format=3 uid="uid://dysnhy70elv4m"]
+
+[ext_resource type="Script" uid="uid://csd8urknlsha8" path="res://ui/hud/hotbar_ui.gd" id="1_5krk4"]
+[ext_resource type="Texture2D" uid="uid://dtawk06lsrsny" path="res://assets/resources/inventory/PANEL_SECCION_INVENTARIO.png" id="1_llfru"]
+[ext_resource type="PackedScene" uid="uid://bxidetdb4kk3p" path="res://ui/hud/inventory_ui_slot.tscn" id="2_0hbuj"]
+
+[node name="HotbarUi" type="Control"]
+layout_mode = 3
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 0
+script = ExtResource("1_5krk4")
+
+[node name="NinePatchRect" type="NinePatchRect" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -212.0
+offset_top = -61.0
+offset_right = 14.0
+offset_bottom = 11.0
+grow_horizontal = 0
+grow_vertical = 0
+texture = ExtResource("1_llfru")
+patch_margin_left = 12
+patch_margin_top = 12
+patch_margin_right = 12
+patch_margin_bottom = 12
+
+[node name="GridContainer" type="GridContainer" parent="NinePatchRect"]
+layout_mode = 0
+offset_left = 23.0
+offset_top = 15.0
+offset_right = 95.0
+offset_bottom = 31.0
+scale = Vector2(2.56, 2.56)
+columns = 4
+
+[node name="inventory_ui_slot1" parent="NinePatchRect/GridContainer" instance=ExtResource("2_0hbuj")]
+layout_mode = 2
+
+[node name="inventory_ui_slot2" parent="NinePatchRect/GridContainer" instance=ExtResource("2_0hbuj")]
+layout_mode = 2
+
+[node name="inventory_ui_slot3" parent="NinePatchRect/GridContainer" instance=ExtResource("2_0hbuj")]
+layout_mode = 2
+
+[node name="inventory_ui_slot4" parent="NinePatchRect/GridContainer" instance=ExtResource("2_0hbuj")]
+layout_mode = 2

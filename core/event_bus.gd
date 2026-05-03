@@ -106,10 +106,14 @@ signal player_healed(amount: float)
 ## Escuchada por enemigos para detectar daño entrante.
 signal player_attack_started(base_damage: float, direction: Vector2, attack_origin: Vector2)
 
-## Señales del sistema de comercio.
+## Señales del sistema de comercio e inventario.
 signal trade_opened
 signal trade_closed
-signal inventory_updated(coins: int)
+signal inventory_updated(slots: Array, coins: int)
+signal hotbar_selection_changed(index: int)
+signal inventory_opened
+signal inventory_closed
+signal inventory_slot_swapped(from_index: int, to_index: int)
 
 ## Señales de enemigos (emitidas por Zombie.gd).
 ## Emitida cuando un zombie muere. Para contadores, logros, y limpieza.
