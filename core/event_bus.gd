@@ -11,6 +11,13 @@
 ## - ToolComponent emite: player_tilled, player_watered, player_planted, player_harvest_attempted
 ## - CropService emite: tile_tilled, crop_planted, crop_watered, crop_grown, crop_harvested
 ## - FarmService escucha: tile_tilled, crop_planted, crop_grown, crop_harvested, crop_watered
+## - HealthComponent emite: player_hp_changed, entity_died, player_healed
+## - HealthHUD escucha: player_hp_changed
+## - AttackComponent emite: player_attack_started
+## - SwordHUD escucha: player_tool_changed (para mostrar estado de la espada)
+## - Zombie.gd emite: zombie_died
+## - ZombieAIComponent usa: PlayerService para localizar al jugador
+## - DamageFlashComponent escucha: HealthComponent.health_changed (local)
 extends Node
 
 # Señales globales
@@ -82,10 +89,35 @@ signal crop_harvested(tile_pos: Vector2i, crop_type: CropComponent.CropType)
 ## Emitida por ToolComponent cuando se usa una herramienta (para squash/stretch feedback).
 signal tool_action_performed(tool: ToolsComponent.Tools, tile_pos: Vector2i)
 
-## Señales del sistema de comercio.
+## Señales de vida y combate (emitidas por HealthComponent)
+## Emitida cada vez que la vida del jugador cambia.
+## Escuchada por HealthHUD para actualizar la barra detallada.
+signal player_hp_changed(current_hp: float, max_hp: float)
+
+## Emitida cuando cualquier entidad con HealthComponent muere (vida = 0).
+## El argumento es el nodo padre del HealthComponent (Player, Slime, etc.).
+signal entity_died(entity: Node)
+
+## Emitida cuando el jugador recibe curación (para feedback visual).
+signal player_healed(amount: float)
+
+## Señales de combate/ataque (emitidas por AttackComponent)
+## Emitida cuando el jugador inicia un ataque con espada.
+## Escuchada por enemigos para detectar daño entrante.
+signal player_attack_started(base_damage: float, direction: Vector2, attack_origin: Vector2)
+
+## Señales del sistema de comercio e inventario.
 signal trade_opened
 signal trade_closed
-signal inventory_updated(coins: int)
+signal inventory_updated(slots: Array, coins: int)
+signal hotbar_selection_changed(index: int)
+signal inventory_opened
+signal inventory_closed
+signal inventory_slot_swapped(from_index: int, to_index: int)
+
+## Señales de enemigos (emitidas por Zombie.gd).
+## Emitida cuando un zombie muere. Para contadores, logros, y limpieza.
+signal zombie_died(zombie: Node)
 
 # Registro de servicios compartidos.
 var services: ServiceLocator = ServiceLocator.new()

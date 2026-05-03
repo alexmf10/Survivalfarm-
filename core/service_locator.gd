@@ -55,3 +55,13 @@ var farm: Node:
 ## Registrado por main.gd al arrancar.
 var trade: RefCounted:
 	get: return get_service(&"trade")
+
+## Atajo para CombatService.
+## Registrado por main.gd al arrancar.
+var combat: RefCounted:
+	get: return get_service(&"combat")
+
+## Atajo para EnemyCoordinatorService.
+## Registrado por main.gd al arrancar.
+var enemy_coord: RefCounted:
+	get: return get_service(&"enemy_coord")
