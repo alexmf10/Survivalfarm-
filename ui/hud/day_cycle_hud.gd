@@ -18,15 +18,15 @@
 class_name DayCycleHUD
 extends CanvasLayer
 
-const COLOR_PARCHMENT:  Color = Color(0.82, 0.76, 0.63)
-const COLOR_BORDER:     Color = Color(0.38, 0.28, 0.20)
-const COLOR_TEXT:       Color = Color(0.35, 0.25, 0.15)
-const COLOR_TEXT_DAY:   Color = Color(0.55, 0.38, 0.08)
+const COLOR_PARCHMENT: Color = Color(0.82, 0.76, 0.63)
+const COLOR_BORDER: Color = Color(0.38, 0.28, 0.20)
+const COLOR_TEXT: Color = Color(0.35, 0.25, 0.15)
+const COLOR_TEXT_DAY: Color = Color(0.55, 0.38, 0.08)
 const COLOR_TEXT_NIGHT: Color = Color(0.35, 0.40, 0.68)
-const COLOR_BAR_DAY:    Color = Color(0.85, 0.65, 0.10)
-const COLOR_BAR_NIGHT:  Color = Color(0.30, 0.35, 0.70)
+const COLOR_BAR_DAY: Color = Color(0.85, 0.65, 0.10)
+const COLOR_BAR_NIGHT: Color = Color(0.30, 0.35, 0.70)
 
-const TINT_DAY:   Color = Color(0, 0, 0, 0)
+const TINT_DAY: Color = Color(0, 0, 0, 0)
 const TINT_NIGHT: Color = Color(0.05, 0.05, 0.2, 0.45)
 const TINT_TRANSITION_DURATION: float = 2.0
 
@@ -66,17 +66,17 @@ func _build_ui() -> void:
 
 	var panel: PanelContainer = PanelContainer.new()
 	panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	panel.offset_left   = -120
-	panel.offset_right  =  -8
-	panel.offset_top    =   8
-	panel.offset_bottom =   8
+	panel.offset_left = -120
+	panel.offset_right = -8
+	panel.offset_top = 8
+	panel.offset_bottom = 8
 
 	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color       = COLOR_PARCHMENT
-	style.border_color   = COLOR_BORDER
-	style.border_width_top    = 2
-	style.border_width_left   = 2
-	style.border_width_right  = 2
+	style.bg_color = COLOR_PARCHMENT
+	style.border_color = COLOR_BORDER
+	style.border_width_top = 2
+	style.border_width_left = 2
+	style.border_width_right = 2
 	style.border_width_bottom = 4
 	style.set_corner_radius_all(0)
 	style.set_content_margin_all(8)
@@ -193,8 +193,8 @@ func _on_day_phase_changed(night: bool) -> void:
 
 	var target_color: Color = TINT_NIGHT if night else TINT_DAY
 	_tint_tween = create_tween()
-	_tint_tween.tween_property(_tint_rect, "color", target_color, TINT_TRANSITION_DURATION)\
-		.set_ease(Tween.EASE_IN_OUT)\
+	_tint_tween.tween_property(_tint_rect, "color", target_color, TINT_TRANSITION_DURATION) \
+		.set_ease(Tween.EASE_IN_OUT) \
 		.set_trans(Tween.TRANS_SINE)
 
 

@@ -1,7 +1,9 @@
-[gd_scene load_steps=4 format=4 uid="uid://biyoaoqxbexbi"]
+[gd_scene load_steps=6 format=4 uid="uid://biyoaoqxbexbi"]
 
 [ext_resource type="TileSet" uid="uid://csru1lfxpv6q1" path="res://assets/resources/tilesets/game_tile_set.tres" id="1_34o6h"]
 [ext_resource type="PackedScene" uid="uid://c8m4r6tawvhqe" path="res://entities/player/player.tscn" id="2_8re64"]
+[ext_resource type="PackedScene" uid="uid://rpvjf1ae6qw1" path="res://ui/hud/inventory_ui.tscn" id="3_8a5k3"]
+[ext_resource type="PackedScene" uid="uid://dysnhy70elv4m" path="res://ui/hud/hotbar_ui.tscn" id="4_cgkh8"]
 
 [sub_resource type="GDScript" id="GDScript_1wtli"]
 script/source = "extends Node2D
@@ -44,3 +46,21 @@ tile_set = ExtResource("1_34o6h")
 
 [node name="Player" parent="." instance=ExtResource("2_8re64")]
 position = Vector2(269, 206)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="inventory_ui" parent="CanvasLayer" instance=ExtResource("3_8a5k3")]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -77.0
+offset_top = -78.0
+offset_right = 4.0
+offset_bottom = 7.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(1.91, 1.91)
+
+[node name="HotbarUi" parent="CanvasLayer" instance=ExtResource("4_cgkh8")]

@@ -1,10 +1,16 @@
-[gd_scene load_steps=57 format=3 uid="uid://c8m4r6s9wvhqe"]
+[gd_scene load_steps=77 format=3 uid="uid://c8m4r6s9wvhqe"]
 
-[ext_resource type="Script" uid="uid://b5k7p3q2nzxyd" path="res://entities/player/player.gd" id="1_player"]
+
+[ext_resource type="Script" uid="uid://b5k7p3q2n0xyd" path="res://entities/player/player.gd" id="1_player"]
 [ext_resource type="Texture2D" uid="uid://nhs1t8tlrvxb" path="res://assets/sprites/char_spritesheet.png" id="2_sheet"]
 [ext_resource type="Script" uid="uid://d7n2t4v8xzqpa" path="res://entities/player/movement_component.gd" id="3_movement"]
 [ext_resource type="Script" uid="uid://e3w1y5h9jkmnb" path="res://entities/player/animation_component.gd" id="4_anim"]
 [ext_resource type="Script" path="res://entities/player/tool_component.gd" id="5_tool"]
+[ext_resource type="Script" path="res://data/component/health_component.gd" id="6_health"]
+[ext_resource type="Script" path="res://entities/behaviours/health_bar_component.gd" id="7_healthbar"]
+[ext_resource type="Script" path="res://entities/player/attack_component.gd" id="8_attack"]
+[ext_resource type="Script" path="res://entities/behaviours/damage_flash_component.gd" id="9_flash"]
+
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_id01"]
 atlas = ExtResource("2_sheet")
@@ -198,8 +204,140 @@ region = Rect2(80, 64, 16, 16)
 atlas = ExtResource("2_sheet")
 region = Rect2(96, 64, 16, 16)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_atk_d1"]
+atlas = ExtResource("2_sheet")
+region = Rect2(7, 199, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_atk_d2"]
+atlas = ExtResource("2_sheet")
+region = Rect2(109, 199, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_atk_d3"]
+atlas = ExtResource("2_sheet")
+region = Rect2(152, 199, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_atk_d4"]
+atlas = ExtResource("2_sheet")
+region = Rect2(190, 199, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_atk_l1"]
+atlas = ExtResource("2_sheet")
+region = Rect2(7, 279, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_atk_l2"]
+atlas = ExtResource("2_sheet")
+region = Rect2(99, 279, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_atk_l3"]
+atlas = ExtResource("2_sheet")
+region = Rect2(144, 279, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_atk_l4"]
+atlas = ExtResource("2_sheet")
+region = Rect2(199, 279, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_atk_u1"]
+atlas = ExtResource("2_sheet")
+region = Rect2(8, 247, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_atk_u2"]
+atlas = ExtResource("2_sheet")
+region = Rect2(99, 247, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_atk_u3"]
+atlas = ExtResource("2_sheet")
+region = Rect2(152, 247, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_atk_u4"]
+atlas = ExtResource("2_sheet")
+region = Rect2(200, 247, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_atk_r1"]
+atlas = ExtResource("2_sheet")
+region = Rect2(7, 327, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_atk_r2"]
+atlas = ExtResource("2_sheet")
+region = Rect2(103, 327, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_atk_r3"]
+atlas = ExtResource("2_sheet")
+region = Rect2(156, 327, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_atk_r4"]
+atlas = ExtResource("2_sheet")
+region = Rect2(206, 327, 32, 32)
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_player"]
 animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_atk_d1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_atk_d2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_atk_d3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_atk_d4")
+}],
+"loop": false,
+"name": &"attack_down",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_atk_l1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_atk_l2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_atk_l3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_atk_l4")
+}],
+"loop": false,
+"name": &"attack_left",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_atk_r1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_atk_r2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_atk_r3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_atk_r4")
+}],
+"loop": false,
+"name": &"attack_right",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_atk_u1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_atk_u2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_atk_u3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_atk_u4")
+}],
+"loop": false,
+"name": &"attack_up",
+"speed": 10.0
+}, {
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_id01")
@@ -390,6 +528,8 @@ size = Vector2(8, 11)
 
 [node name="Player" type="CharacterBody2D"]
 script = ExtResource("1_player")
+collision_layer = 2
+collision_mask = 1
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_player")
@@ -401,19 +541,35 @@ shape = SubResource("RectangleShape2D_body")
 
 [node name="MovementComponent" type="Node" parent="."]
 script = ExtResource("3_movement")
-speed = 60.0
-input_enabled = true
 
 [node name="AnimationComponent" type="Node" parent="."]
 script = ExtResource("4_anim")
-sprite_path = NodePath("../AnimatedSprite2D")
-movement_path = NodePath("../MovementComponent")
-idle_prefix = "idle"
 walk_prefix = "run"
-initial_facing = "down"
 
 [node name="ToolComponent" type="Node" parent="."]
 script = ExtResource("5_tool")
+
+[node name="AttackComponent" type="Node" parent="."]
+script = ExtResource("8_attack")
+base_damage = 15.0
+attack_range = 14.0
+attack_width = 12.0
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("6_health")
+max_health = 100.0
+passive_regen_enabled = true
+passive_regen_amount = 1.0
+passive_regen_interval = 5.0
+
+[node name="HealthBarComponent" type="Node2D" parent="."]
+script = ExtResource("7_healthbar")
+bar_width = 14.0
+bar_height = 2.0
+bar_offset_y = -12.0
+
+[node name="DamageFlashComponent" type="Node" parent="."]
+script = ExtResource("9_flash")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position_smoothing_enabled = true

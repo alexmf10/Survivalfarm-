@@ -1,0 +1,47 @@
+[gd_scene load_steps=3 format=3 uid="uid://bxidetdb4kk3p"]
+
+[ext_resource type="Texture2D" uid="uid://ceyn2k8f7pmu3" path="res://assets/resources/inventory/SLOT_INVENTARIO.png" id="1_4mn6v"]
+[ext_resource type="Script" uid="uid://b7htek74o2aem" path="res://ui/hud/inventory_ui_slot.gd" id="1_wboo7"]
+
+[node name="inventory_ui_slot" type="Panel"]
+self_modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(15, 16)
+offset_right = 15.0
+offset_bottom = 16.0
+script = ExtResource("1_wboo7")
+
+[node name="background" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = -3.0
+offset_top = -2.0
+offset_right = 85.0
+offset_bottom = 89.0
+scale = Vector2(0.23, 0.23)
+texture = ExtResource("1_4mn6v")
+
+[node name="itemIcon" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 3.0
+offset_top = 4.0
+offset_right = 10.0
+offset_bottom = 11.0
+expand_mode = 1
+stretch_mode = 3
+
+[node name="amountLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -6.0
+offset_top = -7.0
+offset_right = 13.0
+offset_bottom = 16.0
+grow_horizontal = 0
+grow_vertical = 0
+scale = Vector2(0.225, 0.225)
+text = "99"
+horizontal_alignment = 2
+vertical_alignment = 2

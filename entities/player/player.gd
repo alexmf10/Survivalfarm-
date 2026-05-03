@@ -22,6 +22,9 @@
 ## ├── MovementComponent                   ← lee WASD, mueve al padre
 ## ├── AnimationComponent                  ← escucha y elige animaciones
 ## ├── ToolComponent                       ← gestiona herramientas y emite señales de cultivo
+## ├── AttackComponent                     ← ataque con espada (clic izquierdo con espada)
+## ├── HealthComponent                     ← vida del jugador (take_damage, heal, died)
+## ├── HealthBarComponent                  ← barra de vida sobre el sprite (oculta si 100%)
 ## └── Camera2D                            ← sigue al jugador
 class_name Player
 extends CharacterBody2D
@@ -46,6 +49,22 @@ func _ready() -> void:
 
 	_last_broadcast_position = global_position
 	EventBus.player_spawned.emit(self)
+
+	EventBus.trade_opened.connect(_on_trade_opened)
+	EventBus.trade_closed.connect(_on_trade_closed)
+
+
+func _on_trade_opened() -> void:
+	var movement := get_node_or_null("MovementComponent") as MovementComponent
+	if movement:
+		movement.stop()
+		movement.input_enabled = false
+
+
+func _on_trade_closed() -> void:
+	var movement := get_node_or_null("MovementComponent") as MovementComponent
+	if movement:
+		movement.input_enabled = true
 
 
 func _exit_tree() -> void:
