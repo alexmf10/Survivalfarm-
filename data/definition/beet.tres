@@ -7,6 +7,7 @@
 script = ExtResource("1_5p2df")
 crop_name = ""
 crop_type = 1
+is_seed = false
 max_stages = 4
 days_per_stage = 1
 spritesheet = ExtResource("2_i40tp")
