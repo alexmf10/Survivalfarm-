@@ -1,0 +1,20 @@
+[gd_scene load_steps=2 format=4 uid="uid://bvq6at7633ytm"]
+
+[ext_resource type="Script" path="res://ui/menus/sleep_overlay.gd" id="1_sleep"]
+
+[node name="SleepOverlay" type="CanvasLayer"]
+layer = 100
+script = ExtResource("1_sleep")
+
+[node name="BlackScreen" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 1)
+mouse_filter = 2
+
+[node name="SaveDialog" type="AcceptDialog" parent="."]
+title = "Has dormido"
+size = Vector2i(280, 100)
+ok_button_text = "Aceptar"
+dialog_text = "Partida guardada"
+visible = false

@@ -19,15 +19,34 @@ var _hint_label: Label
 
 func _ready() -> void:
 	_build_visual()
+	# z_index para depth-sort: la posición ya fue ajustada al base del cart en _build_visual
+	z_index = int(global_position.y)
 	EventBus.trade_opened.connect(func() -> void: _trade_open = true)
 	EventBus.trade_closed.connect(func() -> void: _trade_open = false)
 
 
 func _build_visual() -> void:
+	# Y-sort: queremos que el sort key (= position.y) sea la BASE del cart.
+	# El marker del trader está en el centro visual del cart. Para conseguir
+	# que la posición sea la base, desplazamos +32 (mitad de shop.png 64×64)
+	# y compensamos el sprite con -32 para que visualmente quede igual.
+	position.y += 32
+
 	var sprite: Sprite2D = Sprite2D.new()
 	sprite.texture = load("res://assets/textures/shop/shop.png")
 	sprite.centered = true
+	sprite.position = Vector2(0, -32)
 	add_child(sprite)
+
+	# Cuerpo estático pequeño en la base del carro
+	var body: StaticBody2D = StaticBody2D.new()
+	var col: CollisionShape2D = CollisionShape2D.new()
+	var shape: RectangleShape2D = RectangleShape2D.new()
+	shape.size = Vector2(28, 12)
+	col.shape = shape
+	col.position = Vector2(0, -8)  # justo encima de la base del cart
+	body.add_child(col)
+	add_child(body)
 
 	var name_label: Label = Label.new()
 	name_label.text = "TRADER"

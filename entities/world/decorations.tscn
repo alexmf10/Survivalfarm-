@@ -1,0 +1,304 @@
+[gd_scene load_steps=21 format=3 uid="uid://c5x35n3hoh52"]
+
+[ext_resource type="Texture2D" uid="uid://vgsaqfem1ysr" path="res://assets/sprites/exterior_singles/tree_oak_big.png" id="1_oakbig"]
+[ext_resource type="Texture2D" uid="uid://s5pd8m7nfuyh" path="res://assets/sprites/exterior_singles/tree_oak_small.png" id="2_oaksml"]
+[ext_resource type="Texture2D" uid="uid://c2208p0m3cel0" path="res://assets/sprites/exterior_singles/tree_apple.png" id="3_apple"]
+[ext_resource type="Texture2D" uid="uid://du6uqe6obvl7u" path="res://assets/sprites/exterior_singles/tree_autumn_red.png" id="4_autumn"]
+[ext_resource type="Texture2D" uid="uid://c7heswgnwqwrt" path="res://assets/sprites/exterior_singles/tree_pine_dark.png" id="5_pinedk"]
+[ext_resource type="Texture2D" uid="uid://bufs1hd25yjfb" path="res://assets/sprites/exterior_singles/tree_pine_green.png" id="6_pinegr"]
+[ext_resource type="Texture2D" uid="uid://nwhckwfp71mh" path="res://assets/sprites/exterior_singles/tombstone_marble.png" id="7_tmarb"]
+[ext_resource type="Texture2D" uid="uid://di4hdh58rm2k5" path="res://assets/sprites/exterior_singles/tombstone_black.png" id="8_tblk"]
+[ext_resource type="Texture2D" uid="uid://b38cbdxswgocl" path="res://assets/sprites/exterior_singles/tombstone_brown.png" id="9_tbrwn"]
+[ext_resource type="Texture2D" uid="uid://df3rcaviqk43a" path="res://assets/sprites/exterior_singles/dirt_pile.png" id="11_dirt"]
+[ext_resource type="Texture2D" uid="uid://2awdp4ku0rse" path="res://assets/sprites/exterior_singles/cart_full.png" id="12_cartf"]
+[ext_resource type="Texture2D" uid="uid://bd1hw6d1cxdl" path="res://assets/sprites/exterior_singles/cart_empty.png" id="13_carte"]
+[ext_resource type="Texture2D" uid="uid://7fqlolmhxp5b" path="res://assets/sprites/exterior_singles/bench.png" id="14_bench"]
+[ext_resource type="Texture2D" uid="uid://jb4vne6inuv3" path="res://assets/sprites/exterior_singles/bird_house.png" id="15_bird"]
+[ext_resource type="Script" uid="uid://db0p1wmkv0jnb" path="res://entities/world/decorations.gd" id="script_decorations"]
+
+[sub_resource type="RectangleShape2D" id="shape_tomb_marble"]
+size = Vector2(19, 6)
+
+[sub_resource type="RectangleShape2D" id="shape_tomb_small"]
+size = Vector2(10, 6)
+
+[sub_resource type="RectangleShape2D" id="shape_cart_full"]
+size = Vector2(26, 10)
+
+[sub_resource type="RectangleShape2D" id="shape_bench"]
+size = Vector2(32, 12)
+
+[sub_resource type="RectangleShape2D" id="shape_birdhouse"]
+size = Vector2(10, 8)
+
+[node name="Decorations" type="Node2D"]
+script = ExtResource("script_decorations")
+
+[node name="BossZone" type="Node2D" parent="."]
+
+[node name="TombstoneMarble1" type="StaticBody2D" parent="BossZone"]
+z_index = 192
+position = Vector2(80, 192)
+
+[node name="Sprite2D" type="Sprite2D" parent="BossZone/TombstoneMarble1"]
+position = Vector2(0, -16)
+texture = ExtResource("7_tmarb")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BossZone/TombstoneMarble1"]
+position = Vector2(0.125, -4)
+shape = SubResource("shape_tomb_marble")
+
+[node name="TombstoneMarble2" type="StaticBody2D" parent="BossZone"]
+z_index = 384
+position = Vector2(80, 384)
+
+[node name="Sprite2D" type="Sprite2D" parent="BossZone/TombstoneMarble2"]
+position = Vector2(0, -16)
+texture = ExtResource("7_tmarb")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BossZone/TombstoneMarble2"]
+position = Vector2(0, -4)
+shape = SubResource("shape_tomb_marble")
+
+[node name="TombstoneMarble3" type="StaticBody2D" parent="BossZone"]
+z_index = 192
+position = Vector2(211, 192)
+
+[node name="Sprite2D" type="Sprite2D" parent="BossZone/TombstoneMarble3"]
+position = Vector2(0, -16)
+texture = ExtResource("7_tmarb")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BossZone/TombstoneMarble3"]
+position = Vector2(0, -4)
+shape = SubResource("shape_tomb_marble")
+
+[node name="TombstoneMarble4" type="StaticBody2D" parent="BossZone"]
+z_index = 288
+position = Vector2(80, 288)
+
+[node name="Sprite2D" type="Sprite2D" parent="BossZone/TombstoneMarble4"]
+position = Vector2(0, -16)
+texture = ExtResource("7_tmarb")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BossZone/TombstoneMarble4"]
+position = Vector2(0, -4)
+shape = SubResource("shape_tomb_marble")
+
+[node name="TombstoneMarble5" type="StaticBody2D" parent="BossZone"]
+z_index = 288
+position = Vector2(219, 288)
+
+[node name="Sprite2D" type="Sprite2D" parent="BossZone/TombstoneMarble5"]
+position = Vector2(0, -16)
+texture = ExtResource("7_tmarb")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BossZone/TombstoneMarble5"]
+position = Vector2(0, -4)
+shape = SubResource("shape_tomb_marble")
+
+[node name="TombstoneMarble6" type="StaticBody2D" parent="BossZone"]
+z_index = 384
+position = Vector2(219, 384)
+
+[node name="Sprite2D" type="Sprite2D" parent="BossZone/TombstoneMarble6"]
+position = Vector2(0, -16)
+texture = ExtResource("7_tmarb")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BossZone/TombstoneMarble6"]
+position = Vector2(0, -4)
+shape = SubResource("shape_tomb_marble")
+
+[node name="TombstoneBlack" type="StaticBody2D" parent="BossZone"]
+z_index = 224
+position = Vector2(160, 224)
+
+[node name="Sprite2D" type="Sprite2D" parent="BossZone/TombstoneBlack"]
+position = Vector2(0, -8)
+texture = ExtResource("8_tblk")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BossZone/TombstoneBlack"]
+position = Vector2(0, -3)
+shape = SubResource("shape_tomb_small")
+
+[node name="TombstoneBrown" type="StaticBody2D" parent="BossZone"]
+z_index = 288
+position = Vector2(192, 288)
+
+[node name="Sprite2D" type="Sprite2D" parent="BossZone/TombstoneBrown"]
+position = Vector2(0, -8)
+texture = ExtResource("9_tbrwn")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BossZone/TombstoneBrown"]
+position = Vector2(0, -3)
+shape = SubResource("shape_tomb_small")
+
+[node name="DirtPile1" type="StaticBody2D" parent="BossZone"]
+z_index = 192
+position = Vector2(128, 192)
+
+[node name="Sprite2D" type="Sprite2D" parent="BossZone/DirtPile1"]
+position = Vector2(0, -16)
+texture = ExtResource("11_dirt")
+
+[node name="DirtPile2" type="StaticBody2D" parent="BossZone"]
+z_index = 384
+position = Vector2(224, 384)
+
+[node name="Sprite2D" type="Sprite2D" parent="BossZone/DirtPile2"]
+position = Vector2(-82, -29)
+texture = ExtResource("11_dirt")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BossZone/DirtPile2"]
+
+[node name="Trees" type="Node2D" parent="."]
+
+[node name="TreeOakBig1" type="StaticBody2D" parent="Trees"]
+z_index = 96
+position = Vector2(64, 96)
+
+[node name="Sprite2D" type="Sprite2D" parent="Trees/TreeOakBig1"]
+position = Vector2(0, -32)
+texture = ExtResource("1_oakbig")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Trees/TreeOakBig1"]
+position = Vector2(0, -2)
+polygon = PackedVector2Array(-19, -10, -19, -6, -16, -3, -8, -3, 11, -3, 15, -4, 19, -6, 19, -10, 17, -14, -12, -15, -15, -14)
+
+[node name="TreePineDark1" type="StaticBody2D" parent="Trees"]
+z_index = 128
+position = Vector2(701, 55)
+
+[node name="Sprite2D" type="Sprite2D" parent="Trees/TreePineDark1"]
+position = Vector2(0, -33)
+texture = ExtResource("5_pinedk")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Trees/TreePineDark1"]
+position = Vector2(2, -4)
+polygon = PackedVector2Array(-12, 4, 0, 4, 10, 3, 13, -1, 14, -3, 12, -5, 10, -7, 0.132935, -6.00002, -6.39934, -6.00001, -14, -7, -17, -4, -18, 0)
+
+[node name="TreeOakSmall" type="StaticBody2D" parent="Trees"]
+z_index = 112
+position = Vector2(801, 106)
+
+[node name="Sprite2D" type="Sprite2D" parent="Trees/TreeOakSmall"]
+position = Vector2(0, -34)
+texture = ExtResource("2_oaksml")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Trees/TreeOakSmall"]
+position = Vector2(0, 8)
+polygon = PackedVector2Array(9, -9, 13, -11, 12, -13, 15, -15, 13, -17, 10, -19, 5, -20, 1, -20, -7, -20, -12, -19, -16, -15, -14, -14, -13, -10, -9, -8, -1, -8)
+
+[node name="TreePineGreen1" type="StaticBody2D" parent="Trees"]
+z_index = 224
+position = Vector2(688, 224)
+
+[node name="Sprite2D" type="Sprite2D" parent="Trees/TreePineGreen1"]
+position = Vector2(0, -32)
+texture = ExtResource("6_pinegr")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Trees/TreePineGreen1"]
+polygon = PackedVector2Array(-12, -11, -16, -7, -15, -5, -13, -2, -8, 0, 5, 0, 12, -1, 15, -3, 16, -6, 16, -9, 12, -11)
+
+[node name="TreeApple" type="StaticBody2D" parent="Trees"]
+z_index = 288
+position = Vector2(624, 288)
+
+[node name="Sprite2D" type="Sprite2D" parent="Trees/TreeApple"]
+position = Vector2(0, -32)
+texture = ExtResource("3_apple")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Trees/TreeApple"]
+polygon = PackedVector2Array(-16, -15, 14, -15, 20, -13, 24, -9, 24, -6, 21, -4, 10, 0, -11, 0, -24, -3, -26, -7, -26, -9)
+
+[node name="TreeAutumn" type="StaticBody2D" parent="Trees"]
+z_index = 320
+position = Vector2(800, 320)
+
+[node name="Sprite2D" type="Sprite2D" parent="Trees/TreeAutumn"]
+position = Vector2(0, -32)
+texture = ExtResource("4_autumn")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Trees/TreeAutumn"]
+polygon = PackedVector2Array(-10, 0, 0, 0, 8, 0, 13, -1, 17, -2, 21, -5, 24, -6, 24, -9, 24, -10, 22, -12, 19, -14, 17, -15, -16, -15, -20, -14, -23, -13, -26, -10, -26, -7, -25, -5, -22, -3, -18, -2, -13, -1)
+
+[node name="TreePineDark2" type="StaticBody2D" parent="Trees"]
+z_index = 512
+position = Vector2(64, 512)
+
+[node name="Sprite2D" type="Sprite2D" parent="Trees/TreePineDark2"]
+position = Vector2(0, -32)
+texture = ExtResource("5_pinedk")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Trees/TreePineDark2"]
+polygon = PackedVector2Array(-12, -11, -16, -8, -16, -5, -13, -2, -6, 0, 6, 0, 12, -2, 16, -5, 16, -8, 13, -11)
+
+[node name="TreeOakBig2" type="StaticBody2D" parent="Trees"]
+z_index = 512
+position = Vector2(592, 512)
+
+[node name="Sprite2D" type="Sprite2D" parent="Trees/TreeOakBig2"]
+position = Vector2(0, -32)
+texture = ExtResource("1_oakbig")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Trees/TreeOakBig2"]
+polygon = PackedVector2Array(0, 0, 15, -2, 19, -6, 19, -10, 15, -13, 7, -15, -9, -15, -16, -13, -18, -10, -19, -9, -19, -7, -18, -5, -17, -4, -13, -3, -7, -1)
+
+[node name="TreePineGreen2" type="StaticBody2D" parent="Trees"]
+z_index = 512
+position = Vector2(864, 512)
+
+[node name="Sprite2D" type="Sprite2D" parent="Trees/TreePineGreen2"]
+position = Vector2(0, -32)
+texture = ExtResource("6_pinegr")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Trees/TreePineGreen2"]
+polygon = PackedVector2Array(-6, 0, 6, 0, 13, -2, 16, -5, 16, -8, 12, -11, -13, -11, -16, -8, -16, -5, -13, -2)
+
+[node name="Props" type="Node2D" parent="."]
+
+[node name="CartFull" type="StaticBody2D" parent="Props"]
+z_index = 304
+position = Vector2(624, 304)
+
+[node name="Sprite2D" type="Sprite2D" parent="Props/CartFull"]
+position = Vector2(-59, -20)
+texture = ExtResource("12_cartf")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Props/CartFull"]
+position = Vector2(-61, -11)
+shape = SubResource("shape_cart_full")
+
+[node name="CartEmpty" type="StaticBody2D" parent="Props"]
+z_index = 224
+position = Vector2(592, 224)
+
+[node name="Sprite2D" type="Sprite2D" parent="Props/CartEmpty"]
+position = Vector2(0, -16)
+texture = ExtResource("13_carte")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Props/CartEmpty"]
+polygon = PackedVector2Array(-17, -14, 2, -14, 3, -5, 1, 1, -17, -1, -17, -4, -21, -4, -24, -6, -24, -9)
+
+[node name="Bench" type="StaticBody2D" parent="Props"]
+z_index = 184
+position = Vector2(528, 184)
+
+[node name="Sprite2D" type="Sprite2D" parent="Props/Bench"]
+position = Vector2(0, -8)
+texture = ExtResource("14_bench")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Props/Bench"]
+position = Vector2(0, -6)
+shape = SubResource("shape_bench")
+
+[node name="BirdHouse" type="StaticBody2D" parent="Props"]
+z_index = 104
+position = Vector2(384, 104)
+
+[node name="Sprite2D" type="Sprite2D" parent="Props/BirdHouse"]
+position = Vector2(0, -24)
+texture = ExtResource("15_bird")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Props/BirdHouse"]
+position = Vector2(0, -4)
+shape = SubResource("shape_birdhouse")

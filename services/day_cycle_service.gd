@@ -6,7 +6,7 @@ extends Node
 ## Constantes
 ## Duración de cada fase en segundos (5 minutos = 300 s).
 ## Para pruebas rápidas se puede reducir a 10.0 o 30.0.
-const PHASE_DURATION: float = 10.0
+const PHASE_DURATION: float = 300.0
 
 ## Estado del ciclo
 ## Día actual de la partida (empieza en 1).

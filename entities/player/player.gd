@@ -75,6 +75,10 @@ func _exit_tree() -> void:
 
 
 func _process(delta: float) -> void:
+	# Depth sort: actualizar z_index cada frame para que el jugador quede
+	# delante o detrás de objetos según su posición Y en el mundo.
+	z_index = int(global_position.y)
+
 	# Broadcast throttled de la posición. No se publica cada frame — se
 	# publica como mucho cada POSITION_BROADCAST_INTERVAL segundos, y solo
 	# si el jugador se ha movido lo bastante.

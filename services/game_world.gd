@@ -19,7 +19,7 @@
 class_name GameWorld
 extends Control
 
-const MAP_SCENE_PATH: String = "res://entities/test/xiao/test_scene.tscn"
+const MAP_SCENE_PATH: String = "res://entities/test/alex/alex_scene.tscn"
 
 ## Slot activo (se establece antes de cambiar a esta escena).
 var active_slot: int = 1
@@ -62,8 +62,16 @@ func _build_world() -> void:
 	add_child(world)
 
 	var trader: Trader = Trader.new()
-	trader.position = Vector2(350, 180)
-	world.add_child(trader)
+	# Posicionar al trader en el Marker2D "TraderSpawnPoint" si existe;
+	# si no, fallback a la posición histórica.
+	var trader_marker: Marker2D = world.get_node_or_null("SpawnPoints/TraderSpawnPoint") as Marker2D
+	if trader_marker:
+		trader.position = trader_marker.position
+	else:
+		trader.position = Vector2(350, 180)
+	# call_deferred para evitar "Parent node is busy setting up children" cuando
+	# los _ready() en cascada del mapa se están ejecutando.
+	world.add_child.call_deferred(trader)
 
 
 func _build_hud() -> void:
@@ -84,9 +92,6 @@ func _build_hud() -> void:
 	#add_child(sword_hud)
 
 	var trade_hud: TradeHUD = TradeHUD.new()
-	add_child(trade_hud)
-	
-	var inventory_hud: TradeHUD = TradeHUD.new()
 	add_child(trade_hud)
 
 
@@ -125,6 +130,14 @@ func _input(event: InputEvent) -> void:
 				var day_cycle := EventBus.services.day_cycle as DayCycleService
 				if day_cycle:
 					day_cycle.start_cycle(day_cycle.current_day + 1)
+			KEY_N:
+				# Debug: forzar transición a noche (útil para probar la cama)
+				var day_cycle := EventBus.services.day_cycle as DayCycleService
+				if day_cycle and not day_cycle.is_night:
+					day_cycle.is_night = true
+					day_cycle.elapsed = 0.0
+					EventBus.day_phase_changed.emit(true)
+					EventBus.time_tick.emit(day_cycle.current_day, 0.0, "NIGHT")
 			KEY_O:
 				var crop_svc := EventBus.services.crop as CropService
 				if crop_svc:

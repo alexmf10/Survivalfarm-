@@ -34,6 +34,11 @@ signal day_phase_changed(is_night: bool)
 ## Escuchada por DayCycleHUD para actualizar el contador.
 signal day_started(day_number: int)
 
+## Emitida por la cama (Bed) cuando el jugador la usa para dormir y saltar la noche.
+## El parámetro es el nuevo día al que se ha avanzado.
+## Útil para HUD de transición (fade negro), achievements, narrativa.
+signal night_skipped(new_day: int)
+
 ## Emitida por DayCycleService cada segundo mientras el reloj corre.
 ## Escuchada por DayCycleHUD para actualizar la barra de progreso y etiquetas.
 signal time_tick(day_number: int, elapsed: float, phase: String)

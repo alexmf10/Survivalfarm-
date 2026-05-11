@@ -1,0 +1,15 @@
+[gd_scene format=4 uid="uid://uaj0gwtbfmn0"]
+
+[node name="SpawnPoints" type="Node2D"]
+
+[node name="PlayerSpawn" type="Marker2D" parent="."]
+position = Vector2(464, 224)
+
+[node name="TraderSpawnPoint" type="Marker2D" parent="."]
+position = Vector2(720, 464)
+
+[node name="BossSpawnPoint" type="Marker2D" parent="."]
+position = Vector2(128, 272)
+
+[node name="BedSpawnPoint" type="Marker2D" parent="."]
+position = Vector2(464, 96)

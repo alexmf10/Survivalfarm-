@@ -25,6 +25,9 @@ extends Node
 ## Velocidad en píxeles por segundo.
 @export var speed: float = 60.0
 
+## Multiplicador de velocidad al pulsar Shift (sprint).
+@export var sprint_multiplier: float = 1.8
+
 ## Si true, lee input del teclado. Si false, se mueve solo cuando la entidad
 ## que lo posee llama a set_direction() (útil para IA de enemigos).
 @export var input_enabled: bool = true
@@ -119,8 +122,12 @@ func _physics_process(delta: float) -> void:
 		)
 
 	# Aplicar velocidad al cuerpo y resolver colisiones
+	# Sprint: multiplicar la velocidad si Shift está pulsado (solo para input del jugador)
+	var current_speed: float = speed
+	if input_enabled and Input.is_physical_key_pressed(KEY_SHIFT):
+		current_speed *= sprint_multiplier
 	var previous_position: Vector2 = _body.global_position
-	_body.velocity = _current_direction * speed
+	_body.velocity = _current_direction * current_speed
 	_body.move_and_slide()
 
 	# Emitir señales locales según el estado
