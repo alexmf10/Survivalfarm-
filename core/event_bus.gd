@@ -23,6 +23,14 @@ extends Node
 # Señales globales
 signal achievement_unlocked(achievement_id: String)
 signal profile_updated()
+
+## Emitida por slots_screen cuando el jugador activa un slot para jugar.
+## SupabaseService la escucha para saber qué player_uuid usar.
+signal slot_activated(slot: int, player_uuid: String)
+
+## Emitida por AuthService al cambiar el estado de autenticación.
+## SupabaseService y UI la escuchan para actualizar el estado de sesión.
+signal auth_state_changed(is_authenticated: bool, user_id: String)
 signal screen_change_requested(screen_name: String)
 
 # Señales del ciclo día/noche

@@ -63,6 +63,41 @@ func connect_signals() -> void:
 	EventBus.crop_harvested.connect(_on_crop_harvested)
 	EventBus.inventory_slot_swapped.connect(_on_inventory_slot_swapped)
 
+
+func get_save_data() -> Dictionary:
+	var serialized: Array = []
+	for slot in _slots:
+		if slot == null:
+			serialized.append(null)
+		else:
+			serialized.append({
+				"item_path": (slot["item"] as Resource).resource_path,
+				"amount": slot["amount"],
+			})
+	return {"coins": coins, "inventory": serialized}
+
+
+func load_from_save(data: Dictionary) -> void:
+	coins = data.get("coins", 50)
+	_slots.fill(null)
+	var saved: Array = data.get("inventory", [])
+	if saved.is_empty():
+		# Nueva partida — inventario inicial por defecto
+		_add_to_inventory(_seed_database[CropComponent.CropType.Wheat], 5)
+		_add_to_inventory(_seed_database[CropComponent.CropType.Beet], 3)
+	else:
+		for i: int in range(mini(saved.size(), MAX_SLOTS)):
+			var entry = saved[i]
+			if entry == null:
+				continue
+			var item_path: String = entry.get("item_path", "")
+			if item_path == "":
+				continue
+			var item: Resource = load(item_path)
+			if item:
+				_slots[i] = {"item": item, "amount": entry.get("amount", 1)}
+	EventBus.inventory_updated.emit(_slots, coins)
+
 ##Buscamos si Resource existe. Si existe, lo apilamos. Si no existe, lo añadimos si quedan huecos libres
 func _add_to_inventory(item_resource: Resource, amount: int) -> bool:
 	#stackeamos items

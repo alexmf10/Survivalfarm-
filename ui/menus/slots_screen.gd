@@ -27,6 +27,8 @@ var _btn_play_create: Button
 var _btn_delete: Button
 var _title_label: Label
 var _overlay: Control
+var _btn_auth: Button
+var _auth_label: Label
 
 var _selected_slot: int = -1
 var _slot_is_new: bool = false
@@ -37,8 +39,24 @@ var _saved_nickname_for_slot: String = ""
 func _ready() -> void:
 	_font = load("res://ui/theme/PressStart2P-Regular.ttf") as Font
 	_build_ui()
-	_refresh_slots()
-	_update_action_area()
+	_update_auth_bar()
+
+	var auth: AuthService = EventBus.services.auth as AuthService
+	var save_svc: SaveService = EventBus.services.save as SaveService
+	var is_online: bool = auth != null and auth.is_authenticated()
+	if save_svc:
+		save_svc.online_mode = is_online
+
+	if is_online:
+		_title_label.text = "Sincronizando..."
+		save_svc.sync_cloud_slots(func() -> void:
+			_refresh_slots()
+			_update_action_area()
+			_title_label.text = "GAME"
+		)
+	else:
+		_refresh_slots()
+		_update_action_area()
 
 
 func _build_ui() -> void:
@@ -76,6 +94,17 @@ func _build_ui() -> void:
 	_btn_profile = _create_icon_button("P", Vector2(32, 32))
 	_btn_profile.pressed.connect(_on_profile_pressed)
 	top_hbox.add_child(_btn_profile)
+
+	_auth_label = Label.new()
+	_auth_label.add_theme_font_override("font", _font)
+	_auth_label.add_theme_font_size_override("font_size", 5)
+	_auth_label.add_theme_color_override("font_color", COLOR_TEXT_BROWN)
+	_auth_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	top_hbox.add_child(_auth_label)
+
+	_btn_auth = _create_icon_button("LOGIN", Vector2(52, 32))
+	_btn_auth.pressed.connect(_on_auth_pressed)
+	top_hbox.add_child(_btn_auth)
 
 	# Título
 	_title_label = Label.new()
@@ -411,6 +440,8 @@ func _on_play_create_pressed() -> void:
 		var save_svc_play: SaveService = EventBus.services.save as SaveService
 		if save_svc_play:
 			save_svc_play.active_slot = _selected_slot
+			var uuid: String = save_svc_play.ensure_player_uuid(_selected_slot)
+			EventBus.slot_activated.emit(_selected_slot, uuid)
 		get_tree().change_scene_to_file("res://core/game_world.tscn")
 
 
@@ -487,3 +518,28 @@ func _on_profile_pressed() -> void:
 	inst.connect("back_pressed", _hide_overlay)
 	_overlay.visible = true
 	_overlay.add_child(inst)
+
+
+func _update_auth_bar() -> void:
+	var auth: AuthService = EventBus.services.auth as AuthService
+	if auth and auth.is_authenticated():
+		_auth_label.text = auth.get_email()
+		_btn_auth.text = "LOGOUT"
+	else:
+		_auth_label.text = ""
+		_btn_auth.text = "LOGIN"
+
+
+func _on_auth_pressed() -> void:
+	var auth: AuthService = EventBus.services.auth as AuthService
+	if auth and auth.is_authenticated():
+		auth.sign_out()
+		var save_svc: SaveService = EventBus.services.save as SaveService
+		if save_svc:
+			save_svc.online_mode = false
+		_update_auth_bar()
+		_refresh_slots()
+		_update_action_area()
+		_title_label.text = "Sesión cerrada"
+	else:
+		get_tree().change_scene_to_file("res://ui/menus/auth_screen.tscn")

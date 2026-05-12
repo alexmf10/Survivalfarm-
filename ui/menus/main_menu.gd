@@ -11,6 +11,7 @@ const COLOR_TEXT_BROWN: Color = Color(0.35, 0.25, 0.15)
 
 # Escenas de sub-pantallas
 const SLOTS_SCENE: String = "res://ui/menus/slots_screen.tscn"
+const AUTH_SCENE: String = "res://ui/menus/auth_screen.tscn"
 const OPTIONS_SCENE: String = "res://ui/menus/options_screen.tscn"
 const CONTROL_SCENE: String = "res://ui/menus/control_manual.tscn"
 
@@ -59,7 +60,7 @@ func _build_ui() -> void:
 
 	# Botones
 	btn_play = _create_menu_button("JUGAR")
-	btn_play.pressed.connect(func() -> void: get_tree().change_scene_to_file(SLOTS_SCENE))
+	btn_play.pressed.connect(_on_play_pressed)
 	vbox.add_child(btn_play)
 
 	var btn_options: Button = _create_menu_button("OPCIONES")
@@ -124,6 +125,14 @@ func _create_menu_button(text: String) -> Button:
 	btn.add_theme_stylebox_override("focus", style_hover)
 
 	return btn
+
+
+func _on_play_pressed() -> void:
+	var auth: AuthService = EventBus.services.auth as AuthService
+	if auth and auth.is_authenticated():
+		get_tree().change_scene_to_file(SLOTS_SCENE)
+	else:
+		get_tree().change_scene_to_file(AUTH_SCENE)
 
 
 func _on_manual_pressed() -> void:
