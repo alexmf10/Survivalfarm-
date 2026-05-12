@@ -3,5 +3,4 @@
 /android/
 CLAUDE.md
 
-# Backend secrets — never commit real credentials
-config/backend_config.gd
+# service_role key must NEVER be committed — anon key is safe (protected by RLS)
