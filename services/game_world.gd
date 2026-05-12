@@ -32,9 +32,13 @@ func _ready() -> void:
 	if save_svc and save_svc.active_slot > 0:
 		active_slot = save_svc.active_slot
 
+	EventBus.player_spawned.connect(_on_player_spawned, CONNECT_ONE_SHOT)
+
 	_build_world()
 	_build_hud()
 	_start_day_cycle()
+	call_deferred("_restore_crops")
+	call_deferred("_restore_inventory")
 
 	EventBus.day_started.connect(_on_day_started)
 	EventBus.trade_opened.connect(func() -> void: _trade_open = true)
@@ -99,11 +103,44 @@ func _start_day_cycle() -> void:
 	var day_cycle_svc: DayCycleService = EventBus.services.day_cycle as DayCycleService
 	var save_svc: SaveService = EventBus.services.save as SaveService
 	if day_cycle_svc and save_svc:
-		var saved_day: int = save_svc.get_day(active_slot)
-		day_cycle_svc.start_cycle(saved_day)
+		var data: Dictionary = save_svc.read_slot_json(active_slot)
+		var saved_day: int = data.get("day", 1)
+		var saved_elapsed: float = data.get("elapsed", 0.0)
+		var saved_is_night: bool = data.get("is_night", false)
+		day_cycle_svc.start_cycle(saved_day, saved_elapsed, saved_is_night)
 
 
 # ── Handlers ────────────────────────────────────────────────────────────────
+
+func _on_player_spawned(player: Node) -> void:
+	var save_svc: SaveService = EventBus.services.save as SaveService
+	if not save_svc: return
+	var data: Dictionary = save_svc.read_slot_json(active_slot)
+	var pos_data: Dictionary = data.get("player_position", {})
+	var x: float = pos_data.get("x", 0.0)
+	var y: float = pos_data.get("y", 0.0)
+	if x != 0.0 or y != 0.0:
+		player.global_position = Vector2(x, y)
+
+
+func _restore_inventory() -> void:
+	var save_svc: SaveService = EventBus.services.save as SaveService
+	var trade_svc: TradeService = EventBus.services.trade as TradeService
+	if not save_svc or not trade_svc: return
+	var data: Dictionary = save_svc.read_slot_json(active_slot)
+	trade_svc.load_from_save(data)
+	save_svc.sync_to_cloud(active_slot)
+
+
+func _restore_crops() -> void:
+	var save_svc: SaveService = EventBus.services.save as SaveService
+	var crop_svc: CropService = EventBus.services.crop as CropService
+	if not save_svc or not crop_svc: return
+	var data: Dictionary = save_svc.read_slot_json(active_slot)
+	var crops_data: Array = data.get("crops", [])
+	if not crops_data.is_empty():
+		crop_svc.load_crops_save_data(crops_data)
+
 
 func _on_day_started(day_number: int) -> void:
 	# Auto-guardar el día

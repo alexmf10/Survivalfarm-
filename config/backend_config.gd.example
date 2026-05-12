@@ -1,0 +1,7 @@
+## Backend configuration template.
+## Copy this file to backend_config.gd and fill in your real Supabase values.
+## backend_config.gd is gitignored and must NEVER be committed.
+extends RefCounted
+
+const SUPABASE_URL: String = "https://<your-project-id>.supabase.co"
+const SUPABASE_ANON_KEY: String = "eyJ..."

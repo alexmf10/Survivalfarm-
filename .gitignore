@@ -2,3 +2,5 @@
 .godot/
 /android/
 CLAUDE.md
+
+# service_role key must NEVER be committed — anon key is safe (protected by RLS)

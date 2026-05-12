@@ -27,10 +27,10 @@ var _tick_acc: float = 0.0
 
 
 ## Arranca el ciclo desde el día indicado. Llamado tras cargar una partida.
-func start_cycle(day: int = 1) -> void:
+func start_cycle(day: int = 1, saved_elapsed: float = 0.0, saved_is_night: bool = false) -> void:
 	current_day = day
-	is_night = false
-	elapsed = 0.0
+	is_night = saved_is_night
+	elapsed = saved_elapsed
 	_tick_acc = 0.0
 	running = true
 	## Emitir estado inicial para que la HUD se sincronice
