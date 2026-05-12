@@ -58,6 +58,7 @@ var _sprite: AnimatedSprite2D
 var _tilled_layer: TileMapLayer  # La capa de tierra arada (farm plots)
 var _grass_layer: TileMapLayer   # La capa de hierba (para validar tilling)
 var _is_using_tool: bool = false
+var _last_planted_tile: Vector2i = Vector2i(-9999, -9999)
 var _highlight: Node2D           # Borde 16x16 que marca el tile objetivo
 
 
@@ -85,7 +86,7 @@ func _ready() -> void:
 
 	# Crear el resaltado de tile objetivo (borde rojo 16x16)
 	_highlight = _build_highlight()
-	_body.add_child.call_deferred(_highlight)
+	_body.add_child(_highlight)
 
 
 func _exit_tree() -> void:
@@ -132,10 +133,13 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	# Clic izquierdo → usar la herramienta activa (o cosechar si no hay herramienta)
 	# Si la espada está equipada, no consumir el clic — lo gestiona AttackComponent
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if current_tool == ToolsComponent.Tools.Sword:
 			return  # Delegar al AttackComponent
-		_use_tool()
+		if event.pressed:
+			_use_tool()
+		else:
+			_last_planted_tile = Vector2i(-9999, -9999)
 		return
 
 	# Solo nos interesan pulsaciones de teclado (no repeticiones)
@@ -182,6 +186,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _process(_delta: float) -> void:
 	_update_highlight()
+	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and not _is_using_tool \
+			and current_tool != ToolsComponent.Tools.Sword:
+		_use_tool()
 
 
 ## Datos del tile bajo el ratón — compartido entre las funciones de acción.
@@ -306,11 +313,13 @@ func _use_tool() -> void:
 		var seed_to_plant = trade_svc.get_active_seed()
 		
 		# Si tenemos una semilla válida en la mano Y estamos apuntando a tierra arable
-		if seed_to_plant != null and _is_valid_farm_tile():
+		# _last_planted_tile evita gastar semillas en el mismo tile mientras se mantiene pulsado
+		if seed_to_plant != null and _is_valid_farm_tile() and _last_tile_pos != _last_planted_tile:
+			_last_planted_tile = _last_tile_pos
 			EventBus.player_planted.emit(_last_tile_pos, seed_to_plant.crop_type)
 			trade_svc.consume_active_item()
 			# Usamos la animación de PlantWheat como genérica para agacharse a plantar
-			_perform_feedback(ToolsComponent.Tools.PlantWheat, _last_tile_pos) 
+			_perform_feedback(ToolsComponent.Tools.PlantWheat, _last_tile_pos)
 		else:
 			# Si la casilla no es válida para plantar o tenemos las manos vacías, intentamos cosechar
 			_try_harvest()

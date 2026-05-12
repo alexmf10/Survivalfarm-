@@ -197,7 +197,7 @@ func _on_trade_opened() -> void:
 	_refresh_ui()
 
 
-func _on_inventory_updated(_coins: int) -> void:
+func _on_inventory_updated(_slots: Array, _coins: int) -> void:
 	if visible:
 		_refresh_ui()
 
