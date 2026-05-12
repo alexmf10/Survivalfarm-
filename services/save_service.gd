@@ -136,6 +136,7 @@ func create_new_game(slot: int, nickname: String) -> void:
 	if file:
 		file.store_string(json_string)
 		file.close()
+	sync_to_cloud(slot)
 
 
 func update_nickname(slot: int, new_nickname: String) -> void:

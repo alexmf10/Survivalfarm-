@@ -35,6 +35,11 @@ func _ready() -> void:
 	EventBus.achievement_unlocked.connect(_on_achievement_unlocked)
 	EventBus.auth_state_changed.connect(_on_auth_state_changed)
 
+	# AuthService may have already restored a session before we connected to the signal.
+	var auth: AuthService = EventBus.services.auth as AuthService
+	if auth and auth.is_authenticated():
+		_on_auth_state_changed(true, auth.get_user_id())
+
 
 func _on_auth_state_changed(is_authenticated: bool, user_id: String) -> void:
 	_user_id = user_id if is_authenticated else ""

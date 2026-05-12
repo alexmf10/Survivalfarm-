@@ -129,6 +129,7 @@ func _restore_inventory() -> void:
 	if not save_svc or not trade_svc: return
 	var data: Dictionary = save_svc.read_slot_json(active_slot)
 	trade_svc.load_from_save(data)
+	save_svc.sync_to_cloud(active_slot)
 
 
 func _restore_crops() -> void:
