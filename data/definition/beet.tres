@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_5p2df")
-crop_name = ""
+crop_name = "Beet"
 crop_type = 1
 is_seed = false
 max_stages = 4

@@ -155,6 +155,8 @@ func _disconnect_signals() -> void:
 ## Llamado cada ~1 segundo por DayCycleService vía EventBus.time_tick.
 ## Actualiza la barra de progreso y el reloj MM:SS del tiempo restante.
 func _on_time_tick(day_number: int, elapsed_secs: float, phase: String) -> void:
+	if _day_label:
+		_day_label.text = "DAY %d" % day_number
 	# Obtener PHASE_DURATION del servicio. Fallback a 300 si no está disponible.
 	var phase_duration: float = 300.0
 	var svc = EventBus.services.day_cycle

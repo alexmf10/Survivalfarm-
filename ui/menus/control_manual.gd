@@ -1,10 +1,4 @@
-## Popup con el manual de usuario. Muestra instrucciones del juego.
-##
-## Arquitectura:
-## • Señal personalizada: back_pressed — emitida al pulsar el botón "X".
-## • Instanciado como popup overlay desde main_menu.gd.
-## • No accede ni usa ningún servicio.
-## • Emite back_pressed al cerrar, que MainMenu escucha para limpiar el overlay.
+## User manual popup. Shows the basic game instructions.
 class_name ControlManual
 extends Control
 
@@ -24,7 +18,6 @@ func _ready() -> void:
 
 
 func _build_ui() -> void:
-	# Panel central
 	var panel: PanelContainer = PanelContainer.new()
 	panel.set_anchors_preset(Control.PRESET_CENTER)
 	panel.offset_left = -250
@@ -54,7 +47,6 @@ func _build_ui() -> void:
 	vbox.add_theme_constant_override("separation", 8)
 	panel.add_child(vbox)
 
-	# Título + botón cerrar
 	var top_hbox: HBoxContainer = HBoxContainer.new()
 	vbox.add_child(top_hbox)
 
@@ -90,7 +82,6 @@ func _build_ui() -> void:
 	btn_close.add_theme_stylebox_override("pressed", btn_style)
 	top_hbox.add_child(btn_close)
 
-	# ScrollContainer para el contenido
 	var scroll: ScrollContainer = ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.custom_minimum_size = Vector2(0, 200)
@@ -101,15 +92,14 @@ func _build_ui() -> void:
 	content_vbox.add_theme_constant_override("separation", 10)
 	scroll.add_child(content_vbox)
 
-	# Secciones
 	_add_section(content_vbox, "HOW TO PLAY",
 		"Survive and grow your farm! Plant crops, harvest them,\nsell at market, and defend against monsters at night.\nUpgrade your equipment and unlock achievements.")
 
 	_add_section(content_vbox, "CONTROLS",
-		"W A S D — Move\n1-5 — Select Tool\nE — Use Tool / Harvest\nI / Tab — Inventory\nEsc — Pause")
+		"W A S D - Move\n1-5 - Select Tool\nE - Use Tool / Harvest\nI / Tab - Inventory\nEsc - Pause")
 
 	_add_section(content_vbox, "OBJECTIVES",
-		"• Plant and harvest crops\n• Trade with merchants\n• Equip armor and weapons\n• Survive the night monsters\n• Complete all achievements")
+		"- Plant and harvest crops\n- Trade with merchants\n- Equip armor and weapons\n- Survive the night monsters\n- Complete all achievements")
 
 
 func _add_section(parent: VBoxContainer, header: String, body: String) -> void:

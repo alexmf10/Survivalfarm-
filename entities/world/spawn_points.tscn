@@ -1,4 +1,4 @@
-[gd_scene format=4 uid="uid://uaj0gwtbfmn0"]
+[gd_scene format=3 uid="uid://uaj0gwtbfmn0"]
 
 [node name="SpawnPoints" type="Node2D"]
 
@@ -10,6 +10,30 @@ position = Vector2(720, 464)
 
 [node name="BossSpawnPoint" type="Marker2D" parent="."]
 position = Vector2(128, 272)
+
+[node name="CollectorSpawnPoint" type="Marker2D" parent="."]
+position = Vector2(256, 96)
+
+[node name="NightZombieSpawnPoint1" type="Marker2D" parent="."]
+position = Vector2(80, 160)
+
+[node name="NightZombieSpawnPoint2" type="Marker2D" parent="."]
+position = Vector2(176, 176)
+
+[node name="NightZombieSpawnPoint3" type="Marker2D" parent="."]
+position = Vector2(224, 96)
+
+[node name="NightZombieSpawnPoint4" type="Marker2D" parent="."]
+position = Vector2(128, 304)
+
+[node name="HordeSpawnPoint1" type="Marker2D" parent="."]
+position = Vector2(256, 96)
+
+[node name="HordeSpawnPoint2" type="Marker2D" parent="."]
+position = Vector2(64, 224)
+
+[node name="HordeSpawnPoint3" type="Marker2D" parent="."]
+position = Vector2(192, 320)
 
 [node name="BedSpawnPoint" type="Marker2D" parent="."]
 position = Vector2(464, 96)

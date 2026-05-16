@@ -1,0 +1,71 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://entities/boss/zombie_boss.gd" id="1_boss"]
+[ext_resource type="Script" path="res://entities/boss/boss_sprite_setup.gd" id="2_sprite"]
+[ext_resource type="Script" path="res://entities/player/movement_component.gd" id="3_movement"]
+[ext_resource type="Script" path="res://entities/player/animation_component.gd" id="4_anim"]
+[ext_resource type="Script" path="res://entities/zombie/zombie_ai_component.gd" id="5_ai"]
+[ext_resource type="Script" path="res://entities/zombie/zombie_attack_component.gd" id="6_attack"]
+[ext_resource type="Script" path="res://data/component/health_component.gd" id="7_health"]
+[ext_resource type="Script" path="res://entities/behaviours/health_bar_component.gd" id="8_hbar"]
+[ext_resource type="Script" path="res://entities/behaviours/damage_flash_component.gd" id="9_flash"]
+
+[sub_resource type="RectangleShape2D" id="CollisionShape2D_boss"]
+size = Vector2(24, 28)
+
+[node name="ZombieBoss" type="CharacterBody2D"]
+collision_layer = 4
+script = ExtResource("1_boss")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -28)
+script = ExtResource("2_sprite")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 6)
+shape = SubResource("CollisionShape2D_boss")
+
+[node name="MovementComponent" type="Node" parent="."]
+script = ExtResource("3_movement")
+speed = 22.0
+input_enabled = false
+
+[node name="AnimationComponent" type="Node" parent="."]
+script = ExtResource("4_anim")
+
+[node name="ZombieAIComponent" type="Node" parent="."]
+script = ExtResource("5_ai")
+detection_range = 150.0
+lose_range = 220.0
+attack_range = 38.0
+min_separation_distance = 26.0
+zombie_separation_radius = 34.0
+zombie_separation_strength = 0.9
+circle_radius = 34.0
+wander_interval = 3.0
+wander_pause_chance = 0.25
+
+[node name="ZombieAttackComponent" type="Node" parent="."]
+script = ExtResource("6_attack")
+base_damage = 20.0
+attack_range = 34.0
+attack_width = 26.0
+windup_duration = 0.75
+strike_duration = 0.22
+recovery_duration = 0.9
+hit_stun_duration = 0.22
+windup_scale_factor = 1.12
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("7_health")
+max_health = 300.0
+
+[node name="HealthBarComponent" type="Node2D" parent="."]
+script = ExtResource("8_hbar")
+bar_width = 38.0
+bar_height = 4.0
+bar_offset_y = -78.0
+always_visible = true
+
+[node name="DamageFlashComponent" type="Node" parent="."]
+script = ExtResource("9_flash")

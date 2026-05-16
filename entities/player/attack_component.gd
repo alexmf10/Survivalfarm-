@@ -56,7 +56,7 @@ var _last_attack_facing: Vector2 = Vector2.DOWN  # Para calcular knockback
 func _ready() -> void:
 	_body = get_parent() as CharacterBody2D
 	if _body == null:
-		push_error("AttackComponent: el padre no es un CharacterBody2D.")
+		push_error("AttackComponent: parent is not a CharacterBody2D.")
 		return
 
 	# Buscar componentes hermanos

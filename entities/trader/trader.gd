@@ -1,12 +1,3 @@
-## Entidad del comerciante. Visual temporal con ColorRect (morado).
-## Detecta la proximidad del jugador via PlayerService (sin depender de capas de colisión).
-## Abre la UI de comercio al pulsar E.
-##
-## --- Interacción ---
-## • _process compara distancia al jugador cada frame (radio INTERACT_RADIUS px).
-## • Cuando el jugador entra en rango: muestra el hint "[E] Trade".
-## • Al pulsar E cerca del comerciante: consume el input y emite trade_opened.
-## • Usa _input (antes que _unhandled_input) para tener prioridad sobre ToolComponent.
 class_name Trader
 extends Node2D
 
@@ -19,36 +10,30 @@ var _hint_label: Label
 
 func _ready() -> void:
 	_build_visual()
-	# z_index para depth-sort: la posición ya fue ajustada al base del cart en _build_visual
 	z_index = int(global_position.y)
 	EventBus.trade_opened.connect(func() -> void: _trade_open = true)
 	EventBus.trade_closed.connect(func() -> void: _trade_open = false)
 
 
 func _build_visual() -> void:
-	# Y-sort: queremos que el sort key (= position.y) sea la BASE del cart.
-	# El marker del trader está en el centro visual del cart. Para conseguir
-	# que la posición sea la base, desplazamos +32 (mitad de shop.png 64×64)
-	# y compensamos el sprite con -32 para que visualmente quede igual.
 	position.y += 32
 
-	var sprite: Sprite2D = Sprite2D.new()
+	var sprite := Sprite2D.new()
 	sprite.texture = load("res://assets/textures/shop/shop.png")
 	sprite.centered = true
 	sprite.position = Vector2(0, -32)
 	add_child(sprite)
 
-	# Cuerpo estático pequeño en la base del carro
-	var body: StaticBody2D = StaticBody2D.new()
-	var col: CollisionShape2D = CollisionShape2D.new()
-	var shape: RectangleShape2D = RectangleShape2D.new()
+	var body := StaticBody2D.new()
+	var col := CollisionShape2D.new()
+	var shape := RectangleShape2D.new()
 	shape.size = Vector2(28, 12)
 	col.shape = shape
-	col.position = Vector2(0, -8)  # justo encima de la base del cart
+	col.position = Vector2(0, -8)
 	body.add_child(col)
 	add_child(body)
 
-	var name_label: Label = Label.new()
+	var name_label := Label.new()
 	name_label.text = "TRADER"
 	name_label.add_theme_font_size_override("font_size", 6)
 	name_label.position = Vector2(-18, -34)
@@ -74,8 +59,14 @@ func _process(_delta: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if not _player_in_range or _trade_open:
+	if not _player_in_range or _trade_open or EventBus.dialogue_open:
 		return
 	if event is InputEventKey and event.keycode == KEY_E and event.pressed and not event.echo:
 		get_viewport().set_input_as_handled()
+		var trade_svc := EventBus.services.trade as TradeService
+		if trade_svc and not trade_svc.starter_pack_granted:
+			trade_svc.grant_starter_pack()
+			EventBus.starter_pack_received.emit()
+			EventBus.dialogue_requested.emit("Trader", "I saw you come down the road. Bad idea arriving empty-handed.\n\nTake these seeds and tools. Plant fast. When the collector appears, do not argue.")
+			return
 		EventBus.trade_opened.emit()

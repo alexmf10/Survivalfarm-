@@ -4,14 +4,14 @@ class_name ProfileService
 extends RefCounted
 
 const DEFAULT_ACHIEVEMENTS: Dictionary = {
-	"first_harvest": {"title": "First Harvest", "description": "Recoge tu primera cosecha", "unlocked": false, "unlock_date": ""},
-	"rich_farmer": {"title": "Rich Farmer", "description": "Acumula 100 monedas", "unlocked": false, "unlock_date": ""},
-	"survive_7": {"title": "Week Survivor", "description": "Sobrevive 7 dias", "unlocked": false, "unlock_date": ""},
-	"survive_30": {"title": "Month Survivor", "description": "Sobrevive 30 dias", "unlocked": false, "unlock_date": ""},
-	"first_kill": {"title": "Monster Slayer", "description": "Derrota tu primer enemigo", "unlocked": false, "unlock_date": ""},
-	"boss_defeated": {"title": "Farm Savior", "description": "Derrota al monstruo final", "unlocked": false, "unlock_date": ""},
-	"full_armor": {"title": "Fully Equipped", "description": "Equipa armadura completa", "unlocked": false, "unlock_date": ""},
-	"trader_deal": {"title": "Businessman", "description": "Realiza tu primera transaccion", "unlocked": false, "unlock_date": ""},
+	"first_harvest": {"title": "First Harvest", "description": "Harvest your first crop", "unlocked": false, "unlock_date": ""},
+	"rich_farmer": {"title": "Rich Farmer", "description": "Collect 100 coins", "unlocked": false, "unlock_date": ""},
+	"survive_7": {"title": "Week Survivor", "description": "Survive 7 days", "unlocked": false, "unlock_date": ""},
+	"survive_30": {"title": "Month Survivor", "description": "Survive 30 days", "unlocked": false, "unlock_date": ""},
+	"first_kill": {"title": "Monster Slayer", "description": "Defeat your first enemy", "unlocked": false, "unlock_date": ""},
+	"boss_defeated": {"title": "Farm Savior", "description": "Defeat the final monster", "unlocked": false, "unlock_date": ""},
+	"full_armor": {"title": "Fully Equipped", "description": "Equip a full armor set", "unlocked": false, "unlock_date": ""},
+	"trader_deal": {"title": "Businessman", "description": "Complete your first trade", "unlocked": false, "unlock_date": ""},
 }
 
 var current_slot: int = -1
@@ -46,7 +46,7 @@ func is_achievement_unlocked(achievement_id: String) -> bool:
 func unlock_achievement(achievement_id: String) -> void:
 	if current_slot <= 0: return
 	if not _achievements.has(achievement_id):
-		push_warning("ProfileService: achievement '%s' no existe." % achievement_id)
+		push_warning("ProfileService: achievement '%s' does not exist." % achievement_id)
 		return
 	if _achievements[achievement_id]["unlocked"]:
 		return # Ya desbloqueado
