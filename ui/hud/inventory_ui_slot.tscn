@@ -42,6 +42,5 @@ offset_bottom = 16.0
 grow_horizontal = 0
 grow_vertical = 0
 scale = Vector2(0.225, 0.225)
-text = "99"
 horizontal_alignment = 2
 vertical_alignment = 2
