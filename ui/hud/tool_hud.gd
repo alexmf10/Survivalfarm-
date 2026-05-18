@@ -67,14 +67,12 @@ func _on_inventory_updated(_slots: Array, _coins: int) -> void:
 func _update_tool_label(tool_type: ToolsComponent.Tools) -> void:
 	var tool_name: String
 	match tool_type:
-		ToolsComponent.Tools.None:
-			tool_name = "HOTBAR (1-4)"
 		ToolsComponent.Tools.TillGround:
-			tool_name = "HOE (5)"
+			tool_name = "HOE"
 		ToolsComponent.Tools.WaterCrops:
-			tool_name = "WATERING CAN (6)"
+			tool_name = "WATERING CAN"
 		ToolsComponent.Tools.Sword:
-			tool_name = "SWORD (7)  LMB:ATTACK"
+			tool_name = "SWORD (5)  LMB:ATTACK"
 	if _tool_label:
 		_tool_label.text = tool_name
 

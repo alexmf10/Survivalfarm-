@@ -173,7 +173,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_2: trade_svc.set_active_slot(1)
 		KEY_3: trade_svc.set_active_slot(2)
 		KEY_4: trade_svc.set_active_slot(3)
-		KEY_7:
+		KEY_5:
 			# Alternamos el arma y actualizamos la herramienta
 			_is_weapon_drawn = !_is_weapon_drawn
 			_refresh_active_tool()
