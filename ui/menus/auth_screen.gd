@@ -42,7 +42,7 @@ func _build_ui() -> void:
 	btn_back.offset_left = 12
 	btn_back.offset_right = 44
 	btn_back.offset_bottom = 40
-	btn_back.pressed.connect(func() -> void: get_tree().change_scene_to_file("res://ui/menus/slots_screen.tscn"))
+	btn_back.pressed.connect(func() -> void: get_tree().change_scene_to_file("res://ui/menus/main_menu.tscn"))
 	add_child(btn_back)
 
 	# Center panel
@@ -127,7 +127,7 @@ func _build_ui() -> void:
 	# Guest button
 	var btn_guest: Button = _create_button("JUGAR SIN CUENTA", Vector2(200, 28))
 	btn_guest.add_theme_font_size_override("font_size", 6)
-	btn_guest.pressed.connect(func() -> void: get_tree().change_scene_to_file("res://ui/menus/slots_screen.tscn"))
+	btn_guest.pressed.connect(func() -> void: get_tree().change_scene_to_file("res://ui/menus/main_menu.tscn"))
 	vbox.add_child(btn_guest)
 
 	# Status label
@@ -177,7 +177,7 @@ func _on_submit_pressed() -> void:
 		_btn_submit.disabled = false
 		_btn_submit.text = "ENTRAR" if _mode == "login" else "CREAR"
 		if ok:
-			get_tree().change_scene_to_file("res://ui/menus/slots_screen.tscn")
+			get_tree().change_scene_to_file("res://ui/menus/main_menu.tscn")
 		else:
 			_show_error(error)
 
