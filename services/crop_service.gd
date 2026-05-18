@@ -173,6 +173,38 @@ func _on_day_started(_day_number: int) -> void:
 	_save_state()
 
 
+func get_crops_save_data() -> Array:
+	var result: Array = []
+	for tile_pos: Vector2i in _crops:
+		var crop: CropState = _crops[tile_pos]
+		result.append({
+			"x": tile_pos.x,
+			"y": tile_pos.y,
+			"crop_type": crop.crop_type,
+			"stage": crop.stage,
+			"watered": crop.watered,
+		})
+	return result
+
+
+func load_crops_save_data(crops_data: Array) -> void:
+	_crops.clear()
+	for item: Dictionary in crops_data:
+		var tile_pos: Vector2i = Vector2i(item.get("x", 0), item.get("y", 0))
+		var crop_type: CropComponent.CropType = item.get("crop_type", 0) as CropComponent.CropType
+		var res: CropComponent = _crop_data.get(crop_type)
+		var max_s: int = res.max_stages if res else 4
+		var state: CropState = CropState.new(crop_type, max_s)
+		state.stage = item.get("stage", 0)
+		state.watered = item.get("watered", false)
+		_crops[tile_pos] = state
+		EventBus.crop_planted.emit(tile_pos, crop_type)
+		if state.stage > 0:
+			EventBus.crop_grown.emit(tile_pos, state.stage, max_s)
+		if state.watered:
+			EventBus.crop_watered.emit(tile_pos)
+
+
 func _restore_save_state(state: Dictionary) -> void:
 	_loading_state = true
 	_crops.clear()

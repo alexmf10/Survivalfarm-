@@ -62,5 +62,17 @@ func _ready() -> void:
 	var enemy_coord_svc: EnemyCoordinatorService = EnemyCoordinatorService.new()
 	EventBus.services.register(&"enemy_coord", enemy_coord_svc)
 
-	# Ir al menú principal
-	get_tree().call_deferred("change_scene_to_file", "res://ui/menus/main_menu.tscn")
+	# AuthService: gestiona login/registro con Supabase (Node, necesita árbol).
+	var auth_svc: AuthService = AuthService.new()
+	auth_svc.name = "AuthService"
+	EventBus.add_child(auth_svc)
+	EventBus.services.register(&"auth", auth_svc)
+
+	# SupabaseService: sync de guardados a la nube (Node, necesita árbol).
+	var supabase_svc: SupabaseService = SupabaseService.new()
+	supabase_svc.name = "SupabaseService"
+	EventBus.add_child(supabase_svc)
+	EventBus.services.register(&"supabase", supabase_svc)
+
+	# Ir a la pantalla de login
+	get_tree().call_deferred("change_scene_to_file", "res://ui/menus/auth_screen.tscn")

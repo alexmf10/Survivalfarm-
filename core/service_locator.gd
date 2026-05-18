@@ -70,3 +70,11 @@ var combat: RefCounted:
 ## Registrado por main.gd al arrancar.
 var enemy_coord: RefCounted:
 	get: return get_service(&"enemy_coord")
+
+## Atajo para AuthService (Node).
+var auth: Node:
+	get: return get_service(&"auth")
+
+## Atajo para SupabaseService (Node).
+var supabase: Node:
+	get: return get_service(&"supabase")

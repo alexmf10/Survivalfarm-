@@ -35,12 +35,14 @@ signal tool_changed(new_tool: ToolsComponent.Tools)
 signal tool_used(tool: ToolsComponent.Tools)
 
 # ── Configuración ──────────────────────────────────────────────────────────
-## Radio máximo de acción en píxeles (5 tiles de 16px = 80px).
-const ACTION_RADIUS: float = 80.0
+## Radio máximo de acción en píxeles (1.5 tiles de 16px = 24px).
+const ACTION_RADIUS: float = 24.0
+
+## Tolerancia (px) por detrás del jugador para el cono frontal.
+const FACING_TOLERANCE: float = 4.0
 
 ## Duración de la pausa al usar herramienta (squash/stretch feedback).
-const USE_PAUSE_DURATION: float = 0.05
-const HELD_ACTION_INTERVAL: float = 0.04
+const USE_PAUSE_DURATION: float = 0.2
 
 # ── Estado ──────────────────────────────────────────────────────────────────
 var current_tool: ToolsComponent.Tools = ToolsComponent.Tools.None
@@ -52,9 +54,6 @@ var _tilled_layer: TileMapLayer  # La capa de tierra arada (farm plots)
 var _grass_layer: TileMapLayer   # La capa de hierba (para validar tilling)
 var _is_using_tool: bool = false
 var _highlight: Node2D           # Borde 16x16 que marca el tile objetivo
-var _mouse_action_held: bool = false
-var _held_action_elapsed: float = 0.0
-var _last_held_action_tile: Vector2i = Vector2i(999999, 999999)
 var _feedback_tween: Tween
 
 
@@ -133,14 +132,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.pressed:
 			if current_tool == ToolsComponent.Tools.Sword:
 				return  # Delegar al AttackComponent
-			_mouse_action_held = true
-			_held_action_elapsed = 0.0
-			_last_held_action_tile = Vector2i(999999, 999999)
-			var action_tile := _get_current_action_tile()
-			if _use_tool():
-				_last_held_action_tile = action_tile
-			return
-		_mouse_action_held = false
+			_use_tool()
 		return
 
 	# Solo nos interesan pulsaciones de teclado (no repeticiones)
@@ -185,9 +177,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		EventBus.player_tool_changed.emit(current_tool)
 
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	_update_highlight()
-	_update_held_mouse_action(delta)
 
 
 ## Datos del tile bajo el ratón — compartido entre las funciones de acción.
@@ -213,25 +204,35 @@ func _calculate_tile_under_mouse() -> bool:
 	return true
 
 
+func _get_facing() -> Vector2:
+	if _movement:
+		return _movement.get_facing()
+	return Vector2.DOWN
+
+
+func _is_in_facing_direction(tile_global: Vector2) -> bool:
+	var facing: Vector2 = _get_facing()
+	if facing == Vector2.ZERO:
+		return true
+	var diff: Vector2 = tile_global - _body.global_position
+	return diff.dot(facing) >= -FACING_TOLERANCE
+
+
 ## Valida que el tile bajo el ratón sea un tile de tierra arada válido
-## (existe en la capa) y esté dentro del radio de acción.
+## (existe en la capa), esté dentro del radio de acción y en la dirección a la que mira el jugador.
 func _is_valid_farm_tile() -> bool:
 	if not _calculate_tile_under_mouse():
 		return false
-	# El tile debe existir en la capa de tierra arada (source_id != -1)
 	if _last_cell_source_id == -1:
 		return false
-	# El tile debe estar dentro del radio de acción
 	if _last_distance > ACTION_RADIUS:
+		return false
+	if not _is_in_facing_direction(_last_tile_world_pos):
 		return false
 	return true
 
 
-## Valida que un tile de hierba bajo el ratón sea válido para arar:
-## - existe en la capa de hierba
-## - no tiene ya tierra arada encima
-## - está dentro de la zona aratable designada (clarito — 3x3 bloques)
-## - está dentro del radio de acción
+## Valida que un tile de hierba bajo el ratón sea válido para arar.
 func _is_valid_grass_tile_for_tilling() -> bool:
 	if not _tilled_layer or not _grass_layer:
 		return false
@@ -239,16 +240,15 @@ func _is_valid_grass_tile_for_tilling() -> bool:
 	var grass_tile: Vector2i = _grass_layer.local_to_map(mouse_pos)
 	var grass_source_id: int = _grass_layer.get_cell_source_id(grass_tile)
 	if grass_source_id == -1:
-		return false  # No hay hierba aquí
-	# Comprobar que no haya ya tierra arada en esta posición
+		return false
 	var tilled_source_id: int = _tilled_layer.get_cell_source_id(grass_tile)
 	if tilled_source_id != -1:
-		return false  # Ya está arado
-	# Posición global del centro del tile (no solo local a la capa)
+		return false
 	var tile_world: Vector2 = _grass_layer.to_global(_grass_layer.map_to_local(grass_tile))
 	if _body.global_position.distance_to(tile_world) > ACTION_RADIUS:
 		return false
-	# Guardar la posición para usar luego
+	if not _is_in_facing_direction(tile_world):
+		return false
 	_last_tile_pos = grass_tile
 	_last_tile_world_pos = tile_world
 	return true
@@ -302,33 +302,6 @@ func _use_tool() -> bool:
 			return _try_harvest()
 	return false
 
-
-func _update_held_mouse_action(delta: float) -> void:
-	if not _mouse_action_held:
-		return
-	if current_tool == ToolsComponent.Tools.Sword:
-		return
-
-	_held_action_elapsed += delta
-	if _held_action_elapsed < HELD_ACTION_INTERVAL:
-		return
-
-	var current_tile := _get_current_action_tile()
-	if current_tile == _last_held_action_tile:
-		return
-
-	_held_action_elapsed = 0.0
-	if _use_tool():
-		_last_held_action_tile = current_tile
-
-
-func _get_current_action_tile() -> Vector2i:
-	if current_tool == ToolsComponent.Tools.TillGround:
-		if _is_valid_grass_tile_for_tilling():
-			return _last_tile_pos
-	elif _is_valid_farm_tile():
-		return _last_tile_pos
-	return Vector2i(999999, 999999)
 
 ## Aplica feedback visual al usar una herramienta:
 ## - Pausa breve de movimiento (200ms)
