@@ -12,7 +12,7 @@
 class_name TradeService
 extends RefCounted
 
-const MAX_SLOTS = 16
+const MAX_SLOTS = 21
 
 const SELL_PRICES: Dictionary = {
 	CropComponent.CropType.Wheat: 5,
@@ -93,6 +93,12 @@ func _remove_from_inventory(item_resource: Resource, amount: int) -> bool:
 				return true
 	return false
 
+## Vacía completamente un slot específico (usado por la papelera)
+func clear_slot(index: int) -> void:
+	if index >= 0 and index < _slots.size():
+		_slots[index] = null
+		EventBus.inventory_updated.emit(_slots, coins)
+
 func _on_inventory_slot_swapped(from_index: int, to_index: int) -> void:
 	# Verificación de seguridad
 	if from_index < 0 or from_index >= MAX_SLOTS or to_index < 0 or to_index >= MAX_SLOTS: return
@@ -161,14 +167,6 @@ func add_seeds(crop_type: CropComponent.CropType, amount: int, emit_update: bool
 	if success and emit_update:
 		_emit_inventory_updated()
 	return success
-
-
-#func consume_seed(crop_type: CropComponent.CropType) -> bool:
-	#var item_to_consume = _seed_database[crop_type]
-	#if _remove_from_inventory(item_to_consume, 1):
-		#EventBus.inventory_updated.emit(_slots, coins)
-		#return true
-	#return false
 
 #shop logic-------------
 
