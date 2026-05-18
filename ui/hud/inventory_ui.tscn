@@ -71,6 +71,7 @@ offset_left = 11.0
 offset_top = 39.0
 offset_right = 26.0
 offset_bottom = 55.0
+is_weapon_slot = true
 
 [node name="NinePatchRect" type="NinePatchRect" parent="NinePatchRect2"]
 layout_mode = 0
