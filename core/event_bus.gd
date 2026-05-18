@@ -23,14 +23,6 @@ extends Node
 # Señales globales
 signal achievement_unlocked(achievement_id: String)
 signal profile_updated()
-
-## Emitida por slots_screen cuando el jugador activa un slot para jugar.
-## SupabaseService la escucha para saber qué player_uuid usar.
-signal slot_activated(slot: int, player_uuid: String)
-
-## Emitida por AuthService al cambiar el estado de autenticación.
-## SupabaseService y UI la escuchan para actualizar el estado de sesión.
-signal auth_state_changed(is_authenticated: bool, user_id: String)
 signal screen_change_requested(screen_name: String)
 
 # Señales del ciclo día/noche
@@ -128,9 +120,22 @@ signal inventory_opened
 signal inventory_closed
 signal inventory_slot_swapped(from_index: int, to_index: int)
 
+## Señales de objetivo/historia.
+signal objective_changed(text: String)
+signal dialogue_requested(speaker: String, text: String)
+signal starter_pack_received()
+signal tribute_available(tribute_index: int)
+signal tribute_paid(tribute_index: int)
+signal tribute_failed(message: String)
+signal final_boss_started(message: String)
+
 ## Señales de enemigos (emitidas por Zombie.gd).
 ## Emitida cuando un zombie muere. Para contadores, logros, y limpieza.
 signal zombie_died(zombie: Node)
 
+## Emitida cuando el jugador derrota al boss final y la partida acaba.
+signal game_won(message: String)
+
 # Registro de servicios compartidos.
 var services: ServiceLocator = ServiceLocator.new()
+var dialogue_open: bool = false

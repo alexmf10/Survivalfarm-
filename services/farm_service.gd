@@ -1,9 +1,19 @@
 ## Gestiona los visuales del sistema de cultivos.
-## Descubre el TileMapLayer de tierra arada por grupo "farm_tilled_dirt".
-## Usa set_cells_terrain_connect para pintar tiles con autotile seamless.
+## Descubre automáticamente el TileMapLayer de tierra arada buscando nodos
+## en el grupo "farm_tilled_dirt". No necesita script por escena:
+## solo añade el TileMapLayer al grupo desde el editor de Godot.
 ##
-## Responsabilidades:
-## • Pintar tiles arados (terrain_connect actualiza vecinos automáticamente).
+## --- Arquitectura del sistema de arado ---
+## El TileMapLayer "farm_tilled_dirt" contiene tiles PRE-COLOCADOS que marcan
+## las zonas aratables del mapa (el "clarito" — los dos bloques 3x3). Al cargar:
+##   1. Guardamos la posición + atlas original de cada tile (por si hay edges).
+##   2. Limpiamos esos tiles visualmente (quedan solo como datos).
+##   3. Pasamos esas posiciones a CropService como "zona aratable permitida".
+## Cuando el jugador ara un tile, re-pintamos el TileMapLayer en esa posición
+## usando el atlas que habíamos guardado para respetar el tileset autotile.
+##
+## --- Responsabilidades visuales ---
+## • Pintar el tile arado en el TileMap cuando el jugador ara.
 ## • Instanciar/destruir CropEntity al plantar/cosechar.
 ## • Tinte azul sobre el suelo cuando un cultivo está regado.
 ## • Generar partículas de feedback al arar, regar, plantar y cosechar.
@@ -22,7 +32,9 @@ var _tilled_layer: TileMapLayer
 var _crop_entities: Dictionary = {}  # Vector2i → CropEntity
 var _watered_overlays: Dictionary = {}  # Vector2i → ColorRect (indicador de riego)
 
-var _tillable_tile_data: Dictionary = {}  # Vector2i → true (posiciones aratables)
+# Datos por posición aratable para poder re-pintar al arar.
+# Vector2i → { "source": int, "atlas": Vector2i }
+var _tillable_tile_data: Dictionary = {}
 
 
 func _enter_tree() -> void:
@@ -49,13 +61,16 @@ func _on_node_added(node: Node) -> void:
 		_crop_entities.clear()
 		_watered_overlays.clear()
 		_tillable_tile_data.clear()
+		# Snapshot de tiles pre-colocados = zona aratable permitida.
+		# Guardamos el atlas de cada uno (respeta autotile 3x3).
 		var tillable_positions: Array[Vector2i] = []
 		for pos: Vector2i in _tilled_layer.get_used_cells():
-			_tillable_tile_data[pos] = true
+			_tillable_tile_data[pos] = {
+				"source": _tilled_layer.get_cell_source_id(pos),
+				"atlas": _tilled_layer.get_cell_atlas_coords(pos),
+			}
 			tillable_positions.append(pos)
-		# Repaint pre-placed tiles with terrain_connect so they join seamlessly
-		if not tillable_positions.is_empty():
-			_tilled_layer.set_cells_terrain_connect(tillable_positions, 0, 1)
+		# Inyectar estado en CropService
 		var crop_svc := EventBus.services.crop as CropService
 		if crop_svc:
 			crop_svc.set_tilled_layer(_tilled_layer)
@@ -77,7 +92,13 @@ func _on_node_removed(node: Node) -> void:
 func _on_tile_tilled(tile_pos: Vector2i) -> void:
 	if not _tilled_layer:
 		return
-	_tilled_layer.set_cells_terrain_connect([tile_pos], 0, 1)
+	var data: Dictionary = _tillable_tile_data.get(tile_pos, {})
+	if data.is_empty():
+		# Tile outside pre-placed area — use the first known tilled tile appearance as fallback
+		if _tillable_tile_data.is_empty():
+			return
+		data = _tillable_tile_data.values()[0]
+	_tilled_layer.set_cell(tile_pos, data["source"], data["atlas"])
 
 
 func _on_crop_planted(tile_pos: Vector2i, crop_type: CropComponent.CropType) -> void:

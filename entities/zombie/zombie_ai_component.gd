@@ -70,12 +70,13 @@ var _wander_timer: float = 0.0
 var _wander_direction: Vector2 = Vector2.ZERO
 var _circle_clockwise: bool = true
 var _circle_timer: float = 0.0
+var _apocalypse_hunt_enabled: bool = false
 
 
 func _ready() -> void:
 	_body = get_parent() as CharacterBody2D
 	if _body == null:
-		push_error("ZombieAIComponent: el padre no es CharacterBody2D.")
+		push_error("ZombieAIComponent: parent is not CharacterBody2D.")
 		set_process(false)
 		return
 
@@ -86,7 +87,7 @@ func _ready() -> void:
 			_attack = child
 
 	if _movement == null:
-		push_error("ZombieAIComponent: no se encontró MovementComponent.")
+		push_error("ZombieAIComponent: MovementComponent not found.")
 		set_process(false)
 		return
 
@@ -99,6 +100,22 @@ func _ready() -> void:
 
 	_pick_wander_direction()
 	_wander_timer = randf_range(0.5, wander_interval)
+
+
+func force_apocalypse_hunt() -> void:
+	if _apocalypse_hunt_enabled:
+		return
+	_apocalypse_hunt_enabled = true
+	detection_range = 2200.0
+	lose_range = 2600.0
+	wander_pause_chance = 0.0
+	zombie_separation_radius = 14.0
+	zombie_separation_strength = 0.65
+	circle_repath_interval = 0.35
+	circle_strafe_weight = 0.12
+	if _movement:
+		_movement.speed = max(_movement.speed * 1.5, PLAYER_REFERENCE_SPEED * 0.9)
+	_state = State.CHASE
 
 
 func _process(delta: float) -> void:

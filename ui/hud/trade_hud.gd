@@ -69,7 +69,7 @@ func _build_ui() -> void:
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(title)
 
-	_coins_label = _make_label("COINS: 50", 7, COLOR_GOLD)
+	_coins_label = _make_label("COINS: 0", 7, COLOR_GOLD)
 	_coins_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(_coins_label)
 
@@ -90,7 +90,7 @@ func _build_ui() -> void:
 	vbox.add_child(_make_separator())
 
 	# ── Pie ───────────────────────────────────────────────────────────────
-	var close_hint: Label = _make_label("[ ESC ] CLOSE", 5, COLOR_TEXT_LIGHT)
+	var close_hint: Label = _make_label("[ E / ESC ] CLOSE", 5, COLOR_TEXT_LIGHT)
 	close_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(close_hint)
 
@@ -240,7 +240,7 @@ func _on_buy_pressed(crop_type: CropComponent.CropType) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
 		return
-	if event is InputEventKey and event.keycode == KEY_ESCAPE and event.pressed:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode in [KEY_E, KEY_ESCAPE]:
 		get_viewport().set_input_as_handled()
 		visible = false
 		EventBus.trade_closed.emit()

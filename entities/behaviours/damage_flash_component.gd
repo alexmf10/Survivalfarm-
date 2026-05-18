@@ -44,10 +44,10 @@ func _ready() -> void:
 			_health = child
 
 	if _sprite == null:
-		push_warning("DamageFlashComponent: no se encontró AnimatedSprite2D en '%s'" % parent.name)
+		push_warning("DamageFlashComponent: AnimatedSprite2D not found in '%s'" % parent.name)
 		return
 	if _health == null:
-		push_warning("DamageFlashComponent: no se encontró HealthComponent en '%s'" % parent.name)
+		push_warning("DamageFlashComponent: HealthComponent not found in '%s'" % parent.name)
 		return
 
 	_original_modulate = _sprite.modulate

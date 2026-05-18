@@ -56,10 +56,10 @@ func _ready() -> void:
 	_movement = get_node_or_null(movement_path) as MovementComponent
 
 	if _sprite == null:
-		push_error("AnimationComponent: no se encontró AnimatedSprite2D en '%s'." % sprite_path)
+		push_error("AnimationComponent: AnimatedSprite2D not found at '%s'." % sprite_path)
 		return
 	if _movement == null:
-		push_error("AnimationComponent: no se encontró MovementComponent en '%s'." % movement_path)
+		push_error("AnimationComponent: MovementComponent not found at '%s'." % movement_path)
 		return
 
 	# Conectar señales LOCALES del hermano MovementComponent

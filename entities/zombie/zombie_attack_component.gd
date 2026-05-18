@@ -58,6 +58,7 @@ var _hitbox: Area2D = null
 var _has_dealt_damage: bool = false
 var _original_scale: Vector2 = Vector2.ONE
 var _telegraph_tween: Tween = null
+var _apocalypse_lethality_enabled: bool = false
 
 # Referencias a hermanos
 var _body: CharacterBody2D
@@ -70,7 +71,7 @@ var _coord: EnemyCoordinatorService = null
 func _ready() -> void:
 	_body = get_parent() as CharacterBody2D
 	if _body == null:
-		push_error("ZombieAttackComponent: el padre no es CharacterBody2D.")
+		push_error("ZombieAttackComponent: parent is not CharacterBody2D.")
 		set_process(false)
 		return
 
@@ -122,6 +123,19 @@ func _process(delta: float) -> void:
 ## distinta de IDLE). La IA usa esto para no pelearse por el movimiento.
 func is_busy() -> bool:
 	return _state != State.IDLE
+
+
+func force_apocalypse_lethality() -> void:
+	if _apocalypse_lethality_enabled:
+		return
+	_apocalypse_lethality_enabled = true
+	base_damage *= 2.75
+	windup_duration *= 0.375
+	strike_duration *= 0.375
+	recovery_duration *= 0.375
+	hit_stun_duration *= 0.5
+	attack_range *= 1.15
+	attack_width *= 1.15
 
 
 ## Intenta iniciar un ataque dirigido a target_pos. Devuelve true si se
