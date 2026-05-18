@@ -74,11 +74,18 @@ func get_save_data() -> Dictionary:
 				"item_path": (slot["item"] as Resource).resource_path,
 				"amount": slot["amount"],
 			})
-	return {"coins": coins, "inventory": serialized}
+	return {
+		"coins": coins,
+		"inventory": serialized,
+		"active_hotbar_index": active_hotbar_index,
+		"starter_pack_granted": starter_pack_granted,
+	}
 
 
 func load_from_save(data: Dictionary) -> void:
 	coins = data.get("coins", 0)
+	active_hotbar_index = clampi(int(data.get("active_hotbar_index", 0)), 0, 3)
+	starter_pack_granted = bool(data.get("starter_pack_granted", false))
 	_slots.fill(null)
 	var saved: Array = data.get("inventory", [])
 	for i: int in range(mini(saved.size(), MAX_SLOTS)):

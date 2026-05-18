@@ -104,10 +104,22 @@ func get_save_state() -> Dictionary:
 			"watered": crop.watered,
 			"max_stages": crop.max_stages,
 		})
-	return {"crops": crops}
+	return {"crops": crops, "tilled_tiles": get_tilled_tiles_save_data()}
+
+
+## Devuelve los tiles arados manualmente por el jugador (excluye los del área base del mapa).
+func get_tilled_tiles_save_data() -> Array:
+	var result: Array = []
+	for tile: Vector2i in _tilled_tiles:
+		if not _tillable_area.has(tile) and not _crops.has(tile):
+			result.append({"x": tile.x, "y": tile.y})
+	return result
 
 
 func replay_visual_state() -> void:
+	# Emitir todos los tiles arados (con o sin cultivo) para que FarmService repinte la tierra
+	for tile: Vector2i in _tilled_tiles:
+		EventBus.tile_tilled.emit(tile)
 	for tile: Vector2i in _crops:
 		var crop: CropState = _crops[tile]
 		EventBus.crop_planted.emit(tile, crop.crop_type)
@@ -208,6 +220,15 @@ func load_crops_save_data(crops_data: Array) -> void:
 func _restore_save_state(state: Dictionary) -> void:
 	_loading_state = true
 	_crops.clear()
+
+	# Restaurar tiles arados manualmente (sin cultivo)
+	var tilled: Array = state.get("tilled_tiles", [])
+	for entry in tilled:
+		if not (entry is Dictionary):
+			continue
+		var tile := Vector2i(int(entry.get("x", 0)), int(entry.get("y", 0)))
+		_tilled_tiles[tile] = true
+
 	var crops: Array = state.get("crops", [])
 	for crop_data in crops:
 		if not (crop_data is Dictionary):

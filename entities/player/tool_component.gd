@@ -44,6 +44,9 @@ const FACING_TOLERANCE: float = 4.0
 ## Duración de la pausa al usar herramienta (squash/stretch feedback).
 const USE_PAUSE_DURATION: float = 0.2
 
+## Intervalo mínimo (segundos) entre acciones repetidas al mantener pulsado el botón.
+const HELD_ACTION_INTERVAL: float = 0.12
+
 # ── Estado ──────────────────────────────────────────────────────────────────
 var current_tool: ToolsComponent.Tools = ToolsComponent.Tools.None
 
@@ -54,6 +57,9 @@ var _tilled_layer: TileMapLayer  # La capa de tierra arada (farm plots)
 var _grass_layer: TileMapLayer   # La capa de hierba (para validar tilling)
 var _is_using_tool: bool = false
 var _highlight: Node2D           # Borde 16x16 que marca el tile objetivo
+var _mouse_action_held: bool = false
+var _held_action_elapsed: float = 0.0
+var _last_held_action_tile: Vector2i = Vector2i(999999, 999999)
 var _feedback_tween: Tween
 
 
@@ -132,7 +138,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.pressed:
 			if current_tool == ToolsComponent.Tools.Sword:
 				return  # Delegar al AttackComponent
+			_mouse_action_held = true
+			_held_action_elapsed = HELD_ACTION_INTERVAL
+			_last_held_action_tile = Vector2i(999999, 999999)
 			_use_tool()
+			return
+		_mouse_action_held = false
 		return
 
 	# Solo nos interesan pulsaciones de teclado (no repeticiones)
@@ -177,8 +188,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		EventBus.player_tool_changed.emit(current_tool)
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	_update_highlight()
+	_update_held_mouse_action(delta)
 
 
 ## Datos del tile bajo el ratón — compartido entre las funciones de acción.
@@ -301,6 +313,31 @@ func _use_tool() -> bool:
 			# Si la casilla no es válida para plantar o tenemos las manos vacías, intentamos cosechar
 			return _try_harvest()
 	return false
+
+
+func _update_held_mouse_action(delta: float) -> void:
+	if not _mouse_action_held:
+		return
+	if current_tool == ToolsComponent.Tools.Sword:
+		return
+	_held_action_elapsed += delta
+	if _held_action_elapsed < HELD_ACTION_INTERVAL:
+		return
+	_held_action_elapsed = 0.0
+	var current_tile := _get_current_action_tile()
+	if current_tile == _last_held_action_tile:
+		return
+	if _use_tool():
+		_last_held_action_tile = current_tile
+
+
+func _get_current_action_tile() -> Vector2i:
+	if current_tool == ToolsComponent.Tools.TillGround:
+		if _is_valid_grass_tile_for_tilling():
+			return _last_tile_pos
+	elif _is_valid_farm_tile():
+		return _last_tile_pos
+	return Vector2i(999999, 999999)
 
 
 ## Aplica feedback visual al usar una herramienta:

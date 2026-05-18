@@ -147,18 +147,19 @@ func _assert_legacy_save_migration() -> void:
 		file.close()
 
 	var save_svc := EventBus.services.save as SaveService
-	var story_state: Dictionary = save_svc.get_story_state(2)
-	var trade_state: Dictionary = save_svc.get_trade_state(2)
+	var slot2_data: Dictionary = save_svc.read_slot_json(2)
+	var story_state: Dictionary = slot2_data.get("story_state", {})
 	_assert(bool(story_state.get("starter_pack_granted", false)), "Los saves legacy de dia > 1 no disparan el tutorial inicial.")
 	_assert(int(story_state.get("current_tribute_index", 0)) >= 4, "Los saves legacy de dia > 1 no quedan atrapados en tributos vencidos.")
-	_assert(bool(trade_state.get("starter_pack_granted", false)), "Los saves legacy desbloquean herramientas al cargar.")
+	_assert(bool(slot2_data.get("starter_pack_granted", false)), "Los saves legacy desbloquean herramientas al cargar.")
 
 	var trade_svc := EventBus.services.trade as TradeService
 	var tribute_svc := EventBus.services.tribute as TributeService
-	trade_svc.apply_save_state(trade_state)
+	trade_svc.load_from_save(slot2_data)
 	tribute_svc.apply_save_state(story_state)
-	trade_svc.apply_save_state(save_svc.get_trade_state(1))
-	tribute_svc.apply_save_state(save_svc.get_story_state(1))
+	var slot1_data: Dictionary = save_svc.read_slot_json(1)
+	trade_svc.load_from_save(slot1_data)
+	tribute_svc.apply_save_state(slot1_data.get("story_state", {}))
 	_assert(not trade_svc.starter_pack_granted, "Cambiar de un save legacy a partida nueva reinicia TradeService.")
 	_assert(not tribute_svc.starter_pack_claimed, "Cambiar de un save legacy a partida nueva reinicia TributeService.")
 
@@ -185,8 +186,9 @@ func _assert_legacy_save_migration() -> void:
 	if broken_file:
 		broken_file.store_string(JSON.stringify(broken_data, "\t"))
 		broken_file.close()
-	_assert(not bool(save_svc.get_story_state(3).get("starter_pack_granted", true)), "Un save corrupto dia 1 sin inventario/cultivos permite recuperar el pack.")
-	_assert(not bool(save_svc.get_trade_state(3).get("starter_pack_granted", true)), "Un save corrupto dia 1 desbloquea de nuevo el mercader.")
+	var slot3_data: Dictionary = save_svc.read_slot_json(3)
+	_assert(not bool(slot3_data.get("story_state", {}).get("starter_pack_granted", true)), "Un save corrupto dia 1 sin inventario/cultivos permite recuperar el pack.")
+	_assert(not bool(slot3_data.get("starter_pack_granted", true)), "Un save corrupto dia 1 desbloquea de nuevo el mercader.")
 
 
 func _assert_inventory_and_crop_persistence() -> void:
@@ -202,21 +204,20 @@ func _assert_inventory_and_crop_persistence() -> void:
 	EventBus.player_planted.emit(crop_tile, CropComponent.CropType.Wheat)
 	trade_svc.consume_active_item()
 
-	var saved_trade: Dictionary = save_svc.get_trade_state(1)
+	var slot1_save: Dictionary = save_svc.read_slot_json(1)
 	var reloaded_trade := TradeService.new()
-	reloaded_trade.apply_save_state(saved_trade)
+	reloaded_trade.load_from_save(slot1_save)
 	_assert(reloaded_trade.coins == trade_svc.coins, "Las monedas se recargan desde el save.")
 	_assert(reloaded_trade.get_seed_count(CropComponent.CropType.Wheat) == trade_svc.get_seed_count(CropComponent.CropType.Wheat), "Las semillas se recargan desde el save.")
 
-	var saved_crop: Dictionary = save_svc.get_crop_state(1)
-	var saved_crops: Array = saved_crop.get("crops", [])
-	_assert(saved_crops.size() == 1, "El cultivo plantado se escribe en crop_state.")
+	var saved_crops: Array = slot1_save.get("crops", [])
+	_assert(saved_crops.size() == 1, "El cultivo plantado se escribe en crops.")
 	var reloaded_crop := CropService.new()
 	reloaded_crop.register_crop(preload("res://data/definition/wheat.tres"))
 	reloaded_crop.register_crop(preload("res://data/definition/beet.tres"))
 	reloaded_crop.set_tilled_layer(null)
 	reloaded_crop.set_tillable_area([crop_tile] as Array[Vector2i])
-	reloaded_crop.apply_save_state(saved_crop)
+	reloaded_crop.apply_save_state({"crops": saved_crops})
 	_assert(reloaded_crop.has_crop(crop_tile), "El cultivo plantado se recarga desde el save.")
 
 
