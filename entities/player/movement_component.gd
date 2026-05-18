@@ -59,7 +59,7 @@ var _knockback_timer: float = 0.0
 func _ready() -> void:
 	_body = get_parent() as CharacterBody2D
 	if _body == null:
-		push_error("MovementComponent: el padre no es un CharacterBody2D.")
+		push_error("MovementComponent: parent is not a CharacterBody2D.")
 		set_physics_process(false)
 
 

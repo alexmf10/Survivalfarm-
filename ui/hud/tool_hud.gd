@@ -60,7 +60,7 @@ func _on_player_tool_changed(tool_type: ToolsComponent.Tools) -> void:
 	_update_tool_label(tool_type)
 
 
-func _on_inventory_updated(_coins: int) -> void:
+func _on_inventory_updated(_slots: Array, _coins: int) -> void:
 	_update_tool_label(_current_tool)
 
 

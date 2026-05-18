@@ -41,7 +41,7 @@ func _build_ui() -> void:
 
 	for i: int in range(1, 5):
 		var btn: Button = Button.new()
-		btn.text = "Opcion %d" % i
+		btn.text = "Option %d" % i
 		btn.custom_minimum_size = Vector2(80, 80)
 		
 		btn.add_theme_font_override("font", _font)
@@ -71,7 +71,7 @@ func _build_ui() -> void:
 
 	# Botón Volver
 	var btn_back: Button = Button.new()
-	btn_back.text = "VOLVER"
+	btn_back.text = "BACK"
 	btn_back.custom_minimum_size = Vector2(120, 36)
 	btn_back.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	

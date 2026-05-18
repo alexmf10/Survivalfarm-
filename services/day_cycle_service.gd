@@ -27,16 +27,35 @@ var _tick_acc: float = 0.0
 
 
 ## Arranca el ciclo desde el día indicado. Llamado tras cargar una partida.
-func start_cycle(day: int = 1, saved_elapsed: float = 0.0, saved_is_night: bool = false) -> void:
+func start_cycle(day: int = 1) -> void:
 	current_day = day
-	is_night = saved_is_night
-	elapsed = saved_elapsed
+	is_night = false
+	elapsed = 0.0
 	_tick_acc = 0.0
 	running = true
 	## Emitir estado inicial para que la HUD se sincronice
 	EventBus.day_started.emit(current_day)
 	EventBus.day_phase_changed.emit(is_night)
 	EventBus.time_tick.emit(current_day, elapsed, get_phase_name())
+
+
+func apply_save_state(state: Dictionary) -> void:
+	current_day = max(1, int(state.get("current_day", 1)))
+	is_night = bool(state.get("is_night", false))
+	elapsed = clampf(float(state.get("elapsed", 0.0)), 0.0, PHASE_DURATION)
+	_tick_acc = 0.0
+	running = bool(state.get("running", true))
+	EventBus.day_phase_changed.emit(is_night)
+	EventBus.time_tick.emit(current_day, elapsed, get_phase_name())
+
+
+func get_save_state() -> Dictionary:
+	return {
+		"current_day": current_day,
+		"is_night": is_night,
+		"elapsed": elapsed,
+		"running": running,
+	}
 
 
 ## Pausa el reloj

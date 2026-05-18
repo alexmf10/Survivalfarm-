@@ -52,6 +52,9 @@ extends Node2D
 ## Tiempo en segundos tras el cual la barra se oculta si no hay cambios.
 @export var hide_after_seconds: float = 5.0
 
+## Si true, la barra permanece visible mientras la entidad siga viva.
+@export var always_visible: bool = false
+
 # ── Estado interno ───────────────────────────────────────────────────────────
 var _health_ratio: float = 1.0
 var _health_component: HealthComponent = null
@@ -73,17 +76,18 @@ func _ready() -> void:
 		_last_hp = _health_component.current_health
 		_health_ratio = _health_component.get_health_ratio()
 	else:
-		push_warning("HealthBarComponent: no se encontró HealthComponent en el padre '%s'" % get_parent().name)
+		push_warning("HealthBarComponent: HealthComponent not found in parent '%s'" % get_parent().name)
 
 	# Posicionar la barra arriba del sprite
 	position = Vector2(0, bar_offset_y)
 
-	# Empezar siempre oculta
-	visible = false
+	# Empezar oculta salvo en enemigos especiales como bosses.
+	visible = always_visible
+	call_deferred("_refresh_initial_ratio")
 
 
 func _process(delta: float) -> void:
-	if visible:
+	if visible and not always_visible:
 		_show_timer -= delta
 		if _show_timer <= 0.0:
 			visible = false
@@ -102,10 +106,23 @@ func _on_health_changed(current_hp: float, max_hp: float) -> void:
 		visible = true
 
 	# Ocultar inmediatamente si está al 100% o muerto
-	if _health_ratio >= 1.0 or _health_ratio <= 0.0:
+	if _health_ratio <= 0.0:
+		visible = false
+	elif always_visible:
+		visible = true
+	elif _health_ratio >= 1.0:
 		visible = false
 
 	_last_hp = current_hp
+	queue_redraw()
+
+
+func _refresh_initial_ratio() -> void:
+	if _health_component == null:
+		return
+	_last_hp = _health_component.current_health
+	_health_ratio = _health_component.get_health_ratio()
+	visible = always_visible and _health_ratio > 0.0
 	queue_redraw()
 
 

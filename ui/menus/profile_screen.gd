@@ -215,6 +215,7 @@ func _add_achievement_row(achiev: Dictionary) -> void:
 	# Icono
 	var icon: Label = Label.new()
 	icon.text = "★" if is_unlocked else "☆"
+	icon.text = "*" if is_unlocked else "-"
 	icon.add_theme_font_size_override("font_size", 8)
 	icon.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2) if is_unlocked else Color(0.5, 0.5, 0.5))
 	icon.custom_minimum_size = Vector2(14, 0)

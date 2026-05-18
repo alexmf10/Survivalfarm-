@@ -30,7 +30,7 @@ const CROP_NAMES: Dictionary = {
 }
 
 
-var coins: int = 50
+var coins: int = 0
 var _slots: Array = [] # Inventario
 	
 var _crop_inventory: Dictionary = {}  # CropType → int
@@ -51,52 +51,17 @@ var _seed_database: Dictionary = {
 }
 
 var active_hotbar_index: int = 0 # Guardará un número del 0 al 3
+var starter_pack_granted: bool = false
+var _loading_state: bool = false
 
 func _init() -> void:
 	# Preparamos los 16 huecos vacíos
 	_slots.resize(MAX_SLOTS)
 	_slots.fill(null)
-	_add_to_inventory(_seed_database[CropComponent.CropType.Wheat], 5)
-	_add_to_inventory(_seed_database[CropComponent.CropType.Beet], 3)
 
 func connect_signals() -> void:
 	EventBus.crop_harvested.connect(_on_crop_harvested)
 	EventBus.inventory_slot_swapped.connect(_on_inventory_slot_swapped)
-
-
-func get_save_data() -> Dictionary:
-	var serialized: Array = []
-	for slot in _slots:
-		if slot == null:
-			serialized.append(null)
-		else:
-			serialized.append({
-				"item_path": (slot["item"] as Resource).resource_path,
-				"amount": slot["amount"],
-			})
-	return {"coins": coins, "inventory": serialized}
-
-
-func load_from_save(data: Dictionary) -> void:
-	coins = data.get("coins", 50)
-	_slots.fill(null)
-	var saved: Array = data.get("inventory", [])
-	if saved.is_empty():
-		# Nueva partida — inventario inicial por defecto
-		_add_to_inventory(_seed_database[CropComponent.CropType.Wheat], 5)
-		_add_to_inventory(_seed_database[CropComponent.CropType.Beet], 3)
-	else:
-		for i: int in range(mini(saved.size(), MAX_SLOTS)):
-			var entry = saved[i]
-			if entry == null:
-				continue
-			var item_path: String = entry.get("item_path", "")
-			if item_path == "":
-				continue
-			var item: Resource = load(item_path)
-			if item:
-				_slots[i] = {"item": item, "amount": entry.get("amount", 1)}
-	EventBus.inventory_updated.emit(_slots, coins)
 
 ##Buscamos si Resource existe. Si existe, lo apilamos. Si no existe, lo añadimos si quedan huecos libres
 func _add_to_inventory(item_resource: Resource, amount: int) -> bool:
@@ -139,13 +104,13 @@ func _on_inventory_slot_swapped(from_index: int, to_index: int) -> void:
 	_slots[to_index] = temp
 	
 	# Avisamos a las interfaces para que se repinten
-	EventBus.inventory_updated.emit(_slots, coins)
+	_emit_inventory_updated()
 
 ##Añadimos al inventario una unidad del crop type recogido y emitimos señal de inventory updated
 func _on_crop_harvested(_tile_pos: Vector2i, crop_type: CropComponent.CropType) -> void:
 	var item_to_add = _crop_database[crop_type]
 	if _add_to_inventory(item_to_add, 1):
-		EventBus.inventory_updated.emit(_slots, coins)
+		_emit_inventory_updated()
 
 ##Buscamos crop_type en el inventario y devolvemos su amount, o 0 si no tenemos.
 func get_crop_count(crop_type: CropComponent.CropType) -> int:
@@ -162,6 +127,42 @@ func get_seed_count(crop_type: CropComponent.CropType) -> int:
 	return 0
 
 
+func grant_starter_pack() -> bool:
+	if starter_pack_granted:
+		return false
+	starter_pack_granted = true
+	coins += 50
+	add_seeds(CropComponent.CropType.Wheat, 40, false)
+	add_seeds(CropComponent.CropType.Beet, 20, false)
+	_emit_inventory_updated()
+	return true
+
+
+func has_crops(wheat_amount: int, beet_amount: int) -> bool:
+	return (
+		get_crop_count(CropComponent.CropType.Wheat) >= wheat_amount
+		and get_crop_count(CropComponent.CropType.Beet) >= beet_amount
+	)
+
+
+func remove_crops(wheat_amount: int, beet_amount: int) -> bool:
+	if not has_crops(wheat_amount, beet_amount):
+		return false
+	_remove_from_inventory(_crop_database[CropComponent.CropType.Wheat], wheat_amount)
+	_remove_from_inventory(_crop_database[CropComponent.CropType.Beet], beet_amount)
+	_emit_inventory_updated()
+	return true
+
+
+func add_seeds(crop_type: CropComponent.CropType, amount: int, emit_update: bool = true) -> bool:
+	if amount <= 0:
+		return true
+	var success := _add_to_inventory(_seed_database[crop_type], amount)
+	if success and emit_update:
+		_emit_inventory_updated()
+	return success
+
+
 #func consume_seed(crop_type: CropComponent.CropType) -> bool:
 	#var item_to_consume = _seed_database[crop_type]
 	#if _remove_from_inventory(item_to_consume, 1):
@@ -175,7 +176,7 @@ func sell_crop(crop_type: CropComponent.CropType) -> bool:
 	var item_to_sell = _crop_database[crop_type]
 	if _remove_from_inventory(item_to_sell, 1):
 		coins += SELL_PRICES.get(crop_type, 0)
-		EventBus.inventory_updated.emit(_slots, coins)
+		_emit_inventory_updated()
 		return true
 	return false
 
@@ -189,7 +190,7 @@ func buy_seeds(crop_type: CropComponent.CropType) -> bool:
 	#intentamos meter el item
 	if _add_to_inventory(item_to_buy, 1):
 		coins -= price
-		EventBus.inventory_updated.emit(_slots, coins)
+		_emit_inventory_updated()
 		return true
 		#no se pudo añadir (inventario lleno)
 	else: return false
@@ -199,6 +200,7 @@ func buy_seeds(crop_type: CropComponent.CropType) -> bool:
 func set_active_slot(index: int) -> void:
 	if index >= 0 and index <= 3:
 		active_hotbar_index = index
+		_save_state()
 		EventBus.hotbar_selection_changed.emit(index) 
 
 ## Devuelve la información completa del slot actual seleccionado
@@ -217,4 +219,84 @@ func consume_active_item() -> void:
 	var data = get_active_slot_data()
 	if data:
 		_remove_from_inventory(data["item"], 1)
-		EventBus.inventory_updated.emit(_slots, coins)
+		_emit_inventory_updated()
+
+
+func apply_save_state(state: Dictionary) -> void:
+	_loading_state = true
+	coins = int(state.get("coins", 0))
+	active_hotbar_index = clampi(int(state.get("active_hotbar_index", 0)), 0, 3)
+	starter_pack_granted = bool(state.get("starter_pack_granted", false))
+	_slots.resize(MAX_SLOTS)
+	_slots.fill(null)
+
+	var saved_slots: Array = state.get("slots", [])
+	for i in range(min(saved_slots.size(), MAX_SLOTS)):
+		var slot_data = saved_slots[i]
+		if slot_data is Dictionary:
+			var item := _item_from_saved_slot(slot_data)
+			var amount: int = int(slot_data.get("amount", 0))
+			if item and amount > 0:
+				_slots[i] = {"item": item, "amount": amount}
+
+	_loading_state = false
+	EventBus.inventory_updated.emit(_slots, coins)
+
+
+func get_save_state() -> Dictionary:
+	var saved_slots: Array = []
+	for slot in _slots:
+		saved_slots.append(_saved_slot_from_inventory_slot(slot))
+	return {
+		"coins": coins,
+		"slots": saved_slots,
+		"active_hotbar_index": active_hotbar_index,
+		"starter_pack_granted": starter_pack_granted,
+	}
+
+
+func _saved_slot_from_inventory_slot(slot) -> Variant:
+	if slot == null:
+		return null
+	var item: Resource = slot["item"]
+	var crop_type: int = _crop_type_for_item(item)
+	if crop_type == -1:
+		return null
+	return {
+		"crop_type": crop_type,
+		"is_seed": bool(item.is_seed),
+		"amount": int(slot["amount"]),
+	}
+
+
+func _item_from_saved_slot(slot_data: Dictionary) -> Resource:
+	var crop_type: int = int(slot_data.get("crop_type", -1))
+	var is_seed: bool = bool(slot_data.get("is_seed", false))
+	if is_seed and _seed_database.has(crop_type):
+		return _seed_database[crop_type]
+	if not is_seed and _crop_database.has(crop_type):
+		return _crop_database[crop_type]
+	return null
+
+
+func _crop_type_for_item(item: Resource) -> int:
+	for crop_type in _crop_database:
+		if _crop_database[crop_type] == item:
+			return int(crop_type)
+	for crop_type in _seed_database:
+		if _seed_database[crop_type] == item:
+			return int(crop_type)
+	return -1
+
+
+func _emit_inventory_updated() -> void:
+	_save_state()
+	EventBus.inventory_updated.emit(_slots, coins)
+
+
+func _save_state() -> void:
+	if _loading_state:
+		return
+	var save_svc := EventBus.services.save as SaveService
+	if save_svc and save_svc.active_slot > 0:
+		save_svc.save_trade_state(save_svc.active_slot, get_save_state())

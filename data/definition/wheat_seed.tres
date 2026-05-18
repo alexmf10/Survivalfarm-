@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_kda5y")
-crop_name = "wheat_seed"
+crop_name = "Wheat Seed"
 crop_type = 0
 is_seed = true
 max_stages = 4
