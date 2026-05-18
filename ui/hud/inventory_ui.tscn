@@ -141,6 +141,7 @@ layout_mode = 2
 layout_mode = 2
 
 [node name="trash_slot" parent="NinePatchRect2" instance=ExtResource("3_8a20s")]
+layout_mode = 0
 offset_left = 75.0
 offset_top = 111.0
 offset_right = 90.0
@@ -160,6 +161,7 @@ ignore_texture_size = true
 stretch_mode = 3
 
 [node name="exit_button" type="TextureButton" parent="NinePatchRect2"]
+layout_mode = 0
 offset_left = 166.0
 offset_top = 11.0
 offset_right = 195.0

@@ -16,7 +16,8 @@
 ##   Esto lo gestiona CropService.is_tillable_area().
 ##
 ## --- Controles ---
-## • Teclas 1-5: seleccionan la herramienta activa.
+## • Teclas 1-4: seleccionan la herramienta activa de la Hotbar.
+## • Tecla 7: saca/guarda el arma del slot de equipamiento (índice 19).
 ## • Tecla E: usa la herramienta seleccionada. Si la herramienta es None,
 ##   intenta cosechar el cultivo del tile bajo el ratón.
 ##
@@ -44,6 +45,7 @@ const HELD_ACTION_INTERVAL: float = 0.04
 
 # ── Estado ──────────────────────────────────────────────────────────────────
 var current_tool: ToolsComponent.Tools = ToolsComponent.Tools.None
+var _is_weapon_drawn: bool = false
 
 var _body: CharacterBody2D
 var _movement: MovementComponent
@@ -83,6 +85,10 @@ func _ready() -> void:
 	# Crear el resaltado de tile objetivo (borde rojo 16x16)
 	_highlight = _build_highlight()
 	_body.add_child.call_deferred(_highlight)
+	
+	# NUEVO: Conectamos las señales del EventBus para el inventario
+	EventBus.hotbar_selection_changed.connect(_on_hotbar_changed)
+	EventBus.inventory_updated.connect(_on_inventory_updated)
 
 
 func _exit_tree() -> void:
@@ -90,6 +96,12 @@ func _exit_tree() -> void:
 		get_tree().node_added.disconnect(_on_node_added)
 	if get_tree().node_removed.is_connected(_on_node_removed):
 		get_tree().node_removed.disconnect(_on_node_removed)
+		
+	# NUEVO: Desconectamos las señales
+	if EventBus.hotbar_selection_changed.is_connected(_on_hotbar_changed):
+		EventBus.hotbar_selection_changed.disconnect(_on_hotbar_changed)
+	if EventBus.inventory_updated.is_connected(_on_inventory_updated):
+		EventBus.inventory_updated.disconnect(_on_inventory_updated)
 
 
 func _find_layers() -> void:
@@ -155,34 +167,16 @@ func _unhandled_input(event: InputEvent) -> void:
 	var trade_svc = EventBus.services.trade
 	if not trade_svc: return
 
-	# ─── SISTEMA HÍBRIDO: HOTBAR (1-4) Y HERRAMIENTAS (5-6) ───
-	var new_tool = current_tool
-
+	# ─── SISTEMA DINÁMICO: HOTBAR (1-4) Y ARMA (7) ───
 	match event.keycode:
-		# Teclas 1 al 4: Seleccionan el Hotbar y guardan la herramienta (None)
-		KEY_1: 
-			trade_svc.set_active_slot(0)
-			new_tool = ToolsComponent.Tools.None
-		KEY_2: 
-			trade_svc.set_active_slot(1)
-			new_tool = ToolsComponent.Tools.None
-		KEY_3: 
-			trade_svc.set_active_slot(2)
-			new_tool = ToolsComponent.Tools.None
-		KEY_4: 
-			trade_svc.set_active_slot(3)
-			new_tool = ToolsComponent.Tools.None
-			
-		# Teclas 5 y 6: Equípan herramientas hardcodeadas
-		KEY_5: new_tool = ToolsComponent.Tools.TillGround # Azada
-		KEY_6: new_tool = ToolsComponent.Tools.WaterCrops # Regadera
-		KEY_7: new_tool = ToolsComponent.Tools.Sword # Regadera
-
-	# Si la herramienta ha cambiado, avisamos al resto del juego (UI, etc.)
-	if new_tool != current_tool:
-		current_tool = new_tool
-		tool_changed.emit(current_tool)
-		EventBus.player_tool_changed.emit(current_tool)
+		KEY_1: trade_svc.set_active_slot(0)
+		KEY_2: trade_svc.set_active_slot(1)
+		KEY_3: trade_svc.set_active_slot(2)
+		KEY_4: trade_svc.set_active_slot(3)
+		KEY_7:
+			# Alternamos el arma y actualizamos la herramienta
+			_is_weapon_drawn = !_is_weapon_drawn
+			_refresh_active_tool()
 
 
 func _process(delta: float) -> void:
@@ -269,36 +263,31 @@ func _try_harvest() -> bool:
 ## Usa la herramienta actualmente seleccionada, emitiendo la señal global
 ## correspondiente al EventBus. Si la herramienta es None, intenta cosechar.
 func _use_tool() -> bool:
-	# 1. Si tenemos una herramienta hardcodeada seleccionada (Azada o Regadera)
 	match current_tool:
 		ToolsComponent.Tools.TillGround:
 			if _is_valid_grass_tile_for_tilling():
 				EventBus.player_tilled.emit(_last_tile_pos)
 				_perform_feedback(current_tool, _last_tile_pos)
 				return true
-			return false # Salimos para que no intente plantar
+			return false 
 			
 		ToolsComponent.Tools.WaterCrops:
 			if _is_valid_farm_tile() and _can_water_tile(_last_tile_pos):
 				EventBus.player_watered.emit(_last_tile_pos)
 				_perform_feedback(current_tool, _last_tile_pos)
 				return true
-			return false # Salimos para que no intente plantar
+			return false 
 
-	# 2. Si la herramienta es None (estamos usando el Hotbar 1-4)
 	if current_tool == ToolsComponent.Tools.None:
 		var trade_svc = EventBus.services.trade
 		var seed_to_plant = trade_svc.get_active_seed()
 		
-		# Si tenemos una semilla válida en la mano Y estamos apuntando a tierra arable
 		if seed_to_plant != null and _is_valid_farm_tile() and _can_plant_tile(_last_tile_pos):
 			EventBus.player_planted.emit(_last_tile_pos, seed_to_plant.crop_type)
 			trade_svc.consume_active_item()
-			# Usamos la animación de PlantWheat como genérica para agacharse a plantar
 			_perform_feedback(ToolsComponent.Tools.PlantWheat, _last_tile_pos)
 			return true
 		else:
-			# Si la casilla no es válida para plantar o tenemos las manos vacías, intentamos cosechar
 			return _try_harvest()
 	return false
 
@@ -353,21 +342,17 @@ func _perform_feedback(tool: ToolsComponent.Tools, tile_pos: Vector2i) -> void:
 		_feedback_tween = tween
 		match tool:
 			ToolsComponent.Tools.TillGround:
-				# Azada: elevarse y bajar (golpe hacia abajo)
 				tween.tween_property(_sprite, "scale", Vector2(0.85, 1.2), 0.08)
 				tween.tween_property(_sprite, "scale", Vector2(1.15, 0.85), 0.06)
 				tween.tween_property(_sprite, "scale", Vector2(1.0, 1.0), 0.06)
 			ToolsComponent.Tools.WaterCrops:
-				# Regadera: inclinarse hacia adelante
 				tween.tween_property(_sprite, "scale", Vector2(1.1, 0.9), 0.1)
 				tween.tween_property(_sprite, "scale", Vector2(0.95, 1.05), 0.05)
 				tween.tween_property(_sprite, "scale", Vector2(1.0, 1.0), 0.05)
 			ToolsComponent.Tools.PlantWheat, ToolsComponent.Tools.PlantBeet:
-				# Plantar: agacharse
 				tween.tween_property(_sprite, "scale", Vector2(1.1, 0.8), 0.1)
 				tween.tween_property(_sprite, "scale", Vector2(1.0, 1.0), 0.1)
 			ToolsComponent.Tools.None:
-				# Cosechar (E): agacharse y levantarse con estirón
 				tween.tween_property(_sprite, "scale", Vector2(1.15, 0.8), 0.08)
 				tween.tween_property(_sprite, "scale", Vector2(0.9, 1.15), 0.08)
 				tween.tween_property(_sprite, "scale", Vector2(1.0, 1.0), 0.04)
@@ -408,13 +393,9 @@ func _build_highlight() -> Node2D:
 
 	var half: float = SIZE / 2.0
 	var sides := [
-		# top
 		{"pos": Vector2(-half, -half), "size": Vector2(SIZE, THICK)},
-		# bottom
 		{"pos": Vector2(-half, half - THICK), "size": Vector2(SIZE, THICK)},
-		# left
 		{"pos": Vector2(-half, -half), "size": Vector2(THICK, SIZE)},
-		# right
 		{"pos": Vector2(half - THICK, -half), "size": Vector2(THICK, SIZE)},
 	]
 	for s: Dictionary in sides:
@@ -446,10 +427,48 @@ func _update_highlight() -> void:
 		ToolsComponent.Tools.PlantWheat, \
 		ToolsComponent.Tools.PlantBeet, \
 		ToolsComponent.Tools.None:
-			# Planta/riega/cosecha: todas actúan sobre tiles de tierra arada.
 			valid = _is_valid_farm_tile()
 	if valid:
 		_highlight.global_position = _last_tile_world_pos
 		_highlight.visible = true
 	else:
 		_highlight.visible = false
+
+
+# ── NUEVO: SINCRONIZACIÓN DE INVENTARIO ─────────────────────────────────────
+
+func _on_hotbar_changed(_index: int) -> void:
+	# Si el jugador cambia de slot en la hotbar, enfundamos el arma automáticamente
+	_is_weapon_drawn = false
+	_refresh_active_tool()
+
+func _on_inventory_updated(_slots: Array, _coins: int) -> void:
+	_refresh_active_tool()
+
+## Lee el inventario y actualiza la herramienta de las manos
+func _refresh_active_tool() -> void:
+	var trade_svc = EventBus.services.trade
+	if not trade_svc: return
+
+	var slot_data = null
+	
+	# Si hemos pulsado el 7, ignoramos la hotbar y leemos tu slot de arma (Índice 19)
+	if _is_weapon_drawn:
+		if trade_svc._slots.size() > 19:
+			slot_data = trade_svc._slots[19]
+	else:
+		# Si no, leemos la hotbar normal (0 al 3)
+		slot_data = trade_svc.get_active_slot_data()
+
+	var new_tool = ToolsComponent.Tools.None
+
+	if slot_data != null:
+		var item_resource = slot_data["item"] if typeof(slot_data) == TYPE_DICTIONARY else slot_data
+		if item_resource is ToolsComponent:
+			new_tool = item_resource.tool_type
+
+	# Si ha cambiado, avisamos al juego
+	if new_tool != current_tool:
+		current_tool = new_tool
+		tool_changed.emit(current_tool)
+		EventBus.player_tool_changed.emit(current_tool)

@@ -29,7 +29,6 @@ const CROP_NAMES: Dictionary = {
 	CropComponent.CropType.Beet: "Beet",
 }
 
-
 var coins: int = 0
 var _slots: Array = [] # Inventario
 	
@@ -48,6 +47,12 @@ var _crop_database: Dictionary = {
 var _seed_database: Dictionary = {
 	CropComponent.CropType.Wheat: preload("res://data/definition/wheat_seed.tres"),
 	CropComponent.CropType.Beet: preload("res://data/definition/beet_seed.tres")
+}
+
+var _tool_database: Dictionary = {
+	ToolsComponent.Tools.TillGround: preload("res://data/definition/hoe.tres"),
+	ToolsComponent.Tools.WaterCrops: preload("res://data/definition/watering_can.tres"),
+	ToolsComponent.Tools.Sword: preload("res://data/definition/axe.tres")
 }
 
 var active_hotbar_index: int = 0 # Guardará un número del 0 al 3
@@ -138,6 +143,11 @@ func grant_starter_pack() -> bool:
 		return false
 	starter_pack_granted = true
 	coins += 50
+	
+	_add_to_inventory(_tool_database[ToolsComponent.Tools.TillGround], 1)
+	_add_to_inventory(_tool_database[ToolsComponent.Tools.WaterCrops], 1)
+	_add_to_inventory(_tool_database[ToolsComponent.Tools.Sword], 1)
+	
 	add_seeds(CropComponent.CropType.Wheat, 40, false)
 	add_seeds(CropComponent.CropType.Beet, 20, false)
 	_emit_inventory_updated()
@@ -257,10 +267,23 @@ func _saved_slot_from_inventory_slot(slot) -> Variant:
 	if slot == null:
 		return null
 	var item: Resource = slot["item"]
+	
+	#Comprobamos si el objeto es una herramienta
+	for tool_key in _tool_database:
+		if _tool_database[tool_key] == item:
+			return {
+				"is_tool": true,
+				"tool_type": int(tool_key),
+				"amount": int(slot["amount"])
+			}
+
+	#Si no es herramienta, seguimos con la lógica normal de cultivos/semillas
 	var crop_type: int = _crop_type_for_item(item)
 	if crop_type == -1:
 		return null
+		
 	return {
+		"is_tool": false,
 		"crop_type": crop_type,
 		"is_seed": bool(item.is_seed),
 		"amount": int(slot["amount"]),
@@ -268,8 +291,17 @@ func _saved_slot_from_inventory_slot(slot) -> Variant:
 
 
 func _item_from_saved_slot(slot_data: Dictionary) -> Resource:
+	#Si los datos guardados dicen que es una herramienta, la cargamos
+	if slot_data.get("is_tool", false):
+		var tool_type: int = int(slot_data.get("tool_type", -1))
+		if _tool_database.has(tool_type):
+			return _tool_database[tool_type]
+		return null
+
+	#Si no es herramienta, cargamos semillas o cultivos
 	var crop_type: int = int(slot_data.get("crop_type", -1))
 	var is_seed: bool = bool(slot_data.get("is_seed", false))
+	
 	if is_seed and _seed_database.has(crop_type):
 		return _seed_database[crop_type]
 	if not is_seed and _crop_database.has(crop_type):

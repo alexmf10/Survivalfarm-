@@ -11,7 +11,7 @@ func display(data, index: int) -> void:
 	
 	if data != null:
 		has_item = true
-		var item: CropComponent = data["item"] if data.has("item") else data["crop"]
+		var item: Resource = data["item"] if data.has("item") else data["crop"]
 		var amount: int = data["amount"]
 		
 		var atlas = AtlasTexture.new()
@@ -43,7 +43,7 @@ func display(data, index: int) -> void:
 # DRAG & DROP NATIVO DE GODOT
 # ==========================================
 
-## 1. Al hacer clic y empezar a arrastrar
+##Al hacer clic y empezar a arrastrar
 func _get_drag_data(at_position: Vector2) -> Variant:
 	if not has_item:
 		return null # Si está vacío, no arrastramos nada
@@ -64,12 +64,12 @@ func _get_drag_data(at_position: Vector2) -> Variant:
 	# Devolvemos un diccionario con nuestro índice para que el otro slot sepa quiénes somos
 	return {"type": "inventory_slot", "index": my_index}
 
-## 2. Al pasar el ratón por encima de este slot (mientras arrastramos algo)
+##Al pasar el ratón por encima de este slot (mientras arrastramos algo)
 func _can_drop_data(at_position: Vector2, data: Variant) -> bool:
 	# Comprobamos si lo que estamos soltando es un slot del inventario
 	return typeof(data) == TYPE_DICTIONARY and data.has("type") and data["type"] == "inventory_slot"
 
-## 3. Al soltar el clic sobre este slot
+##Al soltar el clic sobre este slot
 func _drop_data(at_position: Vector2, data: Variant) -> void:
 	var from_index = data["index"]
 	var to_index = my_index
