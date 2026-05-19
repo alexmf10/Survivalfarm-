@@ -57,6 +57,8 @@ var active_slot: int = 1
 var _trade_open: bool = false
 var _saved_player_pos: Vector2 = Vector2.ZERO
 var _night_zombies: Array[Node2D] = []
+var _sunburn_targets: Array[Node2D] = []
+var _sunburn_timer: Timer = null
 var _ui_font: Font
 var _objective_label: Label
 var _objective_text: String = ""
@@ -471,7 +473,7 @@ func _on_day_started(day_number: int) -> void:
 	var save_svc: SaveService = EventBus.services.save as SaveService
 	if save_svc:
 		save_svc.save_day(active_slot, day_number)
-	_clear_night_zombies()
+	_night_zombies.clear()
 
 
 func _notification(what: int) -> void:
@@ -490,7 +492,11 @@ func _save_slot_state() -> void:
 
 func _on_day_phase_changed(is_night: bool) -> void:
 	if not is_night:
-		_clear_night_zombies()
+		var survivors := get_tree().get_nodes_in_group("zombies")
+		for z in survivors:
+			_sunburn_targets.append(z as Node2D)
+		if not _sunburn_targets.is_empty():
+			_start_sunburn_tick()
 		return
 
 	var tribute_svc := EventBus.services.tribute as TributeService
@@ -545,7 +551,7 @@ func _on_tribute_failed(message: String) -> void:
 	_horde_spawned = true
 	_force_night()
 	_pause_day_cycle()
-	_clear_night_zombies()
+	_clear_night_zombies(true)
 	_play_apocalypse_intro(message)
 	_spawn_apocalypse_horde()
 
@@ -556,7 +562,7 @@ func _on_final_boss_started(message: String) -> void:
 	_final_spawned = true
 	_force_night()
 	_pause_day_cycle()
-	_clear_night_zombies()
+	_clear_night_zombies(true)
 	_show_story_message(message)
 
 	var boss_marker := _get_marker("BossSpawnPoint")
@@ -574,14 +580,14 @@ func _restore_persistent_story_encounters() -> void:
 		_horde_spawned = true
 		_force_night()
 		_pause_day_cycle()
-		_clear_night_zombies()
+		_clear_night_zombies(true)
 		_spawn_apocalypse_horde()
 		_show_dialogue_message("Collector", "The debt is already written. The march does not stop because you close your eyes.", true)
 	elif tribute_svc.final_started:
 		_final_spawned = true
 		_force_night()
 		_pause_day_cycle()
-		_clear_night_zombies()
+		_clear_night_zombies(true)
 		var boss_marker := _get_marker("BossSpawnPoint")
 		if boss_marker and get_tree().get_nodes_in_group("bosses").is_empty():
 			_spawn_enemy(BOSS_SCENE_PATH, boss_marker.global_position)
@@ -623,13 +629,13 @@ func _on_entity_died(entity: Node) -> void:
 func _spawn_night_patrol() -> void:
 	if not _night_zombies.is_empty():
 		return
-	_night_zombies = _spawn_zombie_pack(NIGHT_PATROL_MARKERS, 4, 10.0)
-	for i in range(2):
+	_night_zombies = _spawn_zombie_pack(NIGHT_PATROL_MARKERS, 10, 14.0)
+	for i in range(4):
 		var marker_name: String = NIGHT_PATROL_MARKERS[i % NIGHT_PATROL_MARKERS.size()]
 		var marker := _get_marker(marker_name)
 		if marker == null:
 			continue
-		var offset := Vector2(randf_range(-14.0, 14.0), randf_range(-14.0, 14.0))
+		var offset := Vector2(randf_range(-18.0, 18.0), randf_range(-18.0, 18.0))
 		var archer := _spawn_enemy(ZOMBIE_ARCHER_SCENE_PATH, marker.global_position + offset)
 		if archer:
 			_night_zombies.append(archer)
@@ -690,11 +696,55 @@ func _sanitize_apocalypse_spawn_position(pos: Vector2) -> Vector2:
 	)
 
 
-func _clear_night_zombies() -> void:
+func _clear_night_zombies(instant: bool = false) -> void:
+	if instant:
+		if is_instance_valid(_sunburn_timer):
+			_sunburn_timer.stop()
+		for z in _sunburn_targets:
+			if is_instance_valid(z):
+				z.queue_free()
+		_sunburn_targets.clear()
+		for zombie in _night_zombies:
+			if is_instance_valid(zombie):
+				zombie.queue_free()
+		_night_zombies.clear()
+		return
+
+	# Natural dawn: apply sunburn instead of instant removal.
+	if _night_zombies.is_empty():
+		return
 	for zombie in _night_zombies:
 		if is_instance_valid(zombie):
-			zombie.queue_free()
+			_sunburn_targets.append(zombie)
 	_night_zombies.clear()
+	_start_sunburn_tick()
+
+
+func _start_sunburn_tick() -> void:
+	if _sunburn_targets.is_empty():
+		return
+	if not is_instance_valid(_sunburn_timer):
+		_sunburn_timer = Timer.new()
+		_sunburn_timer.wait_time = 1.0
+		_sunburn_timer.timeout.connect(_on_sunburn_tick)
+		add_child(_sunburn_timer)
+	_sunburn_timer.start()
+
+
+func _on_sunburn_tick() -> void:
+	var still_alive: Array[Node2D] = []
+	for zombie in _sunburn_targets:
+		if not is_instance_valid(zombie):
+			continue
+		var health := zombie.get_node_or_null("HealthComponent") as HealthComponent
+		if health == null or health.current_health <= 0.0:
+			continue
+		health.take_damage(20.0)
+		if health.current_health > 0.0:
+			still_alive.append(zombie)
+	_sunburn_targets = still_alive
+	if _sunburn_targets.is_empty():
+		_sunburn_timer.stop()
 
 
 func _force_night() -> void:
@@ -1138,7 +1188,7 @@ func _debug_skip_to_final_boss() -> void:
 	_final_spawned = true
 	_force_night()
 	_pause_day_cycle()
-	_clear_night_zombies()
+	_clear_night_zombies(true)
 	_show_story_message("The final moment has come.\nEnd the patriarch of the horde!")
 
 	var boss_marker := _get_marker("BossSpawnPoint")

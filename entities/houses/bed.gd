@@ -29,10 +29,11 @@ func _process(_delta: float) -> void:
 	if not player_svc or not player_svc.has_player():
 		return
 	var dist: float = global_position.distance_to(player_svc.get_position())
-	var in_range: bool = dist <= INTERACT_RADIUS
-	_player_in_range = in_range
-	if in_range:
-		_hint_label.text = "[E] Sleep" if _can_sleep() else "Cannot\nsleep now"
+	_player_in_range = dist <= INTERACT_RADIUS
+	if _player_in_range:
+		var is_night := _is_night()
+		var can_sleep := is_night and _count_alive_zombies() == 0
+		_hint_label.text = "[E] Sleep" if can_sleep else "[E] Bed"
 		_hint_label.visible = true
 	else:
 		_hint_label.visible = false
@@ -43,21 +44,30 @@ func _input(event: InputEvent) -> void:
 		return
 	if event is InputEventKey and event.keycode == KEY_E and event.pressed and not event.echo:
 		get_viewport().set_input_as_handled()
-		if not _can_sleep():
-			_show_blocked_message()
-			return
-		_start_sleep_sequence()
+		_try_sleep()
 
 
-func _can_sleep() -> bool:
+func _try_sleep() -> void:
+	if not _is_night():
+		EventBus.dialogue_requested.emit("Bed", "You can only sleep at night.")
+		return
+	if _count_alive_zombies() > 0:
+		EventBus.dialogue_requested.emit("Bed", "You cannot sleep while there are enemies nearby.")
+		return
 	var tribute_svc := EventBus.services.tribute as TributeService
-	return tribute_svc == null or tribute_svc.can_sleep()
+	if tribute_svc and not tribute_svc.can_sleep():
+		EventBus.dialogue_requested.emit("Bed", tribute_svc.get_sleep_block_message())
+		return
+	_start_sleep_sequence()
 
 
-func _show_blocked_message() -> void:
-	var tribute_svc := EventBus.services.tribute as TributeService
-	var message: String = tribute_svc.get_sleep_block_message() if tribute_svc else "You cannot sleep now."
-	EventBus.dialogue_requested.emit("Bed", message)
+func _is_night() -> bool:
+	var day_svc := EventBus.services.day_cycle as DayCycleService
+	return day_svc != null and day_svc.is_night
+
+
+func _count_alive_zombies() -> int:
+	return get_tree().get_nodes_in_group("zombies").size()
 
 
 func _start_sleep_sequence() -> void:
@@ -74,22 +84,20 @@ func _start_sleep_sequence() -> void:
 	_sleeping = true
 	_hint_label.visible = false
 
-	var next_day: int = day_svc.current_day + 1
-	var overlay_scene: PackedScene = load(SLEEP_OVERLAY_PATH) as PackedScene
+	var current_day: int = day_svc.current_day
+	var overlay_scene := load(SLEEP_OVERLAY_PATH) as PackedScene
 	if overlay_scene == null:
 		push_error("Bed: could not load SleepOverlay")
 		_sleeping = false
 		return
-	var overlay: CanvasLayer = overlay_scene.instantiate() as CanvasLayer
+	var overlay := overlay_scene.instantiate() as CanvasLayer
 	get_tree().root.add_child(overlay)
 
-	var save_and_advance := func() -> void:
-		save_svc.save_day(slot, next_day)
-		day_svc.start_cycle(next_day)
-		EventBus.night_skipped.emit(next_day)
+	var save_only := func() -> void:
+		save_svc.save_day(slot, current_day)
 
 	overlay.completed.connect(_on_sleep_completed)
-	overlay.play_sleep_sequence(next_day, save_and_advance)
+	overlay.play_sleep_sequence(current_day, save_only)
 
 
 func _on_sleep_completed() -> void:
