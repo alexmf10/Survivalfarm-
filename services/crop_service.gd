@@ -41,6 +41,8 @@ func connect_signals() -> void:
 
 func set_tilled_layer(layer: TileMapLayer) -> void:
 	_tilled_layer = layer
+	if layer == null:
+		return
 	_tilled_tiles.clear()
 	_tillable_area.clear()
 

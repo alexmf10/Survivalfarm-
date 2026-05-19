@@ -78,3 +78,7 @@ var auth: Node:
 ## Atajo para SupabaseService (Node).
 var supabase: Node:
 	get: return get_service(&"supabase")
+
+## Atajo para SoundService (Node).
+var sound: Node:
+	get: return get_service(&"sound")

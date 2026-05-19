@@ -10,6 +10,7 @@
 ## "farm"      → FarmService (Node) — visuales de cultivos
 ## "combat"    → CombatService (byRef) — cálculo centralizado de daño
 ## "enemy_coord" → EnemyCoordinatorService (byRef) — árbitro de ataques enemigos
+## "sound"      → SoundService (Node) — reproduce SFX/música según señales del bus
 extends Node
 
 
@@ -73,6 +74,12 @@ func _ready() -> void:
 	supabase_svc.name = "SupabaseService"
 	EventBus.add_child(supabase_svc)
 	EventBus.services.register(&"supabase", supabase_svc)
+
+	# SoundService: escucha señales del EventBus y reproduce audio (Node, necesita árbol).
+	var sound_svc: SoundService = SoundService.new()
+	sound_svc.name = "SoundService"
+	EventBus.add_child(sound_svc)
+	EventBus.services.register(&"sound", sound_svc)
 
 	# Ir a la pantalla de login
 	get_tree().call_deferred("change_scene_to_file", "res://ui/menus/auth_screen.tscn")
