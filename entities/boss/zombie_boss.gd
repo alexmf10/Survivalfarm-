@@ -2,7 +2,7 @@ class_name ZombieBoss
 extends CharacterBody2D
 
 const DEATH_CLEANUP_DELAY: float = 1.0
-const WIN_MESSAGE: String = "You defeated the patriarch of the horde.\nYour land is safe again."
+const WIN_MESSAGE: String = "You have defeated the zombie boss.\nYou have freed these lands, and the village owes you a debt.\nNow you can rest in peace."
 
 var _last_hp: float = 0.0
 
