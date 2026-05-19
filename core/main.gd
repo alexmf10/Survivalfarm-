@@ -26,6 +26,7 @@ func _ready() -> void:
 	# DayCycleService es Node → necesita ser hijo del árbol para _process()
 	var day_cycle_svc: DayCycleService = DayCycleService.new()
 	day_cycle_svc.name = "DayCycleService"
+	day_cycle_svc.process_mode = Node.PROCESS_MODE_PAUSABLE
 	EventBus.add_child(day_cycle_svc)
 	EventBus.services.register(&"day_cycle", day_cycle_svc)
 
@@ -43,6 +44,7 @@ func _ready() -> void:
 	# FarmService: gestiona los visuales del sistema de cultivos (Node, necesita árbol).
 	var farm_svc: FarmService = FarmService.new()
 	farm_svc.name = "FarmService"
+	farm_svc.process_mode = Node.PROCESS_MODE_PAUSABLE
 	EventBus.add_child(farm_svc)
 	EventBus.services.register(&"farm", farm_svc)
 

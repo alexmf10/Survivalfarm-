@@ -68,6 +68,10 @@ var _dialogue_name_label: Label
 var _dialogue_text_label: Label
 var _dialogue_ignore_until_msec: int = 0
 var _apocalypse_overlay: CanvasLayer
+var _end_overlay: CanvasLayer
+var _pause_layer: CanvasLayer
+var _pause_resume_button: Button
+var _day_cycle_was_running_before_pause: bool = false
 var _horde_spawned: bool = false
 var _final_spawned: bool = false
 var _defeat_active: bool = false
@@ -176,6 +180,7 @@ func _build_world() -> void:
 		return
 
 	var world: Node2D = map_scene.instantiate() as Node2D
+	world.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(world)
 
 	var trader: Trader = Trader.new()
@@ -196,26 +201,32 @@ func _build_hud() -> void:
 
 	var hud_scene: PackedScene = load("res://ui/hud/day_cycle_hud.tscn")
 	var hud: CanvasLayer = hud_scene.instantiate()
+	hud.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(hud)
 
 	var tool_hud_scene: PackedScene = load("res://ui/hud/tool_hud.tscn")
 	var tool_hud: CanvasLayer = tool_hud_scene.instantiate()
+	tool_hud.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(tool_hud)
 
 	var health_hud_scene: PackedScene = load("res://ui/hud/health_hud.tscn")
 	var health_hud: CanvasLayer = health_hud_scene.instantiate()
+	health_hud.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(health_hud)
 
 	var trade_hud: TradeHUD = TradeHUD.new()
+	trade_hud.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(trade_hud)
 
 	_build_objective_hud()
 	_build_dialogue_box()
+	_build_pause_menu()
 
 
 func _build_objective_hud() -> void:
 	var layer := CanvasLayer.new()
 	layer.layer = 30
+	layer.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(layer)
 
 	var panel := PanelContainer.new()
@@ -306,6 +317,7 @@ func _make_wood_panel_style(content_margin: int) -> StyleBoxFlat:
 func _build_dialogue_box() -> void:
 	_dialogue_layer = CanvasLayer.new()
 	_dialogue_layer.layer = 120
+	_dialogue_layer.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(_dialogue_layer)
 
 	_dialogue_panel = PanelContainer.new()
@@ -355,6 +367,88 @@ func _build_dialogue_box() -> void:
 	continue_label.add_theme_color_override("font_color", Color(0.47, 0.34, 0.20))
 	continue_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.add_child(continue_label)
+
+
+func _build_pause_menu() -> void:
+	_pause_layer = CanvasLayer.new()
+	_pause_layer.layer = 135
+	_pause_layer.process_mode = Node.PROCESS_MODE_ALWAYS
+	_pause_layer.visible = false
+	add_child(_pause_layer)
+
+	var shade := ColorRect.new()
+	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	shade.color = Color(0.05, 0.04, 0.03, 0.62)
+	shade.mouse_filter = Control.MOUSE_FILTER_STOP
+	_pause_layer.add_child(shade)
+
+	var panel := PanelContainer.new()
+	panel.set_anchors_preset(Control.PRESET_CENTER)
+	panel.custom_minimum_size = Vector2(260, 156)
+	panel.offset_left = -130
+	panel.offset_top = -78
+	panel.offset_right = 130
+	panel.offset_bottom = 78
+	panel.add_theme_stylebox_override("panel", _make_wood_panel_style(14))
+	shade.add_child(panel)
+
+	var box := VBoxContainer.new()
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_theme_constant_override("separation", 12)
+	panel.add_child(box)
+
+	var title := Label.new()
+	title.text = "PAUSED"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	if _ui_font:
+		title.add_theme_font_override("font", _ui_font)
+	title.add_theme_font_size_override("font_size", 12)
+	title.add_theme_color_override("font_color", UI_COLOR_TEXT)
+	title.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(title)
+
+	_pause_resume_button = _make_pause_button("RESUME")
+	_pause_resume_button.pressed.connect(_close_pause_menu)
+	box.add_child(_pause_resume_button)
+
+	var main_menu_button := _make_pause_button("MAIN MENU")
+	main_menu_button.pressed.connect(_return_to_main_menu)
+	box.add_child(main_menu_button)
+
+
+func _make_pause_button(text: String) -> Button:
+	var btn := Button.new()
+	btn.text = text
+	btn.custom_minimum_size = Vector2(180, 34)
+	if _ui_font:
+		btn.add_theme_font_override("font", _ui_font)
+	btn.add_theme_font_size_override("font_size", 8)
+	btn.add_theme_color_override("font_color", UI_COLOR_TEXT)
+	btn.add_theme_color_override("font_hover_color", UI_COLOR_TEXT)
+	btn.add_theme_color_override("font_pressed_color", UI_COLOR_TEXT)
+	btn.add_theme_color_override("font_focus_color", UI_COLOR_TEXT)
+
+	var style := StyleBoxFlat.new()
+	style.bg_color = UI_COLOR_PARCHMENT
+	style.border_color = UI_COLOR_BORDER
+	style.border_width_top = 2
+	style.border_width_left = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 5
+	style.set_corner_radius_all(0)
+	style.set_content_margin_all(6)
+	btn.add_theme_stylebox_override("normal", style)
+
+	var hover := style.duplicate()
+	hover.bg_color = UI_COLOR_PARCHMENT.lightened(0.08)
+	btn.add_theme_stylebox_override("hover", hover)
+	btn.add_theme_stylebox_override("focus", hover)
+
+	var pressed := style.duplicate()
+	pressed.border_width_bottom = 2
+	pressed.content_margin_top = 4
+	btn.add_theme_stylebox_override("pressed", pressed)
+	return btn
 
 
 func _start_day_cycle() -> void:
@@ -686,6 +780,63 @@ func _hide_dialogue_message() -> void:
 	EventBus.dialogue_open = false
 
 
+func _open_pause_menu() -> void:
+	if _pause_layer == null or _pause_layer.visible:
+		return
+	var day_cycle_svc := EventBus.services.day_cycle as DayCycleService
+	_day_cycle_was_running_before_pause = day_cycle_svc != null and day_cycle_svc.running
+	if day_cycle_svc:
+		day_cycle_svc.pause()
+	var sound_svc := EventBus.services.sound as SoundService
+	if sound_svc:
+		sound_svc.pause_audio()
+	_save_slot_state()
+	_pause_layer.visible = true
+	get_tree().paused = true
+	if _pause_resume_button:
+		_pause_resume_button.grab_focus()
+
+
+func _close_pause_menu() -> void:
+	if _pause_layer == null:
+		return
+	_pause_layer.visible = false
+	get_tree().paused = false
+	var day_cycle_svc := EventBus.services.day_cycle as DayCycleService
+	if day_cycle_svc and _day_cycle_was_running_before_pause:
+		day_cycle_svc.resume()
+	_day_cycle_was_running_before_pause = false
+	var sound_svc := EventBus.services.sound as SoundService
+	if sound_svc:
+		sound_svc.resume_audio()
+
+
+func _return_to_main_menu() -> void:
+	_save_slot_state()
+	var sound_svc := EventBus.services.sound as SoundService
+	if sound_svc:
+		sound_svc.resume_audio()
+	get_tree().paused = false
+	get_tree().change_scene_to_file(MAIN_MENU_SCENE_PATH)
+
+
+func _has_blocking_screen_open() -> bool:
+	if _trade_open:
+		return true
+	if _dialogue_panel and _dialogue_panel.visible:
+		return true
+	if _mission_popup and _mission_popup.visible:
+		return true
+	if _apocalypse_overlay and is_instance_valid(_apocalypse_overlay):
+		return true
+	if _end_overlay and is_instance_valid(_end_overlay):
+		return true
+	for child in get_tree().root.get_children():
+		if child.name == "SleepOverlay" and child is CanvasLayer and child.visible:
+			return true
+	return false
+
+
 func _on_dialogue_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		_hide_dialogue_message()
@@ -703,6 +854,7 @@ func _show_apocalypse_flash() -> void:
 
 	_apocalypse_overlay = CanvasLayer.new()
 	_apocalypse_overlay.layer = 110
+	_apocalypse_overlay.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(_apocalypse_overlay)
 
 	var shade := ColorRect.new()
@@ -747,6 +899,7 @@ func _show_defeat_overlay(message: String) -> void:
 
 func _show_end_overlay(title_text: String, message: String, title_color: Color, border_color: Color, instant: bool = false) -> void:
 	var overlay := CanvasLayer.new()
+	_end_overlay = overlay
 	overlay.layer = 150
 	overlay.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(overlay)
@@ -840,11 +993,26 @@ func _input(event: InputEvent) -> void:
 			get_tree().change_scene_to_file(MAIN_MENU_SCENE_PATH)
 		return
 
+	if _end_overlay and is_instance_valid(_end_overlay):
+		if event.is_action_pressed("pause"):
+			get_viewport().set_input_as_handled()
+			_return_to_main_menu()
+		return
+
+	if _pause_layer and _pause_layer.visible:
+		if event.is_action_pressed("pause"):
+			get_viewport().set_input_as_handled()
+			_close_pause_menu()
+		return
+
 	if _dialogue_panel and _dialogue_panel.visible:
 		if event is InputEventKey and event.pressed and not event.echo:
 			if Time.get_ticks_msec() >= _dialogue_ignore_until_msec and event.keycode in [KEY_E, KEY_ENTER, KEY_SPACE]:
 				get_viewport().set_input_as_handled()
 				_hide_dialogue_message()
+				return
+			if event.is_action_pressed("pause"):
+				get_viewport().set_input_as_handled()
 				return
 		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 			get_viewport().set_input_as_handled()
@@ -854,11 +1022,11 @@ func _input(event: InputEvent) -> void:
 	if _trade_open:
 		return
 	if event.is_action_pressed("pause"):
-		var day_cycle_svc: DayCycleService = EventBus.services.day_cycle as DayCycleService
-		_save_slot_state()
-		if day_cycle_svc:
-			day_cycle_svc.pause()
-		get_tree().change_scene_to_file("res://ui/menus/slots_screen.tscn")
+		get_viewport().set_input_as_handled()
+		if _has_blocking_screen_open():
+			return
+		_open_pause_menu()
+		return
 
 	if event is InputEventKey and event.pressed and not event.echo:
 		match event.keycode:

@@ -348,7 +348,7 @@ func _perform_feedback(tool: ToolsComponent.Tools, tile_pos: Vector2i) -> void:
 				tween.tween_property(_sprite, "scale", Vector2(1.0, 1.0), 0.04)
 
 	# Timer para desbloquear el movimiento
-	await get_tree().create_timer(USE_PAUSE_DURATION).timeout
+	await get_tree().create_timer(USE_PAUSE_DURATION, false).timeout
 	_is_using_tool = false
 
 

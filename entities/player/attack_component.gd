@@ -133,7 +133,7 @@ func _perform_attack() -> void:
 	EventBus.player_attack_started.emit(base_damage, facing, _body.global_position)
 
 	# Destruir hitbox tras la ventana de impacto
-	await _body.get_tree().create_timer(HITBOX_DURATION).timeout
+	await _body.get_tree().create_timer(HITBOX_DURATION, false).timeout
 	_cleanup_hitbox()
 
 

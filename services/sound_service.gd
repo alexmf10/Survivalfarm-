@@ -3,6 +3,8 @@ extends Node
 
 var _music_player: AudioStreamPlayer
 var _sfx_player: AudioStreamPlayer
+var _music_paused_by_game_pause: bool = false
+var _sfx_paused_by_game_pause: bool = false
 
 # key → res:// path; add entries here as you source audio files
 const SOUNDS: Dictionary = {
@@ -94,6 +96,24 @@ func play_music(key: String) -> void:
 
 func stop_music() -> void:
 	_music_player.stop()
+
+
+func pause_audio() -> void:
+	if _music_player and _music_player.playing and not _music_player.stream_paused:
+		_music_player.stream_paused = true
+		_music_paused_by_game_pause = true
+	if _sfx_player and _sfx_player.playing and not _sfx_player.stream_paused:
+		_sfx_player.stream_paused = true
+		_sfx_paused_by_game_pause = true
+
+
+func resume_audio() -> void:
+	if _music_player and _music_paused_by_game_pause:
+		_music_player.stream_paused = false
+	if _sfx_player and _sfx_paused_by_game_pause:
+		_sfx_player.stream_paused = false
+	_music_paused_by_game_pause = false
+	_sfx_paused_by_game_pause = false
 
 func set_sfx_volume(linear: float) -> void:
 	_sfx_player.volume_db = linear_to_db(clampf(linear, 0.0, 1.0))
