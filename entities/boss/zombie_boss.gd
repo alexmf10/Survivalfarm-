@@ -41,7 +41,7 @@ func _on_died() -> void:
 	EventBus.zombie_died.emit(self)
 	await _play_death_sequence()
 	EventBus.game_won.emit(WIN_MESSAGE)
-	await get_tree().create_timer(DEATH_CLEANUP_DELAY).timeout
+	await get_tree().create_timer(DEATH_CLEANUP_DELAY, false).timeout
 	queue_free()
 
 
@@ -63,7 +63,7 @@ func _on_damaged(current_hp: float, _max_hp: float) -> void:
 func _play_death_sequence() -> void:
 	var sprite := get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
 	if sprite == null:
-		await get_tree().create_timer(0.6).timeout
+		await get_tree().create_timer(0.6, false).timeout
 		return
 
 	sprite.stop()

@@ -65,7 +65,7 @@ func _on_died() -> void:
 	EventBus.zombie_died.emit(self)
 
 	# Liberar el nodo tras el delay
-	await get_tree().create_timer(DEATH_CLEANUP_DELAY).timeout
+	await get_tree().create_timer(DEATH_CLEANUP_DELAY, false).timeout
 	queue_free()
 
 
