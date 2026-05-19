@@ -54,6 +54,7 @@ const UI_FONT_PATH: String = "res://ui/theme/PressStart2P-Regular.ttf"
 
 var active_slot: int = 1
 var _trade_open: bool = false
+var _saved_player_pos: Vector2 = Vector2.ZERO
 var _night_zombies: Array[Node2D] = []
 var _ui_font: Font
 var _objective_label: Label
@@ -81,9 +82,9 @@ func _ready() -> void:
 		active_slot = save_svc.active_slot
 
 	_load_slot_state()
+	_connect_events()
 	_build_world()
 	_build_hud()
-	_connect_events()
 	_start_day_cycle()
 
 	var tribute_svc := EventBus.services.tribute as TributeService
@@ -114,6 +115,8 @@ func _exit_tree() -> void:
 		EventBus.entity_died.disconnect(_on_entity_died)
 	if EventBus.game_won.is_connected(_on_game_won):
 		EventBus.game_won.disconnect(_on_game_won)
+	if EventBus.player_spawned.is_connected(_on_player_spawned):
+		EventBus.player_spawned.disconnect(_on_player_spawned)
 
 
 func _connect_events() -> void:
@@ -127,6 +130,7 @@ func _connect_events() -> void:
 	EventBus.game_won.connect(_on_game_won)
 	EventBus.trade_opened.connect(func() -> void: _trade_open = true)
 	EventBus.trade_closed.connect(func() -> void: _trade_open = false)
+	EventBus.player_spawned.connect(_on_player_spawned)
 
 
 func _load_slot_state() -> void:
@@ -134,17 +138,35 @@ func _load_slot_state() -> void:
 	if save_svc == null:
 		return
 
+	var data: Dictionary = save_svc.read_slot_json(active_slot)
+
+	var pos_data = data.get("player_position", null)
+	if pos_data is Dictionary:
+		var px: float = float(pos_data.get("x", 0.0))
+		var py: float = float(pos_data.get("y", 0.0))
+		if px != 0.0 or py != 0.0:
+			_saved_player_pos = Vector2(px, py)
+
 	var trade_svc := EventBus.services.trade as TradeService
 	if trade_svc:
-		trade_svc.apply_save_state(save_svc.get_trade_state(active_slot))
+		trade_svc.load_from_save(data)
 
 	var tribute_svc := EventBus.services.tribute as TributeService
 	if tribute_svc:
-		tribute_svc.apply_save_state(save_svc.get_story_state(active_slot))
+		tribute_svc.apply_save_state(data.get("story_state", {}))
 
 	var crop_svc := EventBus.services.crop as CropService
 	if crop_svc:
-		crop_svc.apply_save_state(save_svc.get_crop_state(active_slot))
+		crop_svc.apply_save_state({
+			"crops": data.get("crops", []),
+			"tilled_tiles": data.get("tilled_tiles", []),
+		})
+
+
+func _on_player_spawned(player: Node) -> void:
+	if _saved_player_pos != Vector2.ZERO:
+		player.global_position = _saved_player_pos
+		_saved_player_pos = Vector2.ZERO
 
 
 func _build_world() -> void:
@@ -339,7 +361,13 @@ func _start_day_cycle() -> void:
 	var day_cycle_svc: DayCycleService = EventBus.services.day_cycle as DayCycleService
 	var save_svc: SaveService = EventBus.services.save as SaveService
 	if day_cycle_svc and save_svc:
-		day_cycle_svc.apply_save_state(save_svc.get_day_cycle_state(active_slot))
+		var data: Dictionary = save_svc.read_slot_json(active_slot)
+		day_cycle_svc.apply_save_state({
+			"current_day": data.get("day", 1),
+			"is_night": data.get("is_night", false),
+			"elapsed": data.get("elapsed", 0.0),
+			"running": true,
+		})
 
 
 func _on_day_started(day_number: int) -> void:
@@ -358,22 +386,9 @@ func _save_slot_state() -> void:
 	var save_svc: SaveService = EventBus.services.save as SaveService
 	if save_svc == null or active_slot <= 0:
 		return
-
 	var day_cycle_svc := EventBus.services.day_cycle as DayCycleService
-	if day_cycle_svc:
-		save_svc.save_day_cycle_state(active_slot, day_cycle_svc.get_save_state())
-
-	var trade_svc := EventBus.services.trade as TradeService
-	if trade_svc:
-		save_svc.save_trade_state(active_slot, trade_svc.get_save_state())
-
-	var tribute_svc := EventBus.services.tribute as TributeService
-	if tribute_svc:
-		save_svc.save_story_state(active_slot, tribute_svc.get_save_state())
-
-	var crop_svc := EventBus.services.crop as CropService
-	if crop_svc:
-		save_svc.save_crop_state(active_slot, crop_svc.get_save_state())
+	var current_day: int = day_cycle_svc.current_day if day_cycle_svc else 1
+	save_svc.save_day(active_slot, current_day)
 
 
 func _on_day_phase_changed(is_night: bool) -> void:

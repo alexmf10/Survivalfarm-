@@ -136,6 +136,10 @@ signal zombie_died(zombie: Node)
 ## Emitida cuando el jugador derrota al boss final y la partida acaba.
 signal game_won(message: String)
 
+## Señales de autenticación y cloud sync.
+signal auth_state_changed(is_authenticated: bool, user_id: String)
+signal slot_activated(slot: int, player_uuid: String)
+
 # Registro de servicios compartidos.
 var services: ServiceLocator = ServiceLocator.new()
 var dialogue_open: bool = false

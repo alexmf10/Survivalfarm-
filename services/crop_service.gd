@@ -41,6 +41,8 @@ func connect_signals() -> void:
 
 func set_tilled_layer(layer: TileMapLayer) -> void:
 	_tilled_layer = layer
+	if layer == null:
+		return
 	_tilled_tiles.clear()
 	_tillable_area.clear()
 
@@ -104,10 +106,22 @@ func get_save_state() -> Dictionary:
 			"watered": crop.watered,
 			"max_stages": crop.max_stages,
 		})
-	return {"crops": crops}
+	return {"crops": crops, "tilled_tiles": get_tilled_tiles_save_data()}
+
+
+## Devuelve los tiles arados manualmente por el jugador (excluye los del área base del mapa).
+func get_tilled_tiles_save_data() -> Array:
+	var result: Array = []
+	for tile: Vector2i in _tilled_tiles:
+		if not _tillable_area.has(tile) and not _crops.has(tile):
+			result.append({"x": tile.x, "y": tile.y})
+	return result
 
 
 func replay_visual_state() -> void:
+	# Emitir todos los tiles arados (con o sin cultivo) para que FarmService repinte la tierra
+	for tile: Vector2i in _tilled_tiles:
+		EventBus.tile_tilled.emit(tile)
 	for tile: Vector2i in _crops:
 		var crop: CropState = _crops[tile]
 		EventBus.crop_planted.emit(tile, crop.crop_type)
@@ -173,9 +187,50 @@ func _on_day_started(_day_number: int) -> void:
 	_save_state()
 
 
+func get_crops_save_data() -> Array:
+	var result: Array = []
+	for tile_pos: Vector2i in _crops:
+		var crop: CropState = _crops[tile_pos]
+		result.append({
+			"x": tile_pos.x,
+			"y": tile_pos.y,
+			"crop_type": crop.crop_type,
+			"stage": crop.stage,
+			"watered": crop.watered,
+		})
+	return result
+
+
+func load_crops_save_data(crops_data: Array) -> void:
+	_crops.clear()
+	for item: Dictionary in crops_data:
+		var tile_pos: Vector2i = Vector2i(item.get("x", 0), item.get("y", 0))
+		var crop_type: CropComponent.CropType = item.get("crop_type", 0) as CropComponent.CropType
+		var res: CropComponent = _crop_data.get(crop_type)
+		var max_s: int = res.max_stages if res else 4
+		var state: CropState = CropState.new(crop_type, max_s)
+		state.stage = item.get("stage", 0)
+		state.watered = item.get("watered", false)
+		_crops[tile_pos] = state
+		EventBus.crop_planted.emit(tile_pos, crop_type)
+		if state.stage > 0:
+			EventBus.crop_grown.emit(tile_pos, state.stage, max_s)
+		if state.watered:
+			EventBus.crop_watered.emit(tile_pos)
+
+
 func _restore_save_state(state: Dictionary) -> void:
 	_loading_state = true
 	_crops.clear()
+
+	# Restaurar tiles arados manualmente (sin cultivo)
+	var tilled: Array = state.get("tilled_tiles", [])
+	for entry in tilled:
+		if not (entry is Dictionary):
+			continue
+		var tile := Vector2i(int(entry.get("x", 0)), int(entry.get("y", 0)))
+		_tilled_tiles[tile] = true
+
 	var crops: Array = state.get("crops", [])
 	for crop_data in crops:
 		if not (crop_data is Dictionary):
