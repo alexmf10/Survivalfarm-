@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://entities/zombie_archer/arrow.gd" id="1_arrow"]
+
+[sub_resource type="CircleShape2D" id="ArrowShape"]
+radius = 2.5
+
+[sub_resource type="RectangleShape2D" id="ArrowShaft"]
+size = Vector2(12.0, 2.0)
+
+[node name="Arrow" type="Area2D"]
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+monitoring = true
+script = ExtResource("1_arrow")
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+color = Color(0.38, 0.22, 0.08, 1)
+polygon = PackedVector2Array(-6, -1, 2, -1, 2, -2.5, 7, 0, 2, 2.5, 2, 1, -6, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("ArrowShape")
