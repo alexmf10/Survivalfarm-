@@ -4,6 +4,7 @@ extends Control
 const MAP_SCENE_PATH: String = "res://entities/test/alex/alex_scene.tscn"
 const MAIN_MENU_SCENE_PATH: String = "res://ui/menus/main_menu.tscn"
 const ZOMBIE_SCENE_PATH: String = "res://entities/zombie/zombie.tscn"
+const ZOMBIE_ARCHER_SCENE_PATH: String = "res://entities/zombie_archer/zombie_archer.tscn"
 const BOSS_SCENE_PATH: String = "res://entities/boss/zombie_boss.tscn"
 const COLLECTOR_SCENE_PATH: String = "res://entities/collector/collector_zombie.tscn"
 
@@ -623,6 +624,15 @@ func _spawn_night_patrol() -> void:
 	if not _night_zombies.is_empty():
 		return
 	_night_zombies = _spawn_zombie_pack(NIGHT_PATROL_MARKERS, 4, 10.0)
+	for i in range(2):
+		var marker_name: String = NIGHT_PATROL_MARKERS[i % NIGHT_PATROL_MARKERS.size()]
+		var marker := _get_marker(marker_name)
+		if marker == null:
+			continue
+		var offset := Vector2(randf_range(-14.0, 14.0), randf_range(-14.0, 14.0))
+		var archer := _spawn_enemy(ZOMBIE_ARCHER_SCENE_PATH, marker.global_position + offset)
+		if archer:
+			_night_zombies.append(archer)
 
 
 func _spawn_zombie_pack(marker_names: Array[String], count: int, jitter: float) -> Array[Node2D]:
@@ -1112,6 +1122,10 @@ func _input(event: InputEvent) -> void:
 			KEY_F:
 				get_viewport().set_input_as_handled()
 				_debug_skip_to_final_boss()
+			KEY_R:
+				get_viewport().set_input_as_handled()
+				var archer_xform: Transform2D = get_viewport().get_canvas_transform()
+				_spawn_enemy(ZOMBIE_ARCHER_SCENE_PATH, archer_xform.affine_inverse() * get_viewport().get_mouse_position())
 
 
 func _debug_skip_to_final_boss() -> void:
