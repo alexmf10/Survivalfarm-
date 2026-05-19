@@ -1,9 +1,11 @@
-[gd_scene load_steps=5 format=3 uid="uid://rpvjf1ae6qw1"]
+[gd_scene load_steps=7 format=3 uid="uid://rpvjf1ae6qw1"]
 
 [ext_resource type="Script" uid="uid://ig6bx7yxj23w" path="res://ui/hud/inventory_ui.gd" id="1_6ch5n"]
 [ext_resource type="Texture2D" uid="uid://dtawk06lsrsny" path="res://assets/resources/inventory/PANEL_SECCION_INVENTARIO.png" id="2_jm3eq"]
 [ext_resource type="Texture2D" uid="uid://f4wdkerb0fm" path="res://assets/resources/inventory/PANEL_INVENTARIO.png" id="2_n6ryj"]
 [ext_resource type="PackedScene" uid="uid://bxidetdb4kk3p" path="res://ui/hud/inventory_ui_slot.tscn" id="3_8a20s"]
+[ext_resource type="Texture2D" uid="uid://1lm0etsqoich" path="res://assets/resources/inventory/BASURA.png" id="5_300cl"]
+[ext_resource type="Texture2D" uid="uid://76y676gogybd" path="res://assets/resources/inventory/X.png" id="6_j0n3s"]
 
 [node name="inventory_ui" type="Control"]
 custom_minimum_size = Vector2(81, 85)
@@ -25,7 +27,7 @@ anchor_bottom = 0.5
 offset_left = -92.5
 offset_top = -66.5
 offset_right = 92.5
-offset_bottom = 66.5
+offset_bottom = 73.5
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_n6ryj")
@@ -69,6 +71,7 @@ offset_left = 11.0
 offset_top = 39.0
 offset_right = 26.0
 offset_bottom = 55.0
+is_weapon_slot = true
 
 [node name="NinePatchRect" type="NinePatchRect" parent="NinePatchRect2"]
 layout_mode = 0
@@ -137,3 +140,36 @@ layout_mode = 2
 
 [node name="inventory_ui_slot16" parent="NinePatchRect2/NinePatchRect/GridContainer" instance=ExtResource("3_8a20s")]
 layout_mode = 2
+
+[node name="trash_slot" parent="NinePatchRect2" instance=ExtResource("3_8a20s")]
+layout_mode = 0
+offset_left = 75.0
+offset_top = 111.0
+offset_right = 90.0
+offset_bottom = 127.0
+
+[node name="trash_button" type="TextureButton" parent="NinePatchRect2"]
+layout_mode = 0
+offset_left = 94.0
+offset_top = 113.0
+offset_right = 133.0
+offset_bottom = 146.0
+scale = Vector2(0.42, 0.42)
+texture_normal = ExtResource("5_300cl")
+texture_pressed = ExtResource("5_300cl")
+texture_hover = ExtResource("5_300cl")
+ignore_texture_size = true
+stretch_mode = 3
+
+[node name="exit_button" type="TextureButton" parent="NinePatchRect2"]
+layout_mode = 0
+offset_left = 166.0
+offset_top = 11.0
+offset_right = 195.0
+offset_bottom = 35.0
+scale = Vector2(0.27, 0.27)
+texture_normal = ExtResource("6_j0n3s")
+texture_pressed = ExtResource("6_j0n3s")
+texture_hover = ExtResource("6_j0n3s")
+ignore_texture_size = true
+stretch_mode = 3
