@@ -157,17 +157,11 @@ func _disconnect_signals() -> void:
 func _on_time_tick(day_number: int, elapsed_secs: float, phase: String) -> void:
 	if _day_label:
 		_day_label.text = "DAY %d" % day_number
-	# Obtener PHASE_DURATION del servicio. Fallback a 300 si no está disponible.
-	var phase_duration: float = 300.0
-	var svc = EventBus.services.day_cycle
-	if svc:
-		phase_duration = svc.PHASE_DURATION
-
-	# Actualizar barra de progreso
-	var progress: float = clampf(elapsed_secs / phase_duration, 0.0, 1.0)
+	var svc := EventBus.services.day_cycle as DayCycleService
+	var progress: float = svc.get_progress() if svc else 0.0
 	_progress_bar.value = progress
 
-	# Calcular y mostrar tiempo restante
+	var phase_duration: float = svc.get_phase_duration() if svc else 150.0
 	var remaining: float = maxf(phase_duration - elapsed_secs, 0.0)
 	var minutes: int = int(remaining) / 60
 	var seconds: int = int(remaining) % 60

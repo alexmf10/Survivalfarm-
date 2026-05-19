@@ -3,10 +3,11 @@
 class_name DayCycleService
 extends Node
 
-## Constantes
-## Duración de cada fase en segundos (5 minutos = 300 s).
-## Para pruebas rápidas se puede reducir a 10.0 o 30.0.
-const PHASE_DURATION: float = 300.0
+## Durations per phase in seconds.
+## Day 1 morning is longer to give the player time to get started.
+const DAY_1_MORNING_DURATION: float = 240.0  # 4 minutes
+const STANDARD_DAY_DURATION: float = 150.0   # 2.5 minutes
+const STANDARD_NIGHT_DURATION: float = 150.0  # 2.5 minutes
 
 ## Estado del ciclo
 ## Día actual de la partida (empieza en 1).
@@ -42,7 +43,7 @@ func start_cycle(day: int = 1) -> void:
 func apply_save_state(state: Dictionary) -> void:
 	current_day = max(1, int(state.get("current_day", 1)))
 	is_night = bool(state.get("is_night", false))
-	elapsed = clampf(float(state.get("elapsed", 0.0)), 0.0, PHASE_DURATION)
+	elapsed = clampf(float(state.get("elapsed", 0.0)), 0.0, get_phase_duration())
 	_tick_acc = 0.0
 	running = bool(state.get("running", true))
 	EventBus.day_phase_changed.emit(is_night)
@@ -68,11 +69,19 @@ func resume() -> void:
 	running = true
 
 
+## Returns the duration in seconds of the current phase.
+func get_phase_duration() -> float:
+	if not is_night and current_day == 1:
+		return DAY_1_MORNING_DURATION
+	return STANDARD_NIGHT_DURATION if is_night else STANDARD_DAY_DURATION
+
+
 ## Progreso de la fase actual como valor 0.0 -> 1.0.
 func get_progress() -> float:
-	if PHASE_DURATION <= 0.0:
+	var dur := get_phase_duration()
+	if dur <= 0.0:
 		return 1.0
-	return clampf(elapsed / PHASE_DURATION, 0.0, 1.0)
+	return clampf(elapsed / dur, 0.0, 1.0)
 
 
 ## Devuelve "DAY" o "NIGHT" según la fase actual.
@@ -94,8 +103,7 @@ func _process(delta: float) -> void:
 		_tick_acc -= 1.0
 		EventBus.time_tick.emit(current_day, elapsed, get_phase_name())
 
-	## Se acabó la fase actual?
-	if elapsed >= PHASE_DURATION:
+	if elapsed >= get_phase_duration():
 		_advance_phase()
 
 
@@ -103,7 +111,7 @@ func _process(delta: float) -> void:
 
 ## Avanza a la siguiente fase. Si termina la noche, incrementa el día.
 func _advance_phase() -> void:
-	elapsed -= PHASE_DURATION  ## conservar excedente para precisión
+	elapsed -= get_phase_duration()  # preserve overflow for precision
 	_tick_acc = 0.0
 
 	if is_night:
