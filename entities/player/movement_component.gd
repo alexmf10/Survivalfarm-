@@ -28,6 +28,15 @@ extends Node
 ## Multiplicador de velocidad al pulsar Shift (sprint).
 @export var sprint_multiplier: float = 1.8
 
+## Velocidad aplicada durante el dash.
+@export var dash_speed: float = 220.0
+
+## Duracion del dash en segundos.
+@export var dash_duration: float = 0.12
+
+## Tiempo minimo entre dashes.
+@export var dash_cooldown: float = 0.45
+
 ## Si true, lee input del teclado. Si false, se mueve solo cuando la entidad
 ## que lo posee llama a set_direction() (útil para IA de enemigos).
 @export var input_enabled: bool = true
@@ -48,6 +57,9 @@ var _body: CharacterBody2D
 var _current_direction: Vector2 = Vector2.ZERO
 var _facing: Vector2 = Vector2.DOWN  # Dirección cardinal actual (para animaciones)
 var _was_moving: bool = false
+var _dash_direction: Vector2 = Vector2.ZERO
+var _dash_timer: float = 0.0
+var _dash_cooldown_timer: float = 0.0
 
 # ── Knockback ───────────────────────────────────────────────────────────────
 ## Tiempo en segundos que dura el knockback hasta decaer a 0.
@@ -68,6 +80,8 @@ func _ready() -> void:
 ## Fuerza la detención del movimiento (útil en pausas, diálogos, cutscenes).
 func stop() -> void:
 	_current_direction = Vector2.ZERO
+	_dash_direction = Vector2.ZERO
+	_dash_timer = 0.0
 	if _body:
 		_body.velocity = Vector2.ZERO
 
@@ -95,8 +109,18 @@ func get_facing() -> Vector2:
 ## KNOCKBACK_DECAY segundos. Reemplaza cualquier knockback anterior.
 ## Útil para que ataques empujen al objetivo (player o enemigo).
 func apply_knockback(impulse: Vector2) -> void:
+	_dash_direction = Vector2.ZERO
+	_dash_timer = 0.0
 	_knockback_velocity = impulse
 	_knockback_timer = KNOCKBACK_DECAY
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not input_enabled:
+		return
+	if event.is_action_pressed(&"dash"):
+		_try_start_dash()
+		get_viewport().set_input_as_handled()
 
 
 # ── Proceso físico ──────────────────────────────────────────────────────────
@@ -104,6 +128,9 @@ func apply_knockback(impulse: Vector2) -> void:
 func _physics_process(delta: float) -> void:
 	if _body == null:
 		return
+
+	if _dash_cooldown_timer > 0.0:
+		_dash_cooldown_timer = maxf(_dash_cooldown_timer - delta, 0.0)
 
 	# Knockback tiene prioridad sobre dirección normal mientras decae.
 	if _knockback_timer > 0.0:
@@ -114,6 +141,14 @@ func _physics_process(delta: float) -> void:
 		# Durante knockback no leemos input ni emitimos señales de "moved".
 		# El AnimationComponent mantendrá la animación que tuviera.
 		_was_moving = false
+		return
+
+	if _dash_timer > 0.0:
+		_dash_timer -= delta
+		_body.velocity = _dash_direction * dash_speed
+		_body.move_and_slide()
+		moved.emit(_dash_direction)
+		_was_moving = true
 		return
 
 	if input_enabled:
@@ -147,6 +182,23 @@ func _physics_process(delta: float) -> void:
 
 
 # ── Lógica interna ──────────────────────────────────────────────────────────
+
+## Intenta lanzar un dash corto en direccion de input o del facing actual.
+func _try_start_dash() -> void:
+	if _body == null or _dash_timer > 0.0 or _dash_cooldown_timer > 0.0:
+		return
+
+	var direction := _current_direction
+	if input_enabled:
+		direction = Input.get_vector(&"move_left", &"move_right", &"move_up", &"move_down")
+	if direction == Vector2.ZERO:
+		direction = _facing
+
+	_dash_direction = direction.normalized()
+	_update_facing(_dash_direction)
+	_dash_timer = dash_duration
+	_dash_cooldown_timer = dash_cooldown
+
 
 ## Determina la dirección cardinal dominante y emite facing_changed si cambió.
 func _update_facing(direction: Vector2) -> void:

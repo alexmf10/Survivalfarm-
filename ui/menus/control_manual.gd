@@ -96,7 +96,7 @@ func _build_ui() -> void:
 		"Survive and grow your farm! Plant crops, harvest them,\nsell at market, and defend against monsters at night.\nUpgrade your equipment and unlock achievements.")
 
 	_add_section(content_vbox, "CONTROLS",
-		"W A S D - Move\n1-4 - Hotbar\n5 - Equip Weapon\nE - Harvest\nI / Tab - Inventory\nClick - Use Tool / Attack\n  Esc - Pause")
+		"W A S D - Move\n1-4 - Hotbar\n5 - Equip Weapon\nE - Harvest\nI / Tab - Inventory\nClick - Use Tool / Attack\nRight Click - Dash\n  Esc - Pause")
 
 	_add_section(content_vbox, "OBJECTIVES",
 		"- Plant and harvest crops\n- Trade with merchants\n- Equip armor and weapons\n- Survive the night monsters\n- Complete all achievements")
