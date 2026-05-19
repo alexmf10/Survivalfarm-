@@ -75,6 +75,7 @@ var _day_cycle_was_running_before_pause: bool = false
 var _horde_spawned: bool = false
 var _final_spawned: bool = false
 var _defeat_active: bool = false
+var _game_ended: bool = false
 
 
 func _ready() -> void:
@@ -98,7 +99,8 @@ func _ready() -> void:
 
 
 func _exit_tree() -> void:
-	_save_slot_state()
+	if not _game_ended:
+		_save_slot_state()
 	var day_cycle_svc: DayCycleService = EventBus.services.day_cycle as DayCycleService
 	if day_cycle_svc:
 		day_cycle_svc.pause()
@@ -594,7 +596,9 @@ func _on_game_won(message: String) -> void:
 		if is_instance_valid(zombie) and not (zombie is ZombieBoss):
 			zombie.queue_free()
 
+	_finish_active_run()
 	_show_victory_overlay(message)
+	call_deferred("_freeze_terminal_game_state")
 
 
 func _on_entity_died(entity: Node) -> void:
@@ -610,6 +614,7 @@ func _on_entity_died(entity: Node) -> void:
 		movement.stop()
 		movement.input_enabled = false
 
+	_finish_active_run()
 	_show_defeat_overlay("The march has devoured the farm.")
 	call_deferred("_freeze_terminal_game_state")
 
@@ -812,12 +817,33 @@ func _close_pause_menu() -> void:
 
 
 func _return_to_main_menu() -> void:
-	_save_slot_state()
+	if not _game_ended:
+		_save_slot_state()
 	var sound_svc := EventBus.services.sound as SoundService
 	if sound_svc:
 		sound_svc.resume_audio()
+		if _game_ended:
+			sound_svc.stop_music()
 	get_tree().paused = false
 	get_tree().change_scene_to_file(MAIN_MENU_SCENE_PATH)
+
+
+func _finish_active_run() -> void:
+	if _game_ended:
+		return
+	_game_ended = true
+	_trade_open = false
+	EventBus.dialogue_open = false
+	_hide_mission_popup()
+
+	var save_svc := EventBus.services.save as SaveService
+	if save_svc and save_svc.active_slot > 0:
+		save_svc.delete_slot(save_svc.active_slot)
+		save_svc.active_slot = -1
+
+	var sound_svc := EventBus.services.sound as SoundService
+	if sound_svc:
+		sound_svc.pause_audio()
 
 
 func _has_blocking_screen_open() -> bool:
@@ -889,15 +915,15 @@ func _shake_world(duration: float = 1.6, strength: float = 8.0) -> void:
 
 
 func _show_victory_overlay(message: String) -> void:
-	_show_end_overlay("VICTORY", message, Color(1.0, 0.86, 0.38), Color(0.75, 0.62, 0.30))
+	_show_end_overlay("VICTORY", message, Color(0.28, 0.48, 0.12), true)
 
 
 func _show_defeat_overlay(message: String) -> void:
 	_defeat_active = true
-	_show_end_overlay("DEFEAT", message, Color(1.0, 0.35, 0.28), Color(0.70, 0.18, 0.14), true)
+	_show_end_overlay("DEFEAT", message, Color(0.52, 0.12, 0.08), true)
 
 
-func _show_end_overlay(title_text: String, message: String, title_color: Color, border_color: Color, instant: bool = false) -> void:
+func _show_end_overlay(title_text: String, message: String, title_color: Color, instant: bool = false) -> void:
 	var overlay := CanvasLayer.new()
 	_end_overlay = overlay
 	overlay.layer = 150
@@ -906,30 +932,20 @@ func _show_end_overlay(title_text: String, message: String, title_color: Color, 
 
 	var shade := ColorRect.new()
 	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
-	shade.color = Color(0.0, 0.0, 0.0, 0.88)
+	shade.color = Color(0.05, 0.04, 0.03, 0.72)
 	shade.modulate.a = 1.0 if instant else 0.0
 	shade.mouse_filter = Control.MOUSE_FILTER_STOP
 	overlay.add_child(shade)
 
 	var panel := PanelContainer.new()
 	panel.set_anchors_preset(Control.PRESET_CENTER)
-	panel.custom_minimum_size = Vector2(360, 132)
-	panel.offset_left = -180
-	panel.offset_top = -66
-	panel.offset_right = 180
-	panel.offset_bottom = 66
+	panel.custom_minimum_size = Vector2(420, 178)
+	panel.offset_left = -210
+	panel.offset_top = -89
+	panel.offset_right = 210
+	panel.offset_bottom = 89
 	panel.modulate.a = 1.0 if instant else 0.0
-
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.10, 0.08, 0.07, 0.96)
-	style.border_color = border_color
-	style.border_width_top = 2
-	style.border_width_bottom = 4
-	style.border_width_left = 2
-	style.border_width_right = 2
-	style.set_corner_radius_all(0)
-	style.set_content_margin_all(14)
-	panel.add_theme_stylebox_override("panel", style)
+	panel.add_theme_stylebox_override("panel", _make_wood_panel_style(18))
 	shade.add_child(panel)
 
 	var box := VBoxContainer.new()
@@ -940,35 +956,36 @@ func _show_end_overlay(title_text: String, message: String, title_color: Color, 
 	var title := Label.new()
 	title.text = title_text
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	if _ui_font:
+		title.add_theme_font_override("font", _ui_font)
 	title.add_theme_font_size_override("font_size", 16)
 	title.add_theme_color_override("font_color", title_color)
+	title.add_theme_constant_override("outline_size", 2)
+	title.add_theme_color_override("font_outline_color", Color(0.70, 0.62, 0.45))
 	box.add_child(title)
+
+	var sep := HSeparator.new()
+	var sep_style := StyleBoxFlat.new()
+	sep_style.bg_color = UI_COLOR_BORDER
+	sep_style.content_margin_top = 1.0
+	sep_style.content_margin_bottom = 1.0
+	sep.add_theme_stylebox_override("separator", sep_style)
+	box.add_child(sep)
 
 	var body := Label.new()
 	body.text = message
 	body.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	body.add_theme_font_size_override("font_size", 8)
-	body.add_theme_color_override("font_color", Color(0.92, 0.88, 0.78))
+	if _ui_font:
+		body.add_theme_font_override("font", _ui_font)
+	body.add_theme_font_size_override("font_size", 7)
+	body.add_theme_color_override("font_color", UI_COLOR_TEXT)
 	box.add_child(body)
 
-	if instant:
-		var prompt := Label.new()
-		prompt.text = "PRESS ESC"
-		prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		prompt.add_theme_font_size_override("font_size", 7)
-		prompt.add_theme_color_override("font_color", Color(1.0, 0.86, 0.42))
-		box.add_child(prompt)
-
-		var blink_timer := Timer.new()
-		blink_timer.process_mode = Node.PROCESS_MODE_ALWAYS
-		blink_timer.wait_time = 0.45
-		blink_timer.autostart = true
-		blink_timer.timeout.connect(func() -> void:
-			if is_instance_valid(prompt):
-				prompt.visible = not prompt.visible
-		)
-		overlay.add_child(blink_timer)
+	var button := _make_end_button("BACK TO MENU")
+	button.pressed.connect(_return_to_main_menu)
+	box.add_child(button)
+	button.grab_focus()
 
 	if instant:
 		return
@@ -980,23 +997,50 @@ func _show_end_overlay(title_text: String, message: String, title_color: Color, 
 	tween.tween_property(panel, "scale", Vector2.ONE, 0.18)
 
 
+func _make_end_button(text: String) -> Button:
+	var btn := Button.new()
+	btn.text = text
+	btn.custom_minimum_size = Vector2(220, 34)
+	if _ui_font:
+		btn.add_theme_font_override("font", _ui_font)
+	btn.add_theme_font_size_override("font_size", 7)
+	btn.add_theme_color_override("font_color", UI_COLOR_TEXT)
+	btn.add_theme_color_override("font_hover_color", UI_COLOR_TEXT)
+	btn.add_theme_color_override("font_pressed_color", UI_COLOR_TEXT)
+	btn.add_theme_color_override("font_focus_color", UI_COLOR_TEXT)
+
+	var style := StyleBoxFlat.new()
+	style.bg_color = UI_COLOR_PARCHMENT
+	style.border_color = UI_COLOR_BORDER
+	style.border_width_top = 2
+	style.border_width_left = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 5
+	style.set_corner_radius_all(0)
+	style.set_content_margin_all(6)
+	btn.add_theme_stylebox_override("normal", style)
+
+	var hover := style.duplicate()
+	hover.bg_color = UI_COLOR_PARCHMENT.lightened(0.08)
+	btn.add_theme_stylebox_override("hover", hover)
+	btn.add_theme_stylebox_override("focus", hover)
+
+	var pressed := style.duplicate()
+	pressed.border_width_bottom = 2
+	pressed.content_margin_top = 4
+	btn.add_theme_stylebox_override("pressed", pressed)
+	return btn
+
+
 func _freeze_terminal_game_state() -> void:
 	get_tree().paused = true
 
 
 func _input(event: InputEvent) -> void:
 	if _defeat_active:
-		if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
-			get_viewport().set_input_as_handled()
-			_defeat_active = false
-			get_tree().paused = false
-			get_tree().change_scene_to_file(MAIN_MENU_SCENE_PATH)
 		return
 
 	if _end_overlay and is_instance_valid(_end_overlay):
-		if event.is_action_pressed("pause"):
-			get_viewport().set_input_as_handled()
-			_return_to_main_menu()
 		return
 
 	if _pause_layer and _pause_layer.visible:
@@ -1065,6 +1109,28 @@ func _input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 				var boss_canvas_xform: Transform2D = get_viewport().get_canvas_transform()
 				_spawn_enemy(BOSS_SCENE_PATH, boss_canvas_xform.affine_inverse() * get_viewport().get_mouse_position())
+			KEY_F:
+				get_viewport().set_input_as_handled()
+				_debug_skip_to_final_boss()
+
+
+func _debug_skip_to_final_boss() -> void:
+	var trade_svc := EventBus.services.trade as TradeService
+	if trade_svc and not trade_svc.starter_pack_granted:
+		trade_svc.grant_starter_pack()
+
+	if _final_spawned:
+		return
+	_final_spawned = true
+	_force_night()
+	_pause_day_cycle()
+	_clear_night_zombies()
+	_show_story_message("The final moment has come.\nEnd the patriarch of the horde!")
+
+	var boss_marker := _get_marker("BossSpawnPoint")
+	if boss_marker:
+		_spawn_enemy(BOSS_SCENE_PATH, boss_marker.global_position)
+	_spawn_zombie_pack(NIGHT_PATROL_MARKERS, 8, 18.0)
 
 
 func _get_marker(marker_name: String) -> Marker2D:
