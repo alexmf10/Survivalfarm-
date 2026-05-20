@@ -13,6 +13,7 @@ class_name TradeService
 extends RefCounted
 
 const MAX_SLOTS = 21
+const MAX_STACK_SIZE = 64
 
 const SELL_PRICES: Dictionary = {
 	CropComponent.CropType.Wheat: 5,
@@ -106,20 +107,44 @@ func load_from_save(data: Dictionary) -> void:
 	EventBus.inventory_updated.emit(_slots, coins)
 
 ##Buscamos si Resource existe. Si existe, lo apilamos. Si no existe, lo añadimos si quedan huecos libres
+## Añade items al inventario respetando el MAX_STACK_SIZE
 func _add_to_inventory(item_resource: Resource, amount: int) -> bool:
-	#stackeamos items
+	var amount_left = amount
+
+	# Intentamos apilar en slots existentes que ya tengan este item y NO estén llenos
 	for i in range(_slots.size()):
 		if _slots[i] != null and _slots[i]["item"] == item_resource:
-			_slots[i]["amount"] += amount
-			return true
-			
-	#si no, buscamos hueco vacío
+			var current_amount = _slots[i]["amount"]
+			if current_amount < MAX_STACK_SIZE:
+				var space_left = MAX_STACK_SIZE - current_amount
+				
+				# Si todo lo que entra cabe en el slot
+				if amount_left <= space_left:
+					_slots[i]["amount"] += amount_left
+					return true 
+				# Si sobra, llenamos este slot y seguimos buscando
+				else:
+					_slots[i]["amount"] = MAX_STACK_SIZE
+					amount_left -= space_left
+
+	# Si todavía queda cantidad por dejar, buscamos huecos vacíos
 	for i in range(_slots.size()):
-		if _slots[i] == null:
-			_slots[i] = {"item": item_resource, "amount": amount}
-			return true
+		if amount_left <= 0:
+			break # Ya guardamos todo
 			
-	return false # Inventario lleno
+		if _slots[i] == null:
+			if amount_left <= MAX_STACK_SIZE:
+				_slots[i] = {"item": item_resource, "amount": amount_left}
+				return true
+			else:
+				_slots[i] = {"item": item_resource, "amount": MAX_STACK_SIZE}
+				amount_left -= MAX_STACK_SIZE
+
+	# Si llegamos aquí y amount_left > 0, el inventario, el espacio es insuficiente, el resto de items se pierden
+	if amount_left > 0:
+		return false 
+
+	return true
 
 ##Si el item Resource se encuentra en el inventario, eliminamos amount cantidad
 func _remove_from_inventory(item_resource: Resource, amount: int) -> bool:
@@ -144,12 +169,29 @@ func clear_slot(index: int) -> void:
 func _on_inventory_slot_swapped(from_index: int, to_index: int) -> void:
 	# Verificación de seguridad
 	if from_index < 0 or from_index >= MAX_SLOTS or to_index < 0 or to_index >= MAX_SLOTS: return
-	if from_index == to_index: return #si no lo movemos de slot se queda
+	if from_index == to_index: return
 	
-	# Intercambiamos los datos en el array
-	var temp = _slots[from_index]
-	_slots[from_index] = _slots[to_index]
-	_slots[to_index] = temp
+	var item_from = _slots[from_index]
+	var item_to = _slots[to_index]
+	
+	# Si ambos slots tienen el MISMO item, intentamos fusionarlos
+	if item_from != null and item_to != null and item_from["item"] == item_to["item"]:
+		var total_amount = item_from["amount"] + item_to["amount"]
+		
+		# Si la suma no supera el límite, se junta todo en el slot elegido
+		if total_amount <= MAX_STACK_SIZE:
+			_slots[to_index]["amount"] = total_amount
+			_slots[from_index] = null
+		# Si lo supera, llenamos el slot elegido hasta 64 y dejamos el resto en el slot original
+		else:
+			_slots[to_index]["amount"] = MAX_STACK_SIZE
+			_slots[from_index]["amount"] = total_amount - MAX_STACK_SIZE
+			
+	# Si son items diferentes o hay un hueco vacío, hacemos un intercambio normal
+	else:
+		var temp = _slots[from_index]
+		_slots[from_index] = _slots[to_index]
+		_slots[to_index] = temp
 	
 	# Avisamos a las interfaces para que se repinten
 	_emit_inventory_updated()
