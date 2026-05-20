@@ -89,16 +89,18 @@ func _ready() -> void:
 	if save_svc and save_svc.active_slot > 0:
 		active_slot = save_svc.active_slot
 
+	_build_hud()
 	_load_slot_state()
 	_connect_events()
 	_build_world()
-	_build_hud()
 	_start_day_cycle()
 
 	var tribute_svc := EventBus.services.tribute as TributeService
 	if tribute_svc:
 		_on_objective_changed(tribute_svc.get_objective_text())
 		call_deferred("_restore_persistent_story_encounters")
+
+	call_deferred("_unlock_new_world")
 
 
 func _exit_tree() -> void:
@@ -142,10 +144,20 @@ func _connect_events() -> void:
 	EventBus.player_spawned.connect(_on_player_spawned)
 
 
+func _unlock_new_world() -> void:
+	var profile_svc: ProfileService = EventBus.services.profile as ProfileService
+	if profile_svc:
+		profile_svc.unlock_achievement("new_world")
+
+
 func _load_slot_state() -> void:
 	var save_svc: SaveService = EventBus.services.save as SaveService
 	if save_svc == null:
 		return
+
+	var profile_svc: ProfileService = EventBus.services.profile as ProfileService
+	if profile_svc:
+		profile_svc.load_profile(active_slot)
 
 	var data: Dictionary = save_svc.read_slot_json(active_slot)
 
@@ -226,6 +238,10 @@ func _build_hud() -> void:
 	_build_objective_hud()
 	_build_dialogue_box()
 	_build_pause_menu()
+
+	var achievement_popup := AchievementPopup.new()
+	achievement_popup.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(achievement_popup)
 
 
 func _build_objective_hud() -> void:
@@ -1176,6 +1192,23 @@ func _input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 				var archer_xform: Transform2D = get_viewport().get_canvas_transform()
 				_spawn_enemy(ZOMBIE_ARCHER_SCENE_PATH, archer_xform.affine_inverse() * get_viewport().get_mouse_position())
+			KEY_QUOTELEFT: # ` — unlock all achievements for testing
+				get_viewport().set_input_as_handled()
+				_debug_unlock_all_achievements()
+
+
+func _debug_unlock_all_achievements() -> void:
+	var profile_svc := EventBus.services.profile as ProfileService
+	if not profile_svc:
+		return
+	var ids: Array[String] = [
+		"new_world", "first_water", "first_plant", "first_harvest", "green_thumb",
+		"survive_night", "survive_7", "survive_30", "trader_deal", "rich_farmer",
+		"first_tribute", "all_tributes", "first_kill", "zombie_slayer",
+		"boss_defeated", "full_armor",
+	]
+	for id in ids:
+		profile_svc.unlock_achievement(id)
 
 
 func _debug_skip_to_final_boss() -> void:
