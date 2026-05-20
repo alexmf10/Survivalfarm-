@@ -141,12 +141,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not _has_starter_pack():
 		return
 
-	# Clic izquierdo → usar la herramienta activa (o cosechar si no hay herramienta)
-	# Si la espada está equipada, no consumir el clic — lo gestiona AttackComponent
+	# Clic izquierdo → usar la herramienta activa (o cosechar si no hay herramienta) 
+	# Si la espada está equipada, no consumir el clic — lo gestiona AttackComponent 
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
 			if current_tool == ToolsComponent.Tools.Sword:
-				return  # Delegar al AttackComponent
+				return  # Delegar al AttackComponent 
 			_mouse_action_held = true
 			_last_held_action_tile = INVALID_ACTION_TILE
 			_try_use_held_action()
@@ -154,7 +154,28 @@ func _unhandled_input(event: InputEvent) -> void:
 		_mouse_action_held = false
 		return
 
-	# Solo nos interesan pulsaciones de teclado (no repeticiones)
+	# Recuperamos el servicio de trade una sola vez para usarlo en los siguientes inputs
+	var trade_svc = EventBus.services.trade
+	if not trade_svc: return
+
+
+	# Movemos la rueda del ratón por la hotbar
+	if event.is_action_pressed("hotbar_next"):
+		var current = trade_svc.active_hotbar_index
+		trade_svc.set_active_slot((current + 1) % 4)
+		get_viewport().set_input_as_handled()
+		return
+		
+	if event.is_action_pressed("hotbar_prev"):
+		var current = trade_svc.active_hotbar_index
+		var new_index = current - 1
+		if new_index < 0: 
+			new_index = 3
+		trade_svc.set_active_slot(new_index)
+		get_viewport().set_input_as_handled()
+		return
+
+	# Solo nos interesan pulsaciones de teclado (no repeticiones) para el resto 
 	if not (event is InputEventKey and event.pressed and not event.echo):
 		return
 
@@ -163,10 +184,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_try_harvest()
 		return
 
-	var trade_svc = EventBus.services.trade
-	if not trade_svc: return
-
-	# ─── SISTEMA DINÁMICO: HOTBAR (1-4) Y ARMA (7) ───
+	# Teclas de la hotbar y la espada
 	match event.keycode:
 		KEY_1: trade_svc.set_active_slot(0)
 		KEY_2: trade_svc.set_active_slot(1)
