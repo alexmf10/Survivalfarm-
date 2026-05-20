@@ -4,22 +4,37 @@ class_name ProfileService
 extends RefCounted
 
 const DEFAULT_ACHIEVEMENTS: Dictionary = {
-	"first_harvest": {"title": "First Harvest", "description": "Harvest your first crop", "unlocked": false, "unlock_date": ""},
-	"rich_farmer": {"title": "Rich Farmer", "description": "Collect 100 coins", "unlocked": false, "unlock_date": ""},
-	"survive_7": {"title": "Week Survivor", "description": "Survive 7 days", "unlocked": false, "unlock_date": ""},
-	"survive_30": {"title": "Month Survivor", "description": "Survive 30 days", "unlocked": false, "unlock_date": ""},
-	"first_kill": {"title": "Monster Slayer", "description": "Defeat your first enemy", "unlocked": false, "unlock_date": ""},
-	"boss_defeated": {"title": "Farm Savior", "description": "Defeat the final monster", "unlocked": false, "unlock_date": ""},
-	"full_armor": {"title": "Fully Equipped", "description": "Equip a full armor set", "unlocked": false, "unlock_date": ""},
-	"trader_deal": {"title": "Businessman", "description": "Complete your first trade", "unlocked": false, "unlock_date": ""},
+	"new_world":     {"title": "New World",       "description": "Start a new adventure",             "unlocked": false, "unlock_date": ""},
+	"first_water":   {"title": "Green Hands",     "description": "Water your crops for the first time","unlocked": false, "unlock_date": ""},
+	"first_plant":   {"title": "Seeds of Hope",   "description": "Plant your first crop",             "unlocked": false, "unlock_date": ""},
+	"first_harvest": {"title": "First Harvest",   "description": "Harvest your first crop",           "unlocked": false, "unlock_date": ""},
+	"green_thumb":   {"title": "Green Thumb",     "description": "Harvest 10 crops",                  "unlocked": false, "unlock_date": ""},
+	"survive_night": {"title": "Night Owl",       "description": "Survive your first night",          "unlocked": false, "unlock_date": ""},
+	"survive_7":     {"title": "Week Survivor",   "description": "Survive 7 days",                   "unlocked": false, "unlock_date": ""},
+	"survive_30":    {"title": "Month Survivor",  "description": "Survive 30 days",                  "unlocked": false, "unlock_date": ""},
+	"trader_deal":   {"title": "Businessman",     "description": "Complete your first trade",         "unlocked": false, "unlock_date": ""},
+	"rich_farmer":   {"title": "Rich Farmer",     "description": "Collect 100 coins",                "unlocked": false, "unlock_date": ""},
+	"first_tribute": {"title": "Tax Collector",   "description": "Pay your first tribute",            "unlocked": false, "unlock_date": ""},
+	"all_tributes":  {"title": "Fulfilled Duty",  "description": "Pay all tributes to the collector", "unlocked": false, "unlock_date": ""},
+	"first_kill":    {"title": "Monster Slayer",  "description": "Defeat your first enemy",           "unlocked": false, "unlock_date": ""},
+	"zombie_slayer": {"title": "Zombie Slayer",   "description": "Defeat 10 zombies",                "unlocked": false, "unlock_date": ""},
+	"boss_defeated": {"title": "Farm Savior",     "description": "Defeat the final monster",          "unlocked": false, "unlock_date": ""},
+	"full_armor":    {"title": "Fully Equipped",  "description": "Equip a full armor set",            "unlocked": false, "unlock_date": ""},
+}
+
+const DEFAULT_STATS: Dictionary = {
+	"harvest_count": 0,
+	"zombie_kill_count": 0,
 }
 
 var current_slot: int = -1
 var _achievements: Dictionary = {}
+var _stats: Dictionary = {}
 
 
 func _init() -> void:
 	_achievements = DEFAULT_ACHIEVEMENTS.duplicate(true)
+	_stats = DEFAULT_STATS.duplicate(true)
 
 
 func load_profile(slot: int) -> void:
@@ -30,8 +45,6 @@ func load_profile(slot: int) -> void:
 func _get_save_path() -> String:
 	return "user://achievements_slot_%d.json" % current_slot
 
-
-# Logros
 
 func get_achievements() -> Dictionary:
 	return _achievements.duplicate(true)
@@ -49,12 +62,20 @@ func unlock_achievement(achievement_id: String) -> void:
 		push_warning("ProfileService: achievement '%s' does not exist." % achievement_id)
 		return
 	if _achievements[achievement_id]["unlocked"]:
-		return # Ya desbloqueado
+		return
 	_achievements[achievement_id]["unlocked"] = true
 	_achievements[achievement_id]["unlock_date"] = Time.get_datetime_string_from_system()
 	_save_profile()
 	if EventBus:
 		EventBus.achievement_unlocked.emit(achievement_id)
+
+
+func increment_stat(key: String) -> int:
+	if not _stats.has(key):
+		return 0
+	_stats[key] += 1
+	_save_profile()
+	return _stats[key]
 
 
 func get_unlocked_count() -> int:
@@ -69,20 +90,23 @@ func get_total_count() -> int:
 	return _achievements.size()
 
 
-# Cargado y guardado
-
 func _save_profile() -> void:
 	if current_slot <= 0: return
-	var data: Dictionary = {"achievements": _achievements}
+	var data: Dictionary = {
+		"achievements": _achievements,
+		"stats": _stats,
+	}
 	var file: FileAccess = FileAccess.open(_get_save_path(), FileAccess.WRITE)
 	if file:
 		file.store_string(JSON.stringify(data, "\t"))
 		file.close()
 
+
 func _load_profile() -> void:
 	_achievements = DEFAULT_ACHIEVEMENTS.duplicate(true)
+	_stats = DEFAULT_STATS.duplicate(true)
 	if current_slot <= 0: return
-	
+
 	var path: String = _get_save_path()
 	if not FileAccess.file_exists(path): return
 
@@ -99,3 +123,7 @@ func _load_profile() -> void:
 		for id: String in _achievements:
 			if saved_achievements.has(id):
 				_achievements[id] = saved_achievements[id]
+		var saved_stats: Dictionary = data.get("stats", {})
+		for key: String in _stats:
+			if saved_stats.has(key):
+				_stats[key] = int(saved_stats[key])

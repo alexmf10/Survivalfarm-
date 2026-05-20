@@ -278,6 +278,7 @@ func buy_seeds(crop_type: CropComponent.CropType) -> bool:
 	if _add_to_inventory(item_to_buy, 1):
 		coins -= price
 		_emit_inventory_updated()
+		EventBus.seeds_purchased.emit(crop_type)
 		return true
 		#no se pudo añadir (inventario lleno)
 	else: return false
