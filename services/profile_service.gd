@@ -78,6 +78,15 @@ func increment_stat(key: String) -> int:
 	return _stats[key]
 
 
+func clear_profile(slot: int) -> void:
+	var path := "user://achievements_slot_%d.json" % slot
+	if FileAccess.file_exists(path):
+		DirAccess.remove_absolute(path)
+	if current_slot == slot:
+		_achievements = DEFAULT_ACHIEVEMENTS.duplicate(true)
+		_stats = DEFAULT_STATS.duplicate(true)
+
+
 func get_unlocked_count() -> int:
 	var count: int = 0
 	for id: String in _achievements:
