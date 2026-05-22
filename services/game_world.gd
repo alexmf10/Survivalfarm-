@@ -89,10 +89,10 @@ func _ready() -> void:
 	if save_svc and save_svc.active_slot > 0:
 		active_slot = save_svc.active_slot
 
-	_build_hud()
 	_load_slot_state()
 	_connect_events()
 	_build_world()
+	_build_hud()
 	_start_day_cycle()
 
 	var tribute_svc := EventBus.services.tribute as TributeService
@@ -155,11 +155,13 @@ func _load_slot_state() -> void:
 	if save_svc == null:
 		return
 
+	var data: Dictionary = save_svc.read_slot_json(active_slot)
+
 	var profile_svc: ProfileService = EventBus.services.profile as ProfileService
 	if profile_svc:
+		if data.is_empty():
+			profile_svc.clear_profile(active_slot)
 		profile_svc.load_profile(active_slot)
-
-	var data: Dictionary = save_svc.read_slot_json(active_slot)
 
 	var pos_data = data.get("player_position", null)
 	if pos_data is Dictionary:
@@ -914,7 +916,11 @@ func _finish_active_run() -> void:
 
 	var save_svc := EventBus.services.save as SaveService
 	if save_svc and save_svc.active_slot > 0:
-		save_svc.delete_slot(save_svc.active_slot)
+		var slot := save_svc.active_slot
+		save_svc.delete_slot(slot)
+		var profile_svc := EventBus.services.profile as ProfileService
+		if profile_svc:
+			profile_svc.clear_profile(slot)
 		save_svc.active_slot = -1
 
 	var sound_svc := EventBus.services.sound as SoundService
