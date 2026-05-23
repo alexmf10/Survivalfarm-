@@ -80,19 +80,55 @@ func _can_drop_data(at_position: Vector2, data: Variant) -> bool:
 
 	var dragged_item = data.get("item")
 	var dragged_from_weapon_slot = data.get("is_weapon_slot", false)
+	var dragged_from_helm_slot = data.get("is_helm_slot", false)
+	var dragged_from_chest_slot = data.get("is_chest_slot", false)
+	var dragged_from_bot_slot = data.get("is_bot_slot", false)
 
-	# CASO 1: weapon slot. Comparamos con el enum Sword (valor 5)
+	# Si el slot tiene restricciones de arma o armadura, las revisamos
+	# Weapon slot
 	if is_weapon_slot:
 		if dragged_item is ToolsComponent and dragged_item.tool_type == ToolsComponent.Tools.Sword:
 			return true
 		return false 
+	# Helm slot
+	if is_helm_slot:
+		if dragged_item is ToolsComponent and dragged_item.tool_type == ToolsComponent.Tools.Helm:
+			return true
+		return false 
+	# Chest slot
+	if is_chest_slot:
+		if dragged_item is ToolsComponent and dragged_item.tool_type == ToolsComponent.Tools.Chest:
+			return true
+		return false 
+	# Bot slot
+	if is_bot_slot:
+		if dragged_item is ToolsComponent and dragged_item.tool_type == ToolsComponent.Tools.Bot:
+			return true
+		return false 
 
-	# CASO 2: otros slots.
-	# Evitamos que al intercambiar, mandemos algo que no sea una espada al slot de armas.
+	# Evitamos que al intercambiar, mandemos algo que no sea al slot restringido.
+	# Weapon slot
 	if dragged_from_weapon_slot and has_item:
 		if not (current_item is ToolsComponent and current_item.tool_type == ToolsComponent.Tools.Sword):
 			return false
-			
+	return true
+	
+	# Helm slot
+	if dragged_from_helm_slot and has_item:
+		if not (current_item is ToolsComponent and current_item.tool_type == ToolsComponent.Tools.Helm):
+			return false
+	return true
+	
+	# Chest slot
+	if dragged_from_chest_slot and has_item:
+		if not (current_item is ToolsComponent and current_item.tool_type == ToolsComponent.Tools.Chest):
+			return false
+	return true
+	
+	# Bot slot
+	if dragged_from_bot_slot and has_item:
+		if not (current_item is ToolsComponent and current_item.tool_type == ToolsComponent.Tools.Bot):
+			return false
 	return true
 
 func _drop_data(at_position: Vector2, data: Variant) -> void:

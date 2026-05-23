@@ -50,6 +50,7 @@ offset_left = 69.0
 offset_top = 55.0
 offset_right = 84.0
 offset_bottom = 71.0
+is_bot_slot = true
 
 [node name="armor_slot_2" parent="NinePatchRect2/NinePatchRect3" instance=ExtResource("3_8a20s")]
 layout_mode = 0
@@ -57,6 +58,7 @@ offset_left = 69.0
 offset_top = 37.0
 offset_right = 84.0
 offset_bottom = 53.0
+is_chest_slot = true
 
 [node name="armor_slot_3" parent="NinePatchRect2/NinePatchRect3" instance=ExtResource("3_8a20s")]
 layout_mode = 0
@@ -64,6 +66,7 @@ offset_left = 69.0
 offset_top = 19.0
 offset_right = 84.0
 offset_bottom = 35.0
+is_helm_slot = true
 
 [node name="weapon_slot" parent="NinePatchRect2/NinePatchRect3" instance=ExtResource("3_8a20s")]
 layout_mode = 0

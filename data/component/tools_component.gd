@@ -7,7 +7,10 @@ enum Tools {
 	WaterCrops,
 	PlantWheat,
 	PlantBeet,
-	Sword
+	Sword,
+	Helm,
+	Chest,
+	Bot
 }
 
 ## Qué herramienta activa esto al tenerlo en la mano
