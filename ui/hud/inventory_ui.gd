@@ -7,9 +7,9 @@ var is_open = false
 @onready var trash_slot = $NinePatchRect2/trash_slot
 
 # Rutas para los slots de equipamiento de la derecha
-@onready var armor_bot = $NinePatchRect2/NinePatchRect3/armor_slot_1
-@onready var armor_chest = $NinePatchRect2/NinePatchRect3/armor_slot_2
-@onready var armor_helm = $NinePatchRect2/NinePatchRect3/armor_slot_3
+@onready var armor_bot = $NinePatchRect2/NinePatchRect3/armor_bot
+@onready var armor_chest = $NinePatchRect2/NinePatchRect3/armor_chest
+@onready var armor_helm = $NinePatchRect2/NinePatchRect3/armor_helm
 @onready var weapon_slot = $NinePatchRect2/NinePatchRect3/weapon_slot
 
 func _ready() -> void:

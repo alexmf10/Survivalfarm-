@@ -44,7 +44,7 @@ patch_margin_top = 4
 patch_margin_right = 4
 patch_margin_bottom = 4
 
-[node name="armor_slot_1" parent="NinePatchRect2/NinePatchRect3" instance=ExtResource("3_8a20s")]
+[node name="armor_bot" parent="NinePatchRect2/NinePatchRect3" instance=ExtResource("3_8a20s")]
 layout_mode = 0
 offset_left = 69.0
 offset_top = 55.0
@@ -52,7 +52,7 @@ offset_right = 84.0
 offset_bottom = 71.0
 is_bot_slot = true
 
-[node name="armor_slot_2" parent="NinePatchRect2/NinePatchRect3" instance=ExtResource("3_8a20s")]
+[node name="armor_chest" parent="NinePatchRect2/NinePatchRect3" instance=ExtResource("3_8a20s")]
 layout_mode = 0
 offset_left = 69.0
 offset_top = 37.0
@@ -60,7 +60,7 @@ offset_right = 84.0
 offset_bottom = 53.0
 is_chest_slot = true
 
-[node name="armor_slot_3" parent="NinePatchRect2/NinePatchRect3" instance=ExtResource("3_8a20s")]
+[node name="armor_helm" parent="NinePatchRect2/NinePatchRect3" instance=ExtResource("3_8a20s")]
 layout_mode = 0
 offset_left = 69.0
 offset_top = 19.0

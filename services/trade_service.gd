@@ -43,23 +43,39 @@ const EQUIPMENT_PRICES: Dictionary = {
 	ToolsComponent.Tools.Helm: 0,
 	ToolsComponent.Tools.Chest: 0,
 	ToolsComponent.Tools.Bot: 0,
+	ToolsComponent.Tools.Sword: 0,
+	}
+
+const ARMOR_UPGRADE_PRICES: Dictionary = {
+	ToolsComponent.Tools.Helm: [1, 2, 3],
+	ToolsComponent.Tools.Chest: [1, 2, 3],
+	ToolsComponent.Tools.Bot:  [1, 2, 3],
+	ToolsComponent.Tools.Sword: [1, 2, 3],
 }
 
 const EQUIPMENT_NAMES: Dictionary = {
 	ToolsComponent.Tools.Helm: "Iron Helm",
 	ToolsComponent.Tools.Chest: "Iron Chestplate",
 	ToolsComponent.Tools.Bot: "Iron Boots",
+	ToolsComponent.Tools.Sword: "Sword",
 }
 
+var armor_levels: Dictionary = {
+	ToolsComponent.Tools.Helm: 0,
+	ToolsComponent.Tools.Chest: 0,
+	ToolsComponent.Tools.Bot: 0
+}
 
 var coins: int = 0
 var _slots: Array = [] # Inventario
-	
+
 var _crop_inventory: Dictionary = {}  # CropType → int
 var _seed_inventory: Dictionary = {   # CropType → int (starting seeds)
 	CropComponent.CropType.Wheat: 5,
 	CropComponent.CropType.Beet:  3,
 }
+
+
 
 # Base de datos de los sprites
 var _crop_database: Dictionary = {
@@ -87,6 +103,9 @@ var _tool_database: Dictionary = {
 	ToolsComponent.Tools.Chest: preload("res://data/definition/chest.tres"),
 	ToolsComponent.Tools.Bot: preload("res://data/definition/bot.tres"),
 }
+
+# Diccionario para guardar el nivel de cada pieza de armadura
+
 
 var active_hotbar_index: int = 0 # Guardará un número del 0 al 3
 var starter_pack_granted: bool = false
@@ -460,3 +479,50 @@ func _save_state() -> void:
 	var save_svc := EventBus.services.save as SaveService
 	if save_svc and save_svc.active_slot > 0:
 		save_svc.save_trade_state(save_svc.active_slot, get_save_state())
+
+## Calcula la reducción de daño total sumando los niveles del Casco, Pechera y Botas
+## Calcula la reducción de daño total leyendo los slots de equipamiento activos.
+## Se llama justo al recibir daño.
+func get_total_armor_reduction() -> float:
+	var total_reduction: float = 0.0
+	
+	if _slots[16] != null: # Botas equipadas
+		total_reduction += _get_reduction_for_level(ToolsComponent.Tools.Bot)
+		
+	if _slots[17] != null: # Pechera equipada
+		total_reduction += _get_reduction_for_level(ToolsComponent.Tools.Chest)
+		
+	if _slots[18] != null: # Casco equipado
+		total_reduction += _get_reduction_for_level(ToolsComponent.Tools.Helm)
+		
+	return minf(total_reduction, 1.0)
+
+
+## Devuelve la reducción de armadura correspondiente a su nivel
+func _get_reduction_for_level(tool_type: ToolsComponent.Tools) -> float:
+	match armor_levels.get(tool_type, 0):
+		0: return 0.05
+		1: return 0.10 
+		2: return 0.15
+		3: return 0.20 
+		_: return 0.0
+	
+	## Sube de nivel una pieza específica si hay dinero suficiente
+func buy_armor_upgrade(tool_type: ToolsComponent.Tools) -> bool:
+	if not armor_levels.has(tool_type): 
+		return false
+		
+	var current_lvl: int = armor_levels[tool_type]
+	if current_lvl >= 3: 
+		return false # Ya está al máximo
+		
+	var price: int = ARMOR_UPGRADE_PRICES[tool_type][current_lvl]
+	
+	if coins >= price:
+		coins -= price
+		armor_levels[tool_type] += 1
+		_emit_inventory_updated()
+		EventBus.equipment_purchased.emit(tool_type)
+		return true
+		
+	return false

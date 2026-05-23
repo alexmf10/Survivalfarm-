@@ -20,6 +20,7 @@ var _coins_label: Label
 var _sell_rows: Dictionary = {}  # CropType → { label, button }
 var _buy_rows:  Dictionary = {}  # CropType → { label, button }
 var _equipment_rows: Dictionary = {}  # Tools → { label, button }
+var _armor_upgrade_rows: Dictionary = {} # Tools -> { label, button }
 
 
 func _ready() -> void:
@@ -145,8 +146,19 @@ func _build_ui() -> void:
 	_add_equipment_row(scroll_vbox, ToolsComponent.Tools.Helm, 150)
 	_add_equipment_row(scroll_vbox, ToolsComponent.Tools.Chest, 300)
 	_add_equipment_row(scroll_vbox, ToolsComponent.Tools.Bot, 120)
+	_add_equipment_row(scroll_vbox, ToolsComponent.Tools.Sword, 0)	
 
 	main_vbox.add_child(_make_separator())
+	
+	# ── Sección equipamiento ───────────────────────────────────────
+	scroll_vbox.add_child(_make_label("-- UPGRADE EQUIPMENT --", 7, COLOR_BUY))
+	_add_armor_upgrade_row(scroll_vbox, ToolsComponent.Tools.Helm)
+	_add_armor_upgrade_row(scroll_vbox, ToolsComponent.Tools.Chest)
+	_add_armor_upgrade_row(scroll_vbox, ToolsComponent.Tools.Bot)
+
+	main_vbox.add_child(_make_separator())
+
+	
 	# ── Pie (Fijo) ────────────────────────────────────────────────────────
 	var close_hint: Label = _make_label("[ E / ESC ] CLOSE", 5, COLOR_TEXT_LIGHT)
 	close_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -209,6 +221,26 @@ func _on_buy_equipment_pressed(tool_type: ToolsComponent.Tools) -> void:
 		# Llamaremos a una nueva función en el TradeService
 		trade_svc.buy_equipment(tool_type)
 
+
+func _add_armor_upgrade_row(parent: VBoxContainer, tool_type: ToolsComponent.Tools) -> void:
+	var hbox: HBoxContainer = HBoxContainer.new()
+	hbox.add_theme_constant_override("separation", 6)
+	parent.add_child(hbox)
+
+	var lbl: Label = _make_label("...", 6, COLOR_TEXT)
+	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hbox.add_child(lbl)
+
+	var btn: Button = _make_button("-???g", COLOR_BUY)
+	btn.pressed.connect(func() -> void: _on_buy_armor_pressed(tool_type))
+	hbox.add_child(btn)
+
+	_armor_upgrade_rows[tool_type] = {"label": lbl, "button": btn}
+
+func _on_buy_armor_pressed(tool_type: ToolsComponent.Tools) -> void:
+	var trade_svc := EventBus.services.trade as TradeService
+	if trade_svc:
+		trade_svc.buy_armor_upgrade(tool_type)
 
 # ── Helpers de estilo ──────────────────────────────────────────────────────
 
@@ -309,6 +341,25 @@ func _refresh_ui() -> void:
 		var row: Dictionary = _equipment_rows[tool_type]
 		var cost: int = TradeService.EQUIPMENT_PRICES.get(tool_type, 0)
 		(row["button"] as Button).disabled = trade_svc.coins < cost
+
+	for tool_type: int in _armor_upgrade_rows:
+		var row: Dictionary = _armor_upgrade_rows[tool_type]
+		var current_lvl: int = trade_svc.armor_levels.get(tool_type, 0)
+		var piece_name: String = TradeService.EQUIPMENT_NAMES.get(tool_type, "?").to_upper()
+		
+		var lbl: Label = row["label"]
+		var btn: Button = row["button"]
+		
+		if current_lvl >= 3:
+			lbl.text = "%s (MAX LVL)" % piece_name
+			btn.text = "MAXED"
+			btn.disabled = true
+		else:
+			var next_lvl: int = current_lvl + 1
+			var price: int = TradeService.ARMOR_UPGRADE_PRICES[tool_type][current_lvl]
+			lbl.text = "%s LVL %d" % [piece_name, next_lvl]
+			btn.text = "-%dg" % price
+			btn.disabled = trade_svc.coins < price
 
 
 func _on_sell_pressed(crop_type: CropComponent.CropType) -> void:

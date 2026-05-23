@@ -253,9 +253,14 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 		return
 	_has_dealt_damage = true
 	var combat_svc: CombatService = EventBus.services.combat as CombatService
+	var trade_svc: TradeService = EventBus.services.trade as TradeService
 	var net_damage: float = base_damage
 	if combat_svc:
-		net_damage = combat_svc.calculate_damage(base_damage, 0.0)
+		var armor_reduction: float = 0.0
+		# Si el TradeService existe, obtenemos la reducción de la armadura actual
+		if trade_svc:
+			armor_reduction = trade_svc.get_total_armor_reduction()
+		net_damage = combat_svc.calculate_damage(base_damage, 0.0, armor_reduction)
 	health.take_damage(net_damage)
 	# Pequeño empujón al jugador hacia atrás del zombi.
 	for child in body.get_children():

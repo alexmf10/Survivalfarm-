@@ -23,3 +23,4 @@ enum Tools {
 @export var frame_width: int = 16  
 @export var frame_height: int = 16
 @export var is_seed: bool = false
+@export var is_stackable: bool = true

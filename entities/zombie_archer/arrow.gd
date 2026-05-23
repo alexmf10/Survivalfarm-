@@ -47,8 +47,12 @@ func _apply_damage(player: Node2D) -> void:
 	for child in player.get_children():
 		if child is HealthComponent:
 			var combat_svc := EventBus.services.combat as CombatService
+			var trade_svc := EventBus.services.trade as TradeService
 			var net_damage := _damage
 			if combat_svc:
-				net_damage = combat_svc.calculate_damage(_damage, 0.0)
+				var armor_reduction: float = 0.0
+				if trade_svc:
+					armor_reduction = trade_svc.get_total_armor_reduction()
+				net_damage = combat_svc.calculate_damage(_damage, 0.0, armor_reduction)
 			child.take_damage(net_damage)
 			break

@@ -1,14 +1,14 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=11 format=3 uid="uid://vf8qfbt25pvw"]
 
-[ext_resource type="Script" path="res://entities/boss/zombie_boss.gd" id="1_boss"]
-[ext_resource type="Script" path="res://entities/boss/boss_sprite_setup.gd" id="2_sprite"]
-[ext_resource type="Script" path="res://entities/player/movement_component.gd" id="3_movement"]
-[ext_resource type="Script" path="res://entities/player/animation_component.gd" id="4_anim"]
-[ext_resource type="Script" path="res://entities/zombie/zombie_ai_component.gd" id="5_ai"]
-[ext_resource type="Script" path="res://entities/zombie/zombie_attack_component.gd" id="6_attack"]
-[ext_resource type="Script" path="res://data/component/health_component.gd" id="7_health"]
-[ext_resource type="Script" path="res://entities/behaviours/health_bar_component.gd" id="8_hbar"]
-[ext_resource type="Script" path="res://entities/behaviours/damage_flash_component.gd" id="9_flash"]
+[ext_resource type="Script" uid="uid://pm0lui3o1xph" path="res://entities/boss/zombie_boss.gd" id="1_boss"]
+[ext_resource type="Script" uid="uid://bcqxd15trv1o1" path="res://entities/boss/boss_sprite_setup.gd" id="2_sprite"]
+[ext_resource type="Script" uid="uid://c8682y0esuxi" path="res://entities/player/movement_component.gd" id="3_movement"]
+[ext_resource type="Script" uid="uid://8i6e3k0ydqvj" path="res://entities/player/animation_component.gd" id="4_anim"]
+[ext_resource type="Script" uid="uid://bw5rr4xvs2eng" path="res://entities/zombie/zombie_ai_component.gd" id="5_ai"]
+[ext_resource type="Script" uid="uid://c0sihalqjgklr" path="res://entities/zombie/zombie_attack_component.gd" id="6_attack"]
+[ext_resource type="Script" uid="uid://y528vmsje8gt" path="res://data/component/health_component.gd" id="7_health"]
+[ext_resource type="Script" uid="uid://b8n2jf4378o5y" path="res://entities/behaviours/health_bar_component.gd" id="8_hbar"]
+[ext_resource type="Script" uid="uid://dkdnr14axnruv" path="res://entities/behaviours/damage_flash_component.gd" id="9_flash"]
 
 [sub_resource type="RectangleShape2D" id="CollisionShape2D_boss"]
 size = Vector2(24, 28)
@@ -54,7 +54,6 @@ windup_duration = 0.75
 strike_duration = 0.22
 recovery_duration = 0.9
 hit_stun_duration = 0.22
-windup_scale_factor = 1.12
 
 [node name="HealthComponent" type="Node" parent="."]
 script = ExtResource("7_health")

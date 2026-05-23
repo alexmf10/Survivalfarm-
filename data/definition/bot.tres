@@ -12,4 +12,5 @@ spritesheet_row = 0
 frame_width = 16
 frame_height = 16
 is_seed = false
+is_stackable = false
 metadata/_custom_type_script = "uid://dho82rffr18o5"

@@ -102,6 +102,13 @@ func _get_tool_text(tool_type: ToolsComponent.Tools) -> String:
 			return "WATERING CAN"
 		ToolsComponent.Tools.Sword:
 			return "SWORD (5)  LMB:ATTACK"
+		ToolsComponent.Tools.Helm:
+			return "HELM"
+		ToolsComponent.Tools.Chest:
+			return "CHESTPLATE"
+		ToolsComponent.Tools.Bot:
+			return "BOOTS"
+			
 	return ""
 
 func _get_seed_count(crop_type: CropComponent.CropType) -> int:
