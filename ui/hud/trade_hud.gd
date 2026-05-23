@@ -155,6 +155,7 @@ func _build_ui() -> void:
 	_add_armor_upgrade_row(scroll_vbox, ToolsComponent.Tools.Helm)
 	_add_armor_upgrade_row(scroll_vbox, ToolsComponent.Tools.Chest)
 	_add_armor_upgrade_row(scroll_vbox, ToolsComponent.Tools.Bot)
+	_add_armor_upgrade_row(scroll_vbox, ToolsComponent.Tools.Sword)
 
 	main_vbox.add_child(_make_separator())
 

@@ -175,6 +175,7 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 	if body in _damaged_entities:
 		return  # Ya dañado en este ataque
 
+	
 	# Buscar HealthComponent en la entidad impactada
 	var health: HealthComponent = null
 	for child in body.get_children():
@@ -189,9 +190,15 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 
 	# Calcular daño usando CombatService
 	var combat_svc: CombatService = EventBus.services.combat as CombatService
+	var trade_svc: TradeService = EventBus.services.trade as TradeService
+	var total_base_damage: float = base_damage	
+	
+	if trade_svc:
+		total_base_damage += trade_svc.get_sword_bonus_damage()
+	
 	var net_damage: float = base_damage
 	if combat_svc:
-		net_damage = combat_svc.calculate_damage(base_damage, 0.0)
+		net_damage = combat_svc.calculate_damage(total_base_damage, 0.0)
 
 	health.take_damage(net_damage)
 

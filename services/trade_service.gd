@@ -63,7 +63,8 @@ const EQUIPMENT_NAMES: Dictionary = {
 var armor_levels: Dictionary = {
 	ToolsComponent.Tools.Helm: 0,
 	ToolsComponent.Tools.Chest: 0,
-	ToolsComponent.Tools.Bot: 0
+	ToolsComponent.Tools.Bot: 0,
+	ToolsComponent.Tools.Sword: 0
 }
 
 var coins: int = 0
@@ -526,3 +527,13 @@ func buy_armor_upgrade(tool_type: ToolsComponent.Tools) -> bool:
 		return true
 		
 	return false
+
+## Calcula el daño extra de la espada (+4 por nivel)
+## Solo se aplica si la espada está en el slot de arma
+func get_sword_bonus_damage() -> float:
+	# Si el slot 19 (weapon_slot) no está vacío
+	if _slots[19] != null:
+		var sword_lvl: int = armor_levels.get(ToolsComponent.Tools.Sword, 0)
+		return float(sword_lvl * 4) # 4 de daño por nivel
+		
+	return 0.0
