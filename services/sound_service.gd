@@ -30,10 +30,11 @@ const SOUNDS: Dictionary = {
 	"tribute_paid":   "res://assets/audio/sfx/story/tribute_paid.ogg",
 	"tribute_failed": "res://assets/audio/sfx/story/tribute_failed.ogg",
 	# Music
-	"music_day":      "res://assets/audio/music/day_theme.ogg",
-	"music_night":    "res://assets/audio/music/night_theme.ogg",
-	"music_boss":     "res://assets/audio/music/boss_theme.ogg",
-	"music_victory":  "res://assets/audio/music/victory_theme.ogg",
+	"music_main_menu": "res://assets/audio/music/main-menu.ogg",
+	"music_day":       "res://assets/audio/music/day.ogg",
+	"music_night":     "res://assets/audio/music/night.ogg",
+	"music_boss":      "res://assets/audio/music/boss.ogg",
+	"music_victory":   "res://assets/audio/music/victory_theme.ogg",
 }
 
 func _ready() -> void:
