@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ToolsComponent" load_steps=3 format=3 uid="uid://bi28d45cbybua"]
+
+[ext_resource type="Script" uid="uid://dho82rffr18o5" path="res://data/component/tools_component.gd" id="1_tx3v0"]
+[ext_resource type="Texture2D" uid="uid://c3qitxhl13n84" path="res://assets/textures/test/objects/equipment.png" id="2_jt5t0"]
+
+[resource]
+script = ExtResource("1_tx3v0")
+tool_type = 8
+spritesheet = ExtResource("2_jt5t0")
+drop_col = 2
+spritesheet_row = 0
+frame_width = 16
+frame_height = 16
+is_seed = false
+metadata/_custom_type_script = "uid://dho82rffr18o5"

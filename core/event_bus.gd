@@ -120,6 +120,7 @@ signal inventory_opened
 signal inventory_closed
 signal inventory_slot_swapped(from_index: int, to_index: int)
 signal seeds_purchased(crop_type: CropComponent.CropType)
+signal equipment_purchased(tool_type: ToolsComponent.Tools)
 
 ## Señales de objetivo/historia.
 signal objective_changed(text: String)

@@ -19,6 +19,7 @@ var _font: Font
 var _coins_label: Label
 var _sell_rows: Dictionary = {}  # CropType → { label, button }
 var _buy_rows:  Dictionary = {}  # CropType → { label, button }
+var _equipment_rows: Dictionary = {}  # Tools → { label, button }
 
 
 func _ready() -> void:
@@ -45,7 +46,7 @@ func _build_ui() -> void:
 	panel.set_anchors_preset(Control.PRESET_CENTER)
 	panel.offset_left  = -150
 	panel.offset_right =  150
-	panel.offset_top   = -185
+	panel.offset_top   = -185 
 	panel.offset_bottom =  185
 
 	var panel_style: StyleBoxFlat = StyleBoxFlat.new()
@@ -60,45 +61,96 @@ func _build_ui() -> void:
 	panel.add_theme_stylebox_override("panel", panel_style)
 	add_child(panel)
 
-	var vbox: VBoxContainer = VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 10)
-	panel.add_child(vbox)
+	# Contenedor principal (Todo lo fijo va aquí)
+	var main_vbox: VBoxContainer = VBoxContainer.new()
+	main_vbox.add_theme_constant_override("separation", 10)
+	panel.add_child(main_vbox)
 
-	# ── Cabecera ──────────────────────────────────────────────────────────
+	# ── Cabecera (Fija) ───────────────────────────────────────────────────
 	var title: Label = _make_label("[ TRADER ]", 10, COLOR_TEXT)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	vbox.add_child(title)
+	main_vbox.add_child(title)
 
 	_coins_label = _make_label("COINS: 0", 7, COLOR_GOLD)
 	_coins_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	vbox.add_child(_coins_label)
+	main_vbox.add_child(_coins_label)
 
-	vbox.add_child(_make_separator())
+	main_vbox.add_child(_make_separator())
 
-	# ── Sección venta ─────────────────────────────────────────────────────
-	vbox.add_child(_make_label("-- SELL --", 7, COLOR_SELL))
-	_add_sell_row(vbox, CropComponent.CropType.Wheat, 5)
-	_add_sell_row(vbox, CropComponent.CropType.Beet,  8)
-	_add_sell_row(vbox, CropComponent.CropType.Lavender,  15)
-	_add_sell_row(vbox, CropComponent.CropType.Ember_lily,  40)
-	_add_sell_row(vbox, CropComponent.CropType.Cotton,  75)
+	# ── Contenedor con Scroll ─────────────────────────────────────────────
+	var scroll: ScrollContainer = ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL 
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	main_vbox.add_child(scroll)
 
-	vbox.add_child(_make_separator())
+	# ── MODIFICACIÓN: Personalización de la barra de Scroll ───────────────
+	var v_bar: VScrollBar = scroll.get_v_scroll_bar()
+	v_bar.custom_minimum_size.x = 5 # Grosor de la barra para estilo retro
+	
+	# Desplazamiento en píxeles hacia la derecha (ajusta este 6 si quieres más o menos)
+	var pixels_to_right: int = 6 
 
-	# ── Sección compra ────────────────────────────────────────────────────
-	vbox.add_child(_make_label("-- BUY SEEDS --", 7, COLOR_BUY))
-	_add_buy_row(vbox, CropComponent.CropType.Wheat, 3)
-	_add_buy_row(vbox, CropComponent.CropType.Beet,  5)
-	_add_buy_row(vbox, CropComponent.CropType.Lavender,  10)
-	_add_buy_row(vbox, CropComponent.CropType.Ember_lily,  25)
-	_add_buy_row(vbox, CropComponent.CropType.Cotton,  50)
+	# Estilo del Canal de fondo (Track)
+	var track_style: StyleBoxFlat = StyleBoxFlat.new()
+	track_style.bg_color = COLOR_PARCHMENT_DARK # Color pergamino oscuro de fondo
+	track_style.set_corner_radius_all(0)
+	track_style.expand_margin_right = pixels_to_right
+	track_style.expand_margin_left = -pixels_to_right
+	v_bar.add_theme_stylebox_override("scroll", track_style)
 
-	vbox.add_child(_make_separator())
+	# Estilo del Bloque de arrastre (Grabber) cambiados a COLOR_BORDER
+	var grabber_style: StyleBoxFlat = StyleBoxFlat.new()
+	grabber_style.bg_color = COLOR_BORDER
+	grabber_style.set_corner_radius_all(0)
+	grabber_style.expand_margin_right = pixels_to_right
+	grabber_style.expand_margin_left = -pixels_to_right
+	
+	# Aplicamos el estilo al grabber en todos sus estados (Normal, Hover y Click)
+	v_bar.add_theme_stylebox_override("grabber", grabber_style)
+	
+	var grabber_hover = grabber_style.duplicate()
+	grabber_hover.bg_color = COLOR_BORDER.lightened(0.15) # Un toque más claro al pasar el ratón
+	v_bar.add_theme_stylebox_override("grabber_highlight", grabber_hover)
+	v_bar.add_theme_stylebox_override("grabber_pressed", grabber_style)
+	# ──────────────────────────────────────────────────────────────────────
 
-	# ── Pie ───────────────────────────────────────────────────────────────
+	# Contenedor para los items (Dentro del scroll)
+	var scroll_vbox: VBoxContainer = VBoxContainer.new()
+	scroll_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll_vbox.add_theme_constant_override("separation", 10)
+	scroll.add_child(scroll_vbox)
+
+	# ── Sección venta ────────────────────────────────────────
+	scroll_vbox.add_child(_make_label("-- SELL --", 7, COLOR_SELL))
+	_add_sell_row(scroll_vbox, CropComponent.CropType.Wheat, 5)
+	_add_sell_row(scroll_vbox, CropComponent.CropType.Beet,  8)
+	_add_sell_row(scroll_vbox, CropComponent.CropType.Cotton, 15)
+	_add_sell_row(scroll_vbox, CropComponent.CropType.Ember_lily, 40)
+	_add_sell_row(scroll_vbox, CropComponent.CropType.Lavender, 75)
+
+	scroll_vbox.add_child(_make_separator())
+
+	# ── Sección compra ───────────────────────────────────────
+	scroll_vbox.add_child(_make_label("-- BUY SEEDS --", 7, COLOR_BUY))
+	_add_buy_row(scroll_vbox, CropComponent.CropType.Wheat, 3)
+	_add_buy_row(scroll_vbox, CropComponent.CropType.Beet,  5)
+	_add_buy_row(scroll_vbox, CropComponent.CropType.Cotton, 10)
+	_add_buy_row(scroll_vbox, CropComponent.CropType.Ember_lily, 25)
+	_add_buy_row(scroll_vbox, CropComponent.CropType.Lavender, 50)
+
+	main_vbox.add_child(_make_separator())
+	
+# ── Sección equipamiento ───────────────────────────────────────
+	scroll_vbox.add_child(_make_label("-- BUY EQUIPMENT --", 7, COLOR_BUY))
+	_add_equipment_row(scroll_vbox, ToolsComponent.Tools.Helm, 150)
+	_add_equipment_row(scroll_vbox, ToolsComponent.Tools.Chest, 300)
+	_add_equipment_row(scroll_vbox, ToolsComponent.Tools.Bot, 120)
+
+	main_vbox.add_child(_make_separator())
+	# ── Pie (Fijo) ────────────────────────────────────────────────────────
 	var close_hint: Label = _make_label("[ E / ESC ] CLOSE", 5, COLOR_TEXT_LIGHT)
 	close_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	vbox.add_child(close_hint)
+	main_vbox.add_child(close_hint)
 
 
 func _add_sell_row(parent: VBoxContainer, crop_type: CropComponent.CropType, price: int) -> void:
@@ -133,6 +185,29 @@ func _add_buy_row(parent: VBoxContainer, crop_type: CropComponent.CropType, cost
 	hbox.add_child(btn)
 
 	_buy_rows[crop_type] = {"label": lbl, "button": btn}
+
+func _add_equipment_row(parent: VBoxContainer, tool_type: ToolsComponent.Tools, cost: int) -> void:
+	var tool_name: String = TradeService.EQUIPMENT_NAMES.get(tool_type, "?").to_upper()
+	var hbox: HBoxContainer = HBoxContainer.new()
+	hbox.add_theme_constant_override("separation", 6)
+	parent.add_child(hbox)
+
+	# A diferencia de las semillas, el equipo no muestra cantidad "x0"
+	var lbl: Label = _make_label("%s" % tool_name, 6, COLOR_TEXT)
+	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hbox.add_child(lbl)
+
+	var btn: Button = _make_button("-%dg" % cost, COLOR_BUY)
+	btn.pressed.connect(func() -> void: _on_buy_equipment_pressed(tool_type))
+	hbox.add_child(btn)
+
+	_equipment_rows[tool_type] = {"label": lbl, "button": btn}
+
+func _on_buy_equipment_pressed(tool_type: ToolsComponent.Tools) -> void:
+	var trade_svc := EventBus.services.trade as TradeService
+	if trade_svc:
+		# Llamaremos a una nueva función en el TradeService
+		trade_svc.buy_equipment(tool_type)
 
 
 # ── Helpers de estilo ──────────────────────────────────────────────────────
@@ -228,6 +303,11 @@ func _refresh_ui() -> void:
 		var cost: int  = TradeService.SEED_PRICES.get(crop_type, 0)
 		var crop_name: String = TradeService.CROP_NAMES.get(crop_type, "?").to_upper()
 		(row["label"] as Label).text = "%s x%d" % [crop_name, seeds]
+		(row["button"] as Button).disabled = trade_svc.coins < cost
+
+	for tool_type: int in _equipment_rows:
+		var row: Dictionary = _equipment_rows[tool_type]
+		var cost: int = TradeService.EQUIPMENT_PRICES.get(tool_type, 0)
 		(row["button"] as Button).disabled = trade_svc.coins < cost
 
 

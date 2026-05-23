@@ -26,7 +26,7 @@ const SELL_PRICES: Dictionary = {
 const SEED_PRICES: Dictionary = {
 	CropComponent.CropType.Wheat: 3,
 	CropComponent.CropType.Beet: 5,
-		CropComponent.CropType.Lavender: 10,
+	CropComponent.CropType.Lavender: 10,
 	CropComponent.CropType.Ember_lily: 25,
 	CropComponent.CropType.Cotton: 50,
 }
@@ -38,6 +38,19 @@ const CROP_NAMES: Dictionary = {
 	CropComponent.CropType.Ember_lily: "Ember lily",
 	CropComponent.CropType.Cotton: "Cotton",
 }
+
+const EQUIPMENT_PRICES: Dictionary = {
+	ToolsComponent.Tools.Helm: 0,
+	ToolsComponent.Tools.Chest: 0,
+	ToolsComponent.Tools.Bot: 0,
+}
+
+const EQUIPMENT_NAMES: Dictionary = {
+	ToolsComponent.Tools.Helm: "Iron Helm",
+	ToolsComponent.Tools.Chest: "Iron Chestplate",
+	ToolsComponent.Tools.Bot: "Iron Boots",
+}
+
 
 var coins: int = 0
 var _slots: Array = [] # Inventario
@@ -69,7 +82,10 @@ var _seed_database: Dictionary = {
 var _tool_database: Dictionary = {
 	ToolsComponent.Tools.TillGround: preload("res://data/definition/hoe.tres"),
 	ToolsComponent.Tools.WaterCrops: preload("res://data/definition/watering_can.tres"),
-	ToolsComponent.Tools.Sword: preload("res://data/definition/weapon.tres")
+	ToolsComponent.Tools.Sword: preload("res://data/definition/weapon.tres"),
+	ToolsComponent.Tools.Helm: preload("res://data/definition/helm.tres"),
+	ToolsComponent.Tools.Chest: preload("res://data/definition/chest.tres"),
+	ToolsComponent.Tools.Bot: preload("res://data/definition/bot.tres"),
 }
 
 var active_hotbar_index: int = 0 # Guardará un número del 0 al 3
@@ -298,6 +314,24 @@ func buy_seeds(crop_type: CropComponent.CropType) -> bool:
 		return true
 		#no se pudo añadir (inventario lleno)
 	else: return false
+
+
+func buy_equipment(tool_type: ToolsComponent.Tools) -> bool:
+	var price: int = EQUIPMENT_PRICES.get(tool_type, 0)
+	# dinero insuficiente
+	if coins < price:
+		return false
+	
+	var item_to_buy = _tool_database[tool_type]
+	# intentamos meter el item
+	if _add_to_inventory(item_to_buy, 1):
+		coins -= price
+		_emit_inventory_updated()
+		EventBus.equipment_purchased.emit(tool_type)
+		return true
+	
+	# no se pudo añadir (inventario lleno)
+	return false
 
 #Hotbar logic-------------
 ## Cambia el slot activo a index
