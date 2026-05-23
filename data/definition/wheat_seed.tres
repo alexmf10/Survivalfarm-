@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="CropComponent" load_steps=3 format=3 uid="uid://6tnurafu33uf"]
 
 [ext_resource type="Script" uid="uid://dyk8gpabr5i6s" path="res://data/component/crop_component.gd" id="1_kda5y"]
-[ext_resource type="Texture2D" uid="uid://dbjrnbco28rga" path="res://assets/textures/test/objects/basic_plants.png" id="2_gn70k"]
+[ext_resource type="Texture2D" uid="uid://bxn15y8mnnmqy" path="res://assets/textures/test/objects/basic_plants.png" id="2_gn70k"]
 
 [resource]
 script = ExtResource("1_kda5y")

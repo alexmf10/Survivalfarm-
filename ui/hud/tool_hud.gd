@@ -17,7 +17,8 @@ func _ready() -> void:
 	_build_ui()
 	EventBus.player_tool_changed.connect(_on_player_tool_changed)
 	EventBus.inventory_updated.connect(_on_inventory_updated)
-	_update_tool_label(ToolsComponent.Tools.None)
+	EventBus.hotbar_selection_changed.connect(_on_hotbar_selection_changed)
+	_update_label()
 
 
 func _build_ui() -> void:
@@ -55,27 +56,53 @@ func _build_ui() -> void:
 	panel.add_child(_tool_label)
 
 
+func _on_hotbar_selection_changed(_index: int) -> void:
+	_update_label()
+
 func _on_player_tool_changed(tool_type: ToolsComponent.Tools) -> void:
 	_current_tool = tool_type
-	_update_tool_label(tool_type)
-
+	_update_label()
 
 func _on_inventory_updated(_slots: Array, _coins: int) -> void:
-	_update_tool_label(_current_tool)
+	_update_label()
 
+##Leemos el item en el slot seleccionado para imprimir sus datos por la hud
+func _update_label() -> void:
+	if not _tool_label:
+		return
+	#Accedemos al trade svc para leer el slot que está usando el jugador
+	var trade_svc := EventBus.services.trade as TradeService
+	var text_to_show: String = ""
+	
+	var item_name: String
+	if trade_svc:
+		var slot_data = trade_svc.get_active_slot_data()
+		
+		if slot_data != null:
+			var item = slot_data["item"]
+			var amount: int = slot_data["amount"]
+			
+			# Si el objeto tiene la propiedad "crop_name", es una semilla o cultivo
+			if "crop_name" in item:
+				text_to_show = "%s (x%d)" % [item.crop_name.to_upper(), amount]
+			else:
+				# Si no la tiene, asumimos que es una herramienta
+				text_to_show = _get_tool_text(_current_tool)
+		else:
+			# Si el slot está completamente vacío
+			text_to_show = ""
 
-func _update_tool_label(tool_type: ToolsComponent.Tools) -> void:
-	var tool_name: String
+	_tool_label.text = text_to_show
+
+func _get_tool_text(tool_type: ToolsComponent.Tools) -> String:
 	match tool_type:
 		ToolsComponent.Tools.TillGround:
-			tool_name = "HOE"
+			return "HOE"
 		ToolsComponent.Tools.WaterCrops:
-			tool_name = "WATERING CAN"
+			return "WATERING CAN"
 		ToolsComponent.Tools.Sword:
-			tool_name = "SWORD (5)  LMB:ATTACK"
-	if _tool_label:
-		_tool_label.text = tool_name
-
+			return "SWORD (5)  LMB:ATTACK"
+	return ""
 
 func _get_seed_count(crop_type: CropComponent.CropType) -> int:
 	var trade_svc := EventBus.services.trade as TradeService
