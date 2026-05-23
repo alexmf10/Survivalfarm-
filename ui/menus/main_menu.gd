@@ -24,6 +24,9 @@ func _ready() -> void:
 	_font = load("res://ui/theme/PressStart2P-Regular.ttf") as Font
 	_build_ui()
 	btn_play.grab_focus()
+	var sound_svc := EventBus.services.get_service(&"sound") as SoundService
+	if sound_svc:
+		sound_svc.play_music("music_main_menu")
 
 
 func _build_ui() -> void:
