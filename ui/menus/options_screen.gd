@@ -90,6 +90,8 @@ func _connect_sound_service() -> void:
 	var sound_svc := EventBus.services.get_service(&"sound") as SoundService
 	if sound_svc == null:
 		return
+	_sfx_slider.set_value_no_signal(sound_svc.get_sfx_volume() * 100.0)
+	_music_slider.set_value_no_signal(sound_svc.get_music_volume() * 100.0)
 	_sfx_slider.value_changed.connect(func(v: float) -> void:
 		sound_svc.set_sfx_volume(v / 100.0))
 	_music_slider.value_changed.connect(func(v: float) -> void:
