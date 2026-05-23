@@ -39,6 +39,9 @@ func _ready() -> void:
 	crop_svc.connect_signals()
 	crop_svc.register_crop(preload("res://data/definition/wheat.tres"))
 	crop_svc.register_crop(preload("res://data/definition/beet.tres"))
+	crop_svc.register_crop(preload("res://data/definition/lavender.tres"))
+	crop_svc.register_crop(preload("res://data/definition/ember_lily.tres"))
+	crop_svc.register_crop(preload("res://data/definition/cotton.tres"))
 	EventBus.services.register(&"crop", crop_svc)
 
 	# FarmService: gestiona los visuales del sistema de cultivos (Node, necesita árbol).

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="CropComponent" load_steps=3 format=3 uid="uid://q5yoe4huavwk"]
+
+[ext_resource type="Script" uid="uid://dyk8gpabr5i6s" path="res://data/component/crop_component.gd" id="1_yy3iv"]
+[ext_resource type="Texture2D" uid="uid://bxn15y8mnnmqy" path="res://assets/textures/test/objects/basic_plants.png" id="2_soyea"]
+
+[resource]
+script = ExtResource("1_yy3iv")
+crop_name = "Lavender"
+crop_type = 4
+is_seed = false
+max_stages = 4
+days_per_stage = 1
+spritesheet = ExtResource("2_soyea")
+frame_width = 16
+frame_height = 16
+spritesheet_row = 2
+seed_col = 0
+drop_col = 5
+metadata/_custom_type_script = "uid://dyk8gpabr5i6s"

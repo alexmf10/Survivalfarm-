@@ -18,16 +18,25 @@ const MAX_STACK_SIZE = 64
 const SELL_PRICES: Dictionary = {
 	CropComponent.CropType.Wheat: 5,
 	CropComponent.CropType.Beet: 8,
+	CropComponent.CropType.Lavender: 15,
+	CropComponent.CropType.Ember_lily: 40,
+	CropComponent.CropType.Cotton: 75,
 }
 
 const SEED_PRICES: Dictionary = {
 	CropComponent.CropType.Wheat: 3,
 	CropComponent.CropType.Beet: 5,
+		CropComponent.CropType.Lavender: 10,
+	CropComponent.CropType.Ember_lily: 25,
+	CropComponent.CropType.Cotton: 50,
 }
 
 const CROP_NAMES: Dictionary = {
 	CropComponent.CropType.Wheat: "Wheat",
 	CropComponent.CropType.Beet: "Beet",
+	CropComponent.CropType.Lavender: "Lavender",
+	CropComponent.CropType.Ember_lily: "Ember lily",
+	CropComponent.CropType.Cotton: "Cotton",
 }
 
 var coins: int = 0
@@ -42,18 +51,25 @@ var _seed_inventory: Dictionary = {   # CropType → int (starting seeds)
 # Base de datos de los sprites
 var _crop_database: Dictionary = {
 	CropComponent.CropType.Wheat: preload("res://data/definition/wheat.tres"),
-	CropComponent.CropType.Beet: preload("res://data/definition/beet.tres")
+	CropComponent.CropType.Beet: preload("res://data/definition/beet.tres"),
+	CropComponent.CropType.Cotton: preload("res://data/definition/cotton.tres"),
+	CropComponent.CropType.Ember_lily: preload("res://data/definition/ember_lily.tres"),
+	CropComponent.CropType.Lavender: preload("res://data/definition/lavender.tres")
 }
 
 var _seed_database: Dictionary = {
 	CropComponent.CropType.Wheat: preload("res://data/definition/wheat_seed.tres"),
-	CropComponent.CropType.Beet: preload("res://data/definition/beet_seed.tres")
+	CropComponent.CropType.Beet: preload("res://data/definition/beet_seed.tres"),
+	CropComponent.CropType.Cotton: preload("res://data/definition/cotton_seed.tres"),
+	CropComponent.CropType.Ember_lily: preload("res://data/definition/ember_lily_seed.tres"),
+	CropComponent.CropType.Lavender: preload("res://data/definition/lavender_seed.tres")
+	
 }
 
 var _tool_database: Dictionary = {
 	ToolsComponent.Tools.TillGround: preload("res://data/definition/hoe.tres"),
 	ToolsComponent.Tools.WaterCrops: preload("res://data/definition/watering_can.tres"),
-	ToolsComponent.Tools.Sword: preload("res://data/definition/axe.tres")
+	ToolsComponent.Tools.Sword: preload("res://data/definition/weapon.tres")
 }
 
 var active_hotbar_index: int = 0 # Guardará un número del 0 al 3

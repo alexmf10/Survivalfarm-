@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="CropComponent" load_steps=3 format=3 uid="uid://ds0lfwtv2wwkx"]
+
+[ext_resource type="Script" uid="uid://dyk8gpabr5i6s" path="res://data/component/crop_component.gd" id="1_130am"]
+[ext_resource type="Texture2D" uid="uid://bxn15y8mnnmqy" path="res://assets/textures/test/objects/basic_plants.png" id="2_t2l0g"]
+
+[resource]
+script = ExtResource("1_130am")
+crop_name = "Ember lily seed"
+crop_type = 3
+is_seed = true
+max_stages = 4
+days_per_stage = 1
+spritesheet = ExtResource("2_t2l0g")
+frame_width = 16
+frame_height = 16
+spritesheet_row = 3
+seed_col = 0
+drop_col = 0
+metadata/_custom_type_script = "uid://dyk8gpabr5i6s"

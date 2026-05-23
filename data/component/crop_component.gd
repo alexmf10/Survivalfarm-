@@ -6,6 +6,9 @@ extends Resource
 enum CropType {
 	Wheat,
 	Beet,
+	Cotton,
+	Ember_lily,
+	Lavender
 }
 
 @export var crop_name: String = ""

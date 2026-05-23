@@ -79,6 +79,9 @@ func _build_ui() -> void:
 	vbox.add_child(_make_label("-- SELL --", 7, COLOR_SELL))
 	_add_sell_row(vbox, CropComponent.CropType.Wheat, 5)
 	_add_sell_row(vbox, CropComponent.CropType.Beet,  8)
+	_add_sell_row(vbox, CropComponent.CropType.Lavender,  15)
+	_add_sell_row(vbox, CropComponent.CropType.Ember_lily,  40)
+	_add_sell_row(vbox, CropComponent.CropType.Cotton,  75)
 
 	vbox.add_child(_make_separator())
 
@@ -86,6 +89,9 @@ func _build_ui() -> void:
 	vbox.add_child(_make_label("-- BUY SEEDS --", 7, COLOR_BUY))
 	_add_buy_row(vbox, CropComponent.CropType.Wheat, 3)
 	_add_buy_row(vbox, CropComponent.CropType.Beet,  5)
+	_add_buy_row(vbox, CropComponent.CropType.Lavender,  10)
+	_add_buy_row(vbox, CropComponent.CropType.Ember_lily,  25)
+	_add_buy_row(vbox, CropComponent.CropType.Cotton,  50)
 
 	vbox.add_child(_make_separator())
 
