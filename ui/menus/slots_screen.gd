@@ -467,6 +467,9 @@ func _on_delete_pressed() -> void:
 func _confirm_delete() -> void:
 	var save_svc: SaveService = EventBus.services.save as SaveService
 	save_svc.delete_slot(_selected_slot)
+	var profile_svc: ProfileService = EventBus.services.profile as ProfileService
+	if profile_svc:
+		profile_svc.clear_profile(_selected_slot)
 	_hide_overlay()
 	_refresh_slots()
 	_update_action_area()
