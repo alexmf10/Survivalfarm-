@@ -17,18 +17,18 @@ const MAX_STACK_SIZE = 64
 
 const SELL_PRICES: Dictionary = {
 	CropComponent.CropType.Wheat: 5,
-	CropComponent.CropType.Beet: 8,
-	CropComponent.CropType.Cotton: 15,
+	CropComponent.CropType.Beet: 9,
+	CropComponent.CropType.Lavender: 18,
 	CropComponent.CropType.Ember_lily: 40,
-	CropComponent.CropType.Lavender: 75,
+	CropComponent.CropType.Cotton: 75,
 }
 
 const SEED_PRICES: Dictionary = {
 	CropComponent.CropType.Wheat: 3,
 	CropComponent.CropType.Beet: 5,
-	CropComponent.CropType.Cotton: 10,
-	CropComponent.CropType.Ember_lily: 25,
-	CropComponent.CropType.Lavender: 50,
+	CropComponent.CropType.Lavender: 10,
+	CropComponent.CropType.Ember_lily: 20,
+	CropComponent.CropType.Cotton: 35,
 }
 
 const CROP_NAMES: Dictionary = {
@@ -40,17 +40,17 @@ const CROP_NAMES: Dictionary = {
 }
 
 const EQUIPMENT_PRICES: Dictionary = {
-	ToolsComponent.Tools.Helm: 150,
-	ToolsComponent.Tools.Chest: 300,
-	ToolsComponent.Tools.Bot: 120,
+	ToolsComponent.Tools.Helm: 15,
+	ToolsComponent.Tools.Chest: 25,
+	ToolsComponent.Tools.Bot: 10,
 	ToolsComponent.Tools.Sword: 0,
 }
 
 const ARMOR_UPGRADE_PRICES: Dictionary = {
-	ToolsComponent.Tools.Helm: [1, 2, 3],
-	ToolsComponent.Tools.Chest: [1, 2, 3],
-	ToolsComponent.Tools.Bot:  [1, 2, 3],
-	ToolsComponent.Tools.Sword: [1, 2, 3],
+	ToolsComponent.Tools.Helm: [10, 30, 40],
+	ToolsComponent.Tools.Chest: [20, 40, 50],
+	ToolsComponent.Tools.Bot:  [10, 25, 35],
+	ToolsComponent.Tools.Sword: [10, 20, 30],
 }
 
 const EQUIPMENT_NAMES: Dictionary = {
@@ -152,7 +152,11 @@ func load_from_save(data: Dictionary) -> void:
 	for tool_type in armor_levels:
 		var str_key: String = str(tool_type)
 		if saved_armor.has(str_key):
+			# Cargamos los datos del nivel de armaduras
 			armor_levels[tool_type] = int(saved_armor[str_key])
+		else:
+			# Si el archivo es nuevo, limpiamos la memoria
+			armor_levels[tool_type] = 0
 	_slots.fill(null)
 	var saved: Array = data.get("inventory", [])
 	for i: int in range(mini(saved.size(), MAX_SLOTS)):
@@ -294,18 +298,27 @@ func grant_starter_pack() -> bool:
 	return true
 
 
-func has_crops(wheat_amount: int, beet_amount: int) -> bool:
+func has_crops(wheat_amount: int, beet_amount: int, lavender_amount: int = 0, lily_amount: int = 0, cotton_amount: int = 0) -> bool:
 	return (
 		get_crop_count(CropComponent.CropType.Wheat) >= wheat_amount
 		and get_crop_count(CropComponent.CropType.Beet) >= beet_amount
+		and get_crop_count(CropComponent.CropType.Lavender) >= lavender_amount
+		and get_crop_count(CropComponent.CropType.Ember_lily) >= lily_amount
+		and get_crop_count(CropComponent.CropType.Cotton) >= cotton_amount
 	)
 
 
-func remove_crops(wheat_amount: int, beet_amount: int) -> bool:
-	if not has_crops(wheat_amount, beet_amount):
+func remove_crops(wheat_amount: int, beet_amount: int, lavender_amount: int = 0, lily_amount: int = 0, cotton_amount: int = 0) -> bool:
+	if not has_crops(wheat_amount, beet_amount, lavender_amount, lily_amount, cotton_amount):
 		return false
 	_remove_from_inventory(_crop_database[CropComponent.CropType.Wheat], wheat_amount)
 	_remove_from_inventory(_crop_database[CropComponent.CropType.Beet], beet_amount)
+	if lavender_amount > 0:
+		_remove_from_inventory(_crop_database[CropComponent.CropType.Lavender], lavender_amount)
+	if lily_amount > 0:
+		_remove_from_inventory(_crop_database[CropComponent.CropType.Ember_lily], lily_amount)
+	if cotton_amount > 0:
+		_remove_from_inventory(_crop_database[CropComponent.CropType.Cotton], cotton_amount)
 	_emit_inventory_updated()
 	return true
 
@@ -394,9 +407,20 @@ func apply_save_state(state: Dictionary) -> void:
 	coins = int(state.get("coins", 0))
 	active_hotbar_index = clampi(int(state.get("active_hotbar_index", 0)), 0, 3)
 	starter_pack_granted = bool(state.get("starter_pack_granted", false))
+	
+	# Leer y aplicar los niveles de armadura comprados
+	var saved_armor: Dictionary = state.get("armor_levels", {})
+	for tool_type in armor_levels:
+		var str_key: String = str(tool_type)
+		if saved_armor.has(str_key):
+			armor_levels[tool_type] = int(saved_armor[str_key])
+		else:
+			armor_levels[tool_type] = 0
+	
+	
 	_slots.resize(MAX_SLOTS)
 	_slots.fill(null)
-
+	
 	var saved_slots: Array = state.get("slots", [])
 	for i in range(min(saved_slots.size(), MAX_SLOTS)):
 		var slot_data = saved_slots[i]
@@ -405,7 +429,7 @@ func apply_save_state(state: Dictionary) -> void:
 			var amount: int = int(slot_data.get("amount", 0))
 			if item and amount > 0:
 				_slots[i] = {"item": item, "amount": amount}
-
+	
 	_loading_state = false
 	EventBus.inventory_updated.emit(_slots, coins)
 
@@ -414,11 +438,17 @@ func get_save_state() -> Dictionary:
 	var saved_slots: Array = []
 	for slot in _slots:
 		saved_slots.append(_saved_slot_from_inventory_slot(slot))
+	
+	var serialized_armor: Dictionary = {}
+	for tool_type in armor_levels:
+		serialized_armor[str(tool_type)] = armor_levels[tool_type]
+	
 	return {
 		"coins": coins,
 		"slots": saved_slots,
 		"active_hotbar_index": active_hotbar_index,
 		"starter_pack_granted": starter_pack_granted,
+		"armor_levels": serialized_armor
 	}
 
 

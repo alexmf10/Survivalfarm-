@@ -9,17 +9,29 @@ const TRIBUTES: Array[Dictionary] = [
 		"due_day": 4,
 		"wheat": 15,
 		"beet": 8,
+		"lavender": 3,
+		"ember_lily": 0,
+		"cotton": 0,
 		"reward_wheat_seeds": 45,
 		"reward_beet_seeds": 24,
-		"dialog": "First tribute. Wheat and beets. The soil signs with roots; you sign with harvest.",
+		"reward_lavender_seeds":3,
+		"reward_ember_lily_seeds":1,
+		"reward_cotton_seeds":1,
+		"dialog": "First tribute. Wheat, beets and ember lilys. The soil signs with roots; you sign with harvest.",
 		"reward_dialog": "Plant these. The ones below prefer food raised in your own dirt.",
 	},
 	{
 		"due_day": 7,
 		"wheat": 35,
 		"beet": 18,
+		"lavender": 5,
+		"ember_lily": 2,
+		"cotton": 0,
 		"reward_wheat_seeds": 55,
 		"reward_beet_seeds": 28,
+		"reward_lavender_seeds":3,
+		"reward_ember_lily_seeds":3,
+		"reward_cotton_seeds":1,
 		"dialog": "Good delivery. The ones below chew better when it arrives fresh.",
 		"reward_dialog": "More seeds. More roots. More mouths waiting under the soil.",
 	},
@@ -27,8 +39,14 @@ const TRIBUTES: Array[Dictionary] = [
 		"due_day": 10,
 		"wheat": 60,
 		"beet": 30,
+		"lavender": 5,
+		"ember_lily": 5,
+		"cotton": 3,
 		"reward_wheat_seeds": 35,
 		"reward_beet_seeds": 18,
+		"reward_lavender_seeds":5,
+		"reward_ember_lily_seeds":5,
+		"reward_cotton_seeds":3,
 		"dialog": "The march can already smell your field. Do not fail now; when they are hungry, they do not know door from owner.",
 		"reward_dialog": "One last sowing, farmer. Let it grow tall. Let it grow deep.",
 	},
@@ -36,6 +54,9 @@ const TRIBUTES: Array[Dictionary] = [
 		"due_day": 12,
 		"wheat": 999,
 		"beet": 999,
+		"lavender": 555,
+		"ember_lily": 666,
+		"cotton": 333,
 		"reward_wheat_seeds": 0,
 		"reward_beet_seeds": 0,
 		"dialog": FINAL_REVEAL_MESSAGE,
@@ -93,12 +114,21 @@ func get_objective_text() -> String:
 		return "The soil is silent."
 	if tribute.get("final", false):
 		return "The last visit will be on day %d." % int(tribute["due_day"])
-	return "Tribute %d: %d wheat + %d beets before day %d." % [
+	var text: String = "Tribute %d (Before Day %d):\n- %d Wheat\n- %d Beets" % [
 		current_tribute_index + 1,
-		tribute["wheat"],
-		tribute["beet"],
 		tribute["due_day"],
+		tribute["wheat"],
+		tribute["beet"]
 	]
+	
+	if tribute.get("lavender", 0) > 0:
+		text += "\n- %d Lavender" % tribute["lavender"]
+	if tribute.get("ember_lily", 0) > 0:
+		text += "\n- %d Ember Lily" % tribute["ember_lily"]
+	if tribute.get("cotton", 0) > 0:
+		text += "\n- %d Cotton" % tribute["cotton"]
+		
+	return text
 
 
 func can_sleep() -> bool:
@@ -181,21 +211,33 @@ func interact_with_collector() -> String:
 
 	var wheat_required: int = int(tribute["wheat"])
 	var beet_required: int = int(tribute["beet"])
+	var lav_required: int = int(tribute["lavender"])
+	var lily_required: int = int(tribute["ember_lily"])
+	var cot_required: int = int(tribute["cotton"])
+
 	var header: String = str(tribute["dialog"])
 
-	if not trade_svc.has_crops(wheat_required, beet_required):
-		return "%s\n\nBring %d wheat and %d beets before night falls on day %d.\n\nYou currently have %d wheat and %d beets." % [
-			header,
-			wheat_required,
-			beet_required,
-			int(tribute["due_day"]),
-			trade_svc.get_crop_count(CropComponent.CropType.Wheat),
-			trade_svc.get_crop_count(CropComponent.CropType.Beet),
-		]
+	if not trade_svc.has_crops(wheat_required, beet_required, lav_required, lily_required, cot_required):
+		# Generamos un ticket de "Falta de pago" dinámico
+		var msg: String = "%s\n\nBring this before night falls on day %d:\n" % [header, int(tribute["due_day"])]
+		msg += "- %d/%d Wheat\n" % [trade_svc.get_crop_count(CropComponent.CropType.Wheat), wheat_required]
+		msg += "- %d/%d Beets\n" % [trade_svc.get_crop_count(CropComponent.CropType.Beet), beet_required]
+		
+		if lav_required > 0:
+			msg += "- %d/%d Lavender\n" % [trade_svc.get_crop_count(CropComponent.CropType.Lavender), lav_required]
+		if lily_required > 0:
+			msg += "- %d/%d Ember Lily\n" % [trade_svc.get_crop_count(CropComponent.CropType.Ember_lily), lily_required]
+		if cot_required > 0:
+			msg += "- %d/%d Cotton\n" % [trade_svc.get_crop_count(CropComponent.CropType.Cotton), cot_required]
+			
+		return msg
 
-	trade_svc.remove_crops(wheat_required, beet_required)
-	trade_svc.add_seeds(CropComponent.CropType.Wheat, int(tribute["reward_wheat_seeds"]))
-	trade_svc.add_seeds(CropComponent.CropType.Beet, int(tribute["reward_beet_seeds"]))
+	trade_svc.remove_crops(wheat_required, beet_required, lav_required, lily_required, cot_required)
+	trade_svc.add_seeds(CropComponent.CropType.Wheat, int(tribute.get("reward_wheat_seeds", 0)))
+	trade_svc.add_seeds(CropComponent.CropType.Beet, int(tribute.get("reward_beet_seeds", 0)))
+	trade_svc.add_seeds(CropComponent.CropType.Lavender, int(tribute.get("reward_lavender_seeds", 0)))
+	trade_svc.add_seeds(CropComponent.CropType.Ember_lily, int(tribute.get("reward_ember_lily_seeds", 0)))
+	trade_svc.add_seeds(CropComponent.CropType.Cotton, int(tribute.get("reward_cotton_seeds", 0)))
 
 	var paid_index: int = current_tribute_index
 	current_tribute_index += 1

@@ -125,9 +125,9 @@ func _build_ui() -> void:
 	scroll_vbox.add_child(_make_label("-- SELL --", 7, COLOR_SELL))
 	_add_sell_row(scroll_vbox, CropComponent.CropType.Wheat)
 	_add_sell_row(scroll_vbox, CropComponent.CropType.Beet)
-	_add_sell_row(scroll_vbox, CropComponent.CropType.Cotton)
-	_add_sell_row(scroll_vbox, CropComponent.CropType.Ember_lily)
 	_add_sell_row(scroll_vbox, CropComponent.CropType.Lavender)
+	_add_sell_row(scroll_vbox, CropComponent.CropType.Ember_lily)
+	_add_sell_row(scroll_vbox, CropComponent.CropType.Cotton)
 
 	scroll_vbox.add_child(_make_separator())
 
@@ -135,19 +135,19 @@ func _build_ui() -> void:
 	scroll_vbox.add_child(_make_label("-- BUY SEEDS --", 7, COLOR_BUY))
 	_add_buy_row(scroll_vbox, CropComponent.CropType.Wheat)
 	_add_buy_row(scroll_vbox, CropComponent.CropType.Beet)
-	_add_buy_row(scroll_vbox, CropComponent.CropType.Cotton)
-	_add_buy_row(scroll_vbox, CropComponent.CropType.Ember_lily)
 	_add_buy_row(scroll_vbox, CropComponent.CropType.Lavender)
+	_add_buy_row(scroll_vbox, CropComponent.CropType.Ember_lily)
+	_add_buy_row(scroll_vbox, CropComponent.CropType.Cotton)
 
 	main_vbox.add_child(_make_separator())
 	
 # ── Sección equipamiento ───────────────────────────────────────
 	scroll_vbox.add_child(_make_label("-- BUY EQUIPMENT --", 7, COLOR_BUY))
-	_add_equipment_row(scroll_vbox, ToolsComponent.Tools.Helm, 150)
-	_add_equipment_row(scroll_vbox, ToolsComponent.Tools.Chest, 300)
-	_add_equipment_row(scroll_vbox, ToolsComponent.Tools.Bot, 120)
+	_add_equipment_row(scroll_vbox, ToolsComponent.Tools.Helm, 15)
+	_add_equipment_row(scroll_vbox, ToolsComponent.Tools.Chest, 25)
+	_add_equipment_row(scroll_vbox, ToolsComponent.Tools.Bot, 10)
 	_add_equipment_row(scroll_vbox, ToolsComponent.Tools.Sword, 0)	
-
+	
 	main_vbox.add_child(_make_separator())
 	
 	# ── Sección equipamiento ───────────────────────────────────────

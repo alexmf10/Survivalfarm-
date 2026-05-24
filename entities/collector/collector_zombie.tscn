@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=2 format=3 uid="uid://clw3y03d1poj0"]
 
-[ext_resource type="Script" path="res://entities/collector/collector_zombie.gd" id="1_collector"]
+[ext_resource type="Script" uid="uid://d3yk2tlq54bwu" path="res://entities/collector/collector_zombie.gd" id="1_collector"]
 
 [node name="CollectorZombie" type="Node2D"]
 script = ExtResource("1_collector")
