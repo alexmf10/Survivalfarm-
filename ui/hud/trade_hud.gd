@@ -67,7 +67,7 @@ func _build_ui() -> void:
 	main_vbox.add_theme_constant_override("separation", 10)
 	panel.add_child(main_vbox)
 
-	# ── Cabecera (Fija) ───────────────────────────────────────────────────
+	# ── Cabecera ───────────────────────────────────────────────────
 	var title: Label = _make_label("[ TRADER ]", 10, COLOR_TEXT)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	main_vbox.add_child(title)
@@ -78,17 +78,16 @@ func _build_ui() -> void:
 
 	main_vbox.add_child(_make_separator())
 
-	# ── Contenedor con Scroll ─────────────────────────────────────────────
+	# Contenedor con Scroll 
 	var scroll: ScrollContainer = ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL 
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	main_vbox.add_child(scroll)
-
-	# ── MODIFICACIÓN: Personalización de la barra de Scroll ───────────────
-	var v_bar: VScrollBar = scroll.get_v_scroll_bar()
-	v_bar.custom_minimum_size.x = 5 # Grosor de la barra para estilo retro
 	
-	# Desplazamiento en píxeles hacia la derecha (ajusta este 6 si quieres más o menos)
+	var v_bar: VScrollBar = scroll.get_v_scroll_bar()
+	v_bar.custom_minimum_size.x = 5 
+	
+	# Desplazamiento en píxeles hacia la derecha
 	var pixels_to_right: int = 6 
 
 	# Estilo del Canal de fondo (Track)
@@ -98,15 +97,13 @@ func _build_ui() -> void:
 	track_style.expand_margin_right = pixels_to_right
 	track_style.expand_margin_left = -pixels_to_right
 	v_bar.add_theme_stylebox_override("scroll", track_style)
-
-	# Estilo del Bloque de arrastre (Grabber) cambiados a COLOR_BORDER
+	
 	var grabber_style: StyleBoxFlat = StyleBoxFlat.new()
 	grabber_style.bg_color = COLOR_BORDER
 	grabber_style.set_corner_radius_all(0)
 	grabber_style.expand_margin_right = pixels_to_right
 	grabber_style.expand_margin_left = -pixels_to_right
 	
-	# Aplicamos el estilo al grabber en todos sus estados (Normal, Hover y Click)
 	v_bar.add_theme_stylebox_override("grabber", grabber_style)
 	
 	var grabber_hover = grabber_style.duplicate()
@@ -139,7 +136,7 @@ func _build_ui() -> void:
 	_add_buy_row(scroll_vbox, CropComponent.CropType.Ember_lily)
 	_add_buy_row(scroll_vbox, CropComponent.CropType.Cotton)
 
-	main_vbox.add_child(_make_separator())
+	scroll_vbox.add_child(_make_separator())
 	
 # ── Sección equipamiento ───────────────────────────────────────
 	scroll_vbox.add_child(_make_label("-- BUY EQUIPMENT --", 7, COLOR_BUY))
@@ -148,19 +145,19 @@ func _build_ui() -> void:
 	_add_equipment_row(scroll_vbox, ToolsComponent.Tools.Bot, 10)
 	_add_equipment_row(scroll_vbox, ToolsComponent.Tools.Sword, 0)	
 	
-	main_vbox.add_child(_make_separator())
+	scroll_vbox.add_child(_make_separator())
 	
-	# ── Sección equipamiento ───────────────────────────────────────
+	# ── Sección mejoras ───────────────────────────────────────
 	scroll_vbox.add_child(_make_label("-- UPGRADE EQUIPMENT --", 7, COLOR_BUY))
 	_add_armor_upgrade_row(scroll_vbox, ToolsComponent.Tools.Helm)
 	_add_armor_upgrade_row(scroll_vbox, ToolsComponent.Tools.Chest)
 	_add_armor_upgrade_row(scroll_vbox, ToolsComponent.Tools.Bot)
 	_add_armor_upgrade_row(scroll_vbox, ToolsComponent.Tools.Sword)
 
-	main_vbox.add_child(_make_separator())
+	scroll_vbox.add_child(_make_separator())
 
 	
-	# ── Pie (Fijo) ────────────────────────────────────────────────────────
+	# ── Pie ────────────────────────────────────────────────────────
 	var close_hint: Label = _make_label("[ E / ESC ] CLOSE", 5, COLOR_TEXT_LIGHT)
 	close_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	main_vbox.add_child(close_hint)

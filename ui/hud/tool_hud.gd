@@ -70,27 +70,29 @@ func _on_inventory_updated(_slots: Array, _coins: int) -> void:
 func _update_label() -> void:
 	if not _tool_label:
 		return
-	#Accedemos al trade svc para leer el slot que está usando el jugador
+	# Accedemos al trade svc para leer el slot que está usando el jugador
 	var trade_svc := EventBus.services.trade as TradeService
 	var text_to_show: String = ""
 	
-	var item_name: String
-	if trade_svc:
-		var slot_data = trade_svc.get_active_slot_data()
-		
-		if slot_data != null:
-			var item = slot_data["item"]
-			var amount: int = slot_data["amount"]
+	if _current_tool == ToolsComponent.Tools.Sword:
+		text_to_show = _get_tool_text(_current_tool)
+	else:
+		if trade_svc:
+			var slot_data = trade_svc.get_active_slot_data()
 			
-			# Si el objeto tiene la propiedad "crop_name", es una semilla o cultivo
-			if "crop_name" in item:
-				text_to_show = "%s (x%d)" % [item.crop_name.to_upper(), amount]
+			if slot_data != null:
+				var item = slot_data["item"]
+				var amount: int = slot_data["amount"]
+				
+				# Si el objeto tiene la propiedad "crop_name", es una semilla o cultivo
+				if "crop_name" in item:
+					text_to_show = "%s (x%d)" % [item.crop_name.to_upper(), amount]
+				else:
+					# Si no la tiene, asumimos que es una herramienta
+					text_to_show = _get_tool_text(_current_tool)
 			else:
-				# Si no la tiene, asumimos que es una herramienta
-				text_to_show = _get_tool_text(_current_tool)
-		else:
-			# Si el slot está completamente vacío
-			text_to_show = ""
+				# Si el slot está completamente vacío
+				text_to_show = ""
 
 	_tool_label.text = text_to_show
 

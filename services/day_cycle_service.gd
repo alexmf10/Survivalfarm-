@@ -125,3 +125,23 @@ func _advance_phase() -> void:
 
 	EventBus.day_phase_changed.emit(is_night)
 	EventBus.time_tick.emit(current_day, elapsed, get_phase_name())
+
+## Salta inmediatamente a la mañana del día siguiente.
+func skip_to_next_morning() -> void:
+	current_day += 1
+	is_night = false
+	elapsed = 0.0
+	_tick_acc = 0.0
+	
+	EventBus.day_started.emit(current_day)
+	EventBus.day_phase_changed.emit(is_night)
+	EventBus.time_tick.emit(current_day, elapsed, get_phase_name())
+
+## Salta inmediatamente a la noche del mismo día.
+func skip_to_night() -> void:
+	is_night = true
+	elapsed = 0.0
+	_tick_acc = 0.0
+	
+	EventBus.day_phase_changed.emit(is_night)
+	EventBus.time_tick.emit(current_day, elapsed, get_phase_name())

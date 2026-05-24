@@ -565,12 +565,12 @@ func buy_armor_upgrade(tool_type: ToolsComponent.Tools) -> bool:
 
 	return false
 
-## Calcula el daño extra de la espada (+4 por nivel)
+## Calcula el daño extra de la espada (+5 por nivel)
 ## Solo se aplica si la espada está en el slot de arma
 func get_sword_bonus_damage() -> float:
 	# Si el slot 19 (weapon_slot) no está vacío
 	if _slots[19] != null:
 		var sword_lvl: int = armor_levels.get(int(ToolsComponent.Tools.Sword), 0)
-		return float(sword_lvl * 4) # 4 de daño por nivel
+		return float(sword_lvl * 5) # 5 de daño por nivel
 		
 	return 0.0

@@ -31,8 +31,7 @@ func _process(_delta: float) -> void:
 	var dist: float = global_position.distance_to(player_svc.get_position())
 	_player_in_range = dist <= INTERACT_RADIUS
 	if _player_in_range:
-		var is_night := _is_night()
-		var can_sleep := is_night and _count_alive_zombies() == 0
+		var can_sleep :=  _count_alive_zombies() == 0
 		_hint_label.text = "[E] Sleep" if can_sleep else "[E] Bed"
 		_hint_label.visible = true
 	else:
@@ -48,9 +47,6 @@ func _input(event: InputEvent) -> void:
 
 
 func _try_sleep() -> void:
-	if not _is_night():
-		EventBus.dialogue_requested.emit("Bed", "You can only sleep at night.")
-		return
 	if _count_alive_zombies() > 0:
 		EventBus.dialogue_requested.emit("Bed", "You cannot sleep while there are enemies nearby.")
 		return
@@ -85,6 +81,8 @@ func _start_sleep_sequence() -> void:
 	_hint_label.visible = false
 
 	var current_day: int = day_svc.current_day
+	var was_night: bool = day_svc.is_night
+	
 	var overlay_scene := load(SLEEP_OVERLAY_PATH) as PackedScene
 	if overlay_scene == null:
 		push_error("Bed: could not load SleepOverlay")
@@ -93,11 +91,21 @@ func _start_sleep_sequence() -> void:
 	var overlay := overlay_scene.instantiate() as CanvasLayer
 	get_tree().root.add_child(overlay)
 
-	var save_only := func() -> void:
-		save_svc.save_day(slot, current_day)
+	var sleep_action := func() -> void:
+		if was_night:
+			# Si era de noche avanza al día siguiente mañana
+			day_svc.skip_to_next_morning()
+			save_svc.save_day(slot, day_svc.current_day)
+		else:
+			# Si era de día solo avanza a la noche del mismo día
+			day_svc.skip_to_night()
+			save_svc.save_day(slot, day_svc.current_day)
 
 	overlay.completed.connect(_on_sleep_completed)
-	overlay.play_sleep_sequence(current_day, save_only)
+		
+	# Reproduce la animación correspondiente 
+	var day_to_show: int = current_day + 1 if was_night else current_day
+	overlay.play_sleep_sequence(day_to_show, sleep_action)
 
 
 func _on_sleep_completed() -> void:
