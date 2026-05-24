@@ -296,6 +296,7 @@ func save_trade_state(slot: int, _ignored: Dictionary) -> void:
 		data["inventory"] = save_data.get("inventory", [])
 		data["active_hotbar_index"] = save_data.get("active_hotbar_index", 0)
 		data["starter_pack_granted"] = save_data.get("starter_pack_granted", false)
+		data["armor_levels"] = save_data.get("armor_levels", {})
 	var file_w: FileAccess = FileAccess.open(path, FileAccess.WRITE)
 	if file_w:
 		file_w.store_string(JSON.stringify(data, "\t"))
