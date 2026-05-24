@@ -18,17 +18,17 @@ const MAX_STACK_SIZE = 64
 const SELL_PRICES: Dictionary = {
 	CropComponent.CropType.Wheat: 5,
 	CropComponent.CropType.Beet: 8,
-	CropComponent.CropType.Lavender: 15,
+	CropComponent.CropType.Cotton: 15,
 	CropComponent.CropType.Ember_lily: 40,
-	CropComponent.CropType.Cotton: 75,
+	CropComponent.CropType.Lavender: 75,
 }
 
 const SEED_PRICES: Dictionary = {
 	CropComponent.CropType.Wheat: 3,
 	CropComponent.CropType.Beet: 5,
-	CropComponent.CropType.Lavender: 10,
+	CropComponent.CropType.Cotton: 10,
 	CropComponent.CropType.Ember_lily: 25,
-	CropComponent.CropType.Cotton: 50,
+	CropComponent.CropType.Lavender: 50,
 }
 
 const CROP_NAMES: Dictionary = {
@@ -40,11 +40,11 @@ const CROP_NAMES: Dictionary = {
 }
 
 const EQUIPMENT_PRICES: Dictionary = {
-	ToolsComponent.Tools.Helm: 0,
-	ToolsComponent.Tools.Chest: 0,
-	ToolsComponent.Tools.Bot: 0,
+	ToolsComponent.Tools.Helm: 150,
+	ToolsComponent.Tools.Chest: 300,
+	ToolsComponent.Tools.Bot: 120,
 	ToolsComponent.Tools.Sword: 0,
-	}
+}
 
 const ARMOR_UPGRADE_PRICES: Dictionary = {
 	ToolsComponent.Tools.Helm: [1, 2, 3],
@@ -61,10 +61,10 @@ const EQUIPMENT_NAMES: Dictionary = {
 }
 
 var armor_levels: Dictionary = {
-	ToolsComponent.Tools.Helm: 0,
-	ToolsComponent.Tools.Chest: 0,
-	ToolsComponent.Tools.Bot: 0,
-	ToolsComponent.Tools.Sword: 0
+	int(ToolsComponent.Tools.Helm): 0,
+	int(ToolsComponent.Tools.Chest): 0,
+	int(ToolsComponent.Tools.Bot): 0,
+	int(ToolsComponent.Tools.Sword): 0,
 }
 
 var coins: int = 0
@@ -132,11 +132,15 @@ func get_save_data() -> Dictionary:
 				"item_path": (slot["item"] as Resource).resource_path,
 				"amount": slot["amount"],
 			})
+	var serialized_armor: Dictionary = {}
+	for tool_type in armor_levels:
+		serialized_armor[str(tool_type)] = armor_levels[tool_type]
 	return {
 		"coins": coins,
 		"inventory": serialized,
 		"active_hotbar_index": active_hotbar_index,
 		"starter_pack_granted": starter_pack_granted,
+		"armor_levels": serialized_armor,
 	}
 
 
@@ -144,6 +148,11 @@ func load_from_save(data: Dictionary) -> void:
 	coins = data.get("coins", 0)
 	active_hotbar_index = clampi(int(data.get("active_hotbar_index", 0)), 0, 3)
 	starter_pack_granted = bool(data.get("starter_pack_granted", false))
+	var saved_armor: Dictionary = data.get("armor_levels", {})
+	for tool_type in armor_levels:
+		var str_key: String = str(tool_type)
+		if saved_armor.has(str_key):
+			armor_levels[tool_type] = int(saved_armor[str_key])
 	_slots.fill(null)
 	var saved: Array = data.get("inventory", [])
 	for i: int in range(mini(saved.size(), MAX_SLOTS)):
@@ -501,31 +510,29 @@ func get_total_armor_reduction() -> float:
 
 ## Devuelve la reducción de armadura correspondiente a su nivel
 func _get_reduction_for_level(tool_type: ToolsComponent.Tools) -> float:
-	match armor_levels.get(tool_type, 0):
+	match armor_levels.get(int(tool_type), 0):
 		0: return 0.05
-		1: return 0.10 
+		1: return 0.10
 		2: return 0.15
-		3: return 0.20 
+		3: return 0.20
 		_: return 0.0
-	
-	## Sube de nivel una pieza específica si hay dinero suficiente
+
 func buy_armor_upgrade(tool_type: ToolsComponent.Tools) -> bool:
-	if not armor_levels.has(tool_type): 
+	var key := int(tool_type)
+	var current_lvl: int = armor_levels.get(key, -1)
+	if current_lvl < 0:
 		return false
-		
-	var current_lvl: int = armor_levels[tool_type]
-	if current_lvl >= 3: 
-		return false # Ya está al máximo
-		
+	if current_lvl >= 3:
+		return false
+
 	var price: int = ARMOR_UPGRADE_PRICES[tool_type][current_lvl]
-	
 	if coins >= price:
 		coins -= price
-		armor_levels[tool_type] += 1
+		armor_levels[key] += 1
 		_emit_inventory_updated()
 		EventBus.equipment_purchased.emit(tool_type)
 		return true
-		
+
 	return false
 
 ## Calcula el daño extra de la espada (+4 por nivel)
@@ -533,7 +540,7 @@ func buy_armor_upgrade(tool_type: ToolsComponent.Tools) -> bool:
 func get_sword_bonus_damage() -> float:
 	# Si el slot 19 (weapon_slot) no está vacío
 	if _slots[19] != null:
-		var sword_lvl: int = armor_levels.get(ToolsComponent.Tools.Sword, 0)
+		var sword_lvl: int = armor_levels.get(int(ToolsComponent.Tools.Sword), 0)
 		return float(sword_lvl * 4) # 4 de daño por nivel
 		
 	return 0.0

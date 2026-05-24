@@ -123,21 +123,21 @@ func _build_ui() -> void:
 
 	# ── Sección venta ────────────────────────────────────────
 	scroll_vbox.add_child(_make_label("-- SELL --", 7, COLOR_SELL))
-	_add_sell_row(scroll_vbox, CropComponent.CropType.Wheat, 5)
-	_add_sell_row(scroll_vbox, CropComponent.CropType.Beet,  8)
-	_add_sell_row(scroll_vbox, CropComponent.CropType.Cotton, 15)
-	_add_sell_row(scroll_vbox, CropComponent.CropType.Ember_lily, 40)
-	_add_sell_row(scroll_vbox, CropComponent.CropType.Lavender, 75)
+	_add_sell_row(scroll_vbox, CropComponent.CropType.Wheat)
+	_add_sell_row(scroll_vbox, CropComponent.CropType.Beet)
+	_add_sell_row(scroll_vbox, CropComponent.CropType.Cotton)
+	_add_sell_row(scroll_vbox, CropComponent.CropType.Ember_lily)
+	_add_sell_row(scroll_vbox, CropComponent.CropType.Lavender)
 
 	scroll_vbox.add_child(_make_separator())
 
 	# ── Sección compra ───────────────────────────────────────
 	scroll_vbox.add_child(_make_label("-- BUY SEEDS --", 7, COLOR_BUY))
-	_add_buy_row(scroll_vbox, CropComponent.CropType.Wheat, 3)
-	_add_buy_row(scroll_vbox, CropComponent.CropType.Beet,  5)
-	_add_buy_row(scroll_vbox, CropComponent.CropType.Cotton, 10)
-	_add_buy_row(scroll_vbox, CropComponent.CropType.Ember_lily, 25)
-	_add_buy_row(scroll_vbox, CropComponent.CropType.Lavender, 50)
+	_add_buy_row(scroll_vbox, CropComponent.CropType.Wheat)
+	_add_buy_row(scroll_vbox, CropComponent.CropType.Beet)
+	_add_buy_row(scroll_vbox, CropComponent.CropType.Cotton)
+	_add_buy_row(scroll_vbox, CropComponent.CropType.Ember_lily)
+	_add_buy_row(scroll_vbox, CropComponent.CropType.Lavender)
 
 	main_vbox.add_child(_make_separator())
 	
@@ -166,8 +166,9 @@ func _build_ui() -> void:
 	main_vbox.add_child(close_hint)
 
 
-func _add_sell_row(parent: VBoxContainer, crop_type: CropComponent.CropType, price: int) -> void:
+func _add_sell_row(parent: VBoxContainer, crop_type: CropComponent.CropType) -> void:
 	var crop_name: String = TradeService.CROP_NAMES.get(crop_type, "?").to_upper()
+	var price: int = TradeService.SELL_PRICES.get(crop_type, 0)
 	var hbox: HBoxContainer = HBoxContainer.new()
 	hbox.add_theme_constant_override("separation", 6)
 	parent.add_child(hbox)
@@ -183,8 +184,9 @@ func _add_sell_row(parent: VBoxContainer, crop_type: CropComponent.CropType, pri
 	_sell_rows[crop_type] = {"label": lbl, "button": btn}
 
 
-func _add_buy_row(parent: VBoxContainer, crop_type: CropComponent.CropType, cost: int) -> void:
+func _add_buy_row(parent: VBoxContainer, crop_type: CropComponent.CropType) -> void:
 	var crop_name: String = TradeService.CROP_NAMES.get(crop_type, "?").to_upper()
+	var cost: int = TradeService.SEED_PRICES.get(crop_type, 0)
 	var hbox: HBoxContainer = HBoxContainer.new()
 	hbox.add_theme_constant_override("separation", 6)
 	parent.add_child(hbox)
@@ -200,7 +202,7 @@ func _add_buy_row(parent: VBoxContainer, crop_type: CropComponent.CropType, cost
 	_buy_rows[crop_type] = {"label": lbl, "button": btn}
 
 func _add_equipment_row(parent: VBoxContainer, tool_type: ToolsComponent.Tools, cost: int) -> void:
-	var tool_name: String = TradeService.EQUIPMENT_NAMES.get(tool_type, "?").to_upper()
+	var tool_name: String = TradeService.EQUIPMENT_NAMES.get(int(tool_type), "?").to_upper()
 	var hbox: HBoxContainer = HBoxContainer.new()
 	hbox.add_theme_constant_override("separation", 6)
 	parent.add_child(hbox)
@@ -214,7 +216,7 @@ func _add_equipment_row(parent: VBoxContainer, tool_type: ToolsComponent.Tools, 
 	btn.pressed.connect(func() -> void: _on_buy_equipment_pressed(tool_type))
 	hbox.add_child(btn)
 
-	_equipment_rows[tool_type] = {"label": lbl, "button": btn}
+	_equipment_rows[int(tool_type)] = {"label": lbl, "button": btn, "cost": cost}
 
 func _on_buy_equipment_pressed(tool_type: ToolsComponent.Tools) -> void:
 	var trade_svc := EventBus.services.trade as TradeService
@@ -236,7 +238,7 @@ func _add_armor_upgrade_row(parent: VBoxContainer, tool_type: ToolsComponent.Too
 	btn.pressed.connect(func() -> void: _on_buy_armor_pressed(tool_type))
 	hbox.add_child(btn)
 
-	_armor_upgrade_rows[tool_type] = {"label": lbl, "button": btn}
+	_armor_upgrade_rows[int(tool_type)] = {"label": lbl, "button": btn}
 
 func _on_buy_armor_pressed(tool_type: ToolsComponent.Tools) -> void:
 	var trade_svc := EventBus.services.trade as TradeService
@@ -338,19 +340,19 @@ func _refresh_ui() -> void:
 		(row["label"] as Label).text = "%s x%d" % [crop_name, seeds]
 		(row["button"] as Button).disabled = trade_svc.coins < cost
 
-	for tool_type: int in _equipment_rows:
+	for tool_type in _equipment_rows:
 		var row: Dictionary = _equipment_rows[tool_type]
-		var cost: int = TradeService.EQUIPMENT_PRICES.get(tool_type, 0)
+		var cost: int = row.get("cost", 0)
 		(row["button"] as Button).disabled = trade_svc.coins < cost
 
-	for tool_type: int in _armor_upgrade_rows:
+	for tool_type in _armor_upgrade_rows:
 		var row: Dictionary = _armor_upgrade_rows[tool_type]
 		var current_lvl: int = trade_svc.armor_levels.get(tool_type, 0)
 		var piece_name: String = TradeService.EQUIPMENT_NAMES.get(tool_type, "?").to_upper()
-		
+
 		var lbl: Label = row["label"]
 		var btn: Button = row["button"]
-		
+
 		if current_lvl >= 3:
 			lbl.text = "%s (MAX LVL)" % piece_name
 			btn.text = "MAXED"
