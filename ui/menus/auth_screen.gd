@@ -127,7 +127,12 @@ func _build_ui() -> void:
 	# Guest button
 	var btn_guest: Button = _create_button("JUGAR SIN CUENTA", Vector2(200, 28))
 	btn_guest.add_theme_font_size_override("font_size", 6)
-	btn_guest.pressed.connect(func() -> void: get_tree().change_scene_to_file("res://ui/menus/main_menu.tscn"))
+	btn_guest.pressed.connect(func() -> void:
+		var auth_svc: AuthService = EventBus.services.auth as AuthService
+		if auth_svc:
+			auth_svc.sign_out()
+		get_tree().change_scene_to_file("res://ui/menus/main_menu.tscn")
+	)
 	vbox.add_child(btn_guest)
 
 	# Status label

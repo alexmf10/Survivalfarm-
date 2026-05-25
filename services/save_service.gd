@@ -377,3 +377,20 @@ func _merge_cloud_slot(slot: int, cloud_data: Dictionary, cloud_updated_at: Stri
 		if file:
 			file.store_string(JSON.stringify(cloud_data, "\t"))
 			file.close()
+
+
+func clear_cloud_saves() -> void:
+	for i: int in range(1, MAX_SLOTS + 1):
+		var path: String = CLOUD_SAVE_DIR + "slot_%d.json" % i
+		if FileAccess.file_exists(path):
+			DirAccess.remove_absolute(path)
+
+
+func write_cloud_slot(slot: int, data: Dictionary) -> void:
+	if slot < 1 or slot > MAX_SLOTS:
+		return
+	var path: String = CLOUD_SAVE_DIR + "slot_%d.json" % slot
+	var file: FileAccess = FileAccess.open(path, FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(data, "\t"))
+		file.close()

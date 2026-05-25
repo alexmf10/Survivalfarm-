@@ -141,6 +141,7 @@ signal game_won(message: String)
 ## Señales de autenticación y cloud sync.
 signal auth_state_changed(is_authenticated: bool, user_id: String)
 signal slot_activated(slot: int, player_uuid: String)
+signal cloud_sync_completed
 
 # Registro de servicios compartidos.
 var services: ServiceLocator = ServiceLocator.new()

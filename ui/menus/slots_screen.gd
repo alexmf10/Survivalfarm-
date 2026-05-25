@@ -19,6 +19,8 @@ var _font_small: Font
 
 # Nodos
 var _slot_buttons: Array[Button] = []
+var _slot_container: HBoxContainer
+var _sync_label: Label
 var _action_vbox: VBoxContainer
 var _nick_input: LineEdit
 var _btn_ok_nick: Button
@@ -37,6 +39,22 @@ var _saved_nickname_for_slot: String = ""
 func _ready() -> void:
 	_font = load("res://ui/theme/PressStart2P-Regular.ttf") as Font
 	_build_ui()
+
+	var auth: AuthService = EventBus.services.auth as AuthService
+	var supabase: SupabaseService = EventBus.services.supabase as SupabaseService
+	if auth and auth.is_authenticated() and supabase and not supabase._cloud_sync_done:
+		_sync_label.visible = true
+		_slot_container.visible = false
+		_action_vbox.visible = false
+		EventBus.cloud_sync_completed.connect(_on_cloud_sync_completed, CONNECT_ONE_SHOT)
+	else:
+		_refresh_slots()
+		_update_action_area()
+
+
+func _on_cloud_sync_completed() -> void:
+	_sync_label.visible = false
+	_slot_container.visible = true
 	_refresh_slots()
 	_update_action_area()
 
@@ -89,17 +107,17 @@ func _build_ui() -> void:
 	add_child(_title_label)
 
 	# Contenedor de slots
-	var slot_container: HBoxContainer = HBoxContainer.new()
-	slot_container.alignment = BoxContainer.ALIGNMENT_CENTER
-	slot_container.add_theme_constant_override("separation", 8)
-	slot_container.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	slot_container.set_anchor(SIDE_LEFT, 0.0)
-	slot_container.set_anchor(SIDE_RIGHT, 1.0)
-	slot_container.offset_top = 85
-	slot_container.offset_bottom = 230
-	slot_container.offset_left = 16
-	slot_container.offset_right = -16
-	add_child(slot_container)
+	_slot_container = HBoxContainer.new()
+	_slot_container.alignment = BoxContainer.ALIGNMENT_CENTER
+	_slot_container.add_theme_constant_override("separation", 8)
+	_slot_container.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_slot_container.set_anchor(SIDE_LEFT, 0.0)
+	_slot_container.set_anchor(SIDE_RIGHT, 1.0)
+	_slot_container.offset_top = 85
+	_slot_container.offset_bottom = 230
+	_slot_container.offset_left = 16
+	_slot_container.offset_right = -16
+	add_child(_slot_container)
 
 	for i: int in range(1, 6):
 		var slot_btn: Button = Button.new()
@@ -112,7 +130,7 @@ func _build_ui() -> void:
 		slot_btn.add_theme_color_override("font_pressed_color", COLOR_TEXT_BROWN)
 		slot_btn.add_theme_color_override("font_focus_color", COLOR_TEXT_BROWN) # Evitar que sea blanco al quedarse con el foco
 		slot_btn.pressed.connect(_on_slot_pressed.bind(i))
-		slot_container.add_child(slot_btn)
+		_slot_container.add_child(slot_btn)
 		_slot_buttons.append(slot_btn)
 
 	# Zona de acciones (inferior)
@@ -182,6 +200,18 @@ func _build_ui() -> void:
 	_apply_thick_button_style(_btn_delete)
 	_btn_delete.pressed.connect(_on_delete_pressed)
 	btn_hbox.add_child(_btn_delete)
+
+	# Indicador de sincronización en la nube
+	_sync_label = Label.new()
+	_sync_label.text = "SYNCING WITH CLOUD..."
+	_sync_label.add_theme_font_override("font", _font)
+	_sync_label.add_theme_font_size_override("font_size", 10)
+	_sync_label.add_theme_color_override("font_color", COLOR_TEXT_BROWN)
+	_sync_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_sync_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_sync_label.set_anchors_preset(Control.PRESET_CENTER)
+	_sync_label.visible = false
+	add_child(_sync_label)
 
 	# Overlay para popups y confirmaciones
 	_overlay = Control.new()

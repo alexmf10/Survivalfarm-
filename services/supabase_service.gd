@@ -9,6 +9,7 @@ const RETRY_DELAY_SEC: float = 3.0
 
 var _user_id: String = ""
 var _active_slot: int = -1
+var _cloud_sync_done: bool = false
 
 # Cola de logros
 var _busy: bool = false
@@ -42,9 +43,23 @@ func _ready() -> void:
 
 
 func _on_auth_state_changed(is_authenticated: bool, user_id: String) -> void:
+	_cloud_sync_done = false
 	_user_id = user_id if is_authenticated else ""
 	_pending_queue.clear()
 	_busy = false
+
+	var save_svc: SaveService = EventBus.services.save as SaveService
+	if not save_svc:
+		return
+
+	if is_authenticated:
+		save_svc.online_mode = true
+		_download_cloud_saves()
+	else:
+		save_svc.online_mode = false
+		save_svc.clear_cloud_saves()
+		_cloud_sync_done = true
+		EventBus.cloud_sync_completed.emit()
 
 
 func _on_slot_activated(slot: int, _uuid: String) -> void:
@@ -167,6 +182,24 @@ func delete_save(slot: int) -> void:
 	var headers: PackedStringArray = _auth_headers(config)
 	_http_save.request(url, headers, HTTPClient.METHOD_DELETE, "")
 	_save_callback = Callable()
+
+
+func _download_cloud_saves() -> void:
+	fetch_saves(func(saves: Array) -> void:
+		var save_svc: SaveService = EventBus.services.save as SaveService
+		if not save_svc:
+			_cloud_sync_done = true
+			EventBus.cloud_sync_completed.emit()
+			return
+		save_svc.clear_cloud_saves()
+		for s: Dictionary in saves:
+			var slot: int = s.get("slot_number", -1)
+			var data: Dictionary = s.get("save_data", {})
+			if slot >= 1 and not data.is_empty():
+				save_svc.write_cloud_slot(slot, data)
+		_cloud_sync_done = true
+		EventBus.cloud_sync_completed.emit()
+	)
 
 
 func _on_save_request_completed(result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
