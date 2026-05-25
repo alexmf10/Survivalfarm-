@@ -286,7 +286,7 @@ func grant_starter_pack() -> bool:
 	if starter_pack_granted:
 		return false
 	starter_pack_granted = true
-	coins += 50
+	coins += 60
 	
 	_add_to_inventory(_tool_database[ToolsComponent.Tools.TillGround], 1)
 	_add_to_inventory(_tool_database[ToolsComponent.Tools.WaterCrops], 1)
