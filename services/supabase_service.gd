@@ -145,7 +145,7 @@ func push_save(slot: int, save_data: Dictionary) -> void:
 	var config: GDScript = _load_config()
 	if not config:
 		return
-	var url: String = config.SUPABASE_URL + "/rest/v1/player_saves"
+	var url: String = config.SUPABASE_URL + "/rest/v1/player_saves?on_conflict=user_id,slot_number"
 	var body: String = JSON.stringify({
 		"user_id": _user_id,
 		"slot_number": slot,
@@ -166,7 +166,7 @@ func fetch_saves(callback: Callable) -> void:
 	if not config:
 		callback.call([])
 		return
-	var url: String = config.SUPABASE_URL + "/rest/v1/player_saves?user_id=eq.%s&select=slot_number,save_data,updated_at" % _user_id
+	var url: String = config.SUPABASE_URL + "/rest/v1/player_saves?user_id=eq.%s&select=slot_number,save_data,updated_at&order=updated_at.desc" % _user_id
 	var headers: PackedStringArray = _auth_headers(config)
 	_save_callback = callback
 	_http_save.request(url, headers, HTTPClient.METHOD_GET, "")
@@ -192,8 +192,12 @@ func _download_cloud_saves() -> void:
 			EventBus.cloud_sync_completed.emit()
 			return
 		save_svc.clear_cloud_saves()
+		var seen_slots: Array[int] = []
 		for s: Dictionary in saves:
 			var slot: int = s.get("slot_number", -1)
+			if slot in seen_slots:
+				continue
+			seen_slots.append(slot)
 			var data: Dictionary = s.get("save_data", {})
 			if slot >= 1 and not data.is_empty():
 				save_svc.write_cloud_slot(slot, data)
